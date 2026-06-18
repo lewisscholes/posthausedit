@@ -5119,7 +5119,7 @@ async function loadEditor(){
   var list=rootIds.map(function(id){ return byId[id]; }).filter(Boolean);
   list.forEach(function(v){ var er=editedByRoot[v.id]; if(er){ v._editedId=er.id; v._editedAt=er.created_at; } v._srcProxy=null; v._srcES=null; v._rootId=null; });
   try{ var dres=await sb.from('ed_video_downloads').select('video_id').eq('user_id',state.user.id); var dset=new Set((dres.data||[]).map(function(d){ return d.video_id; })); list=list.filter(function(v){ return (v._editedId||(v.edit_state&&v.edit_state.segments))?true:!dset.has(v.id); }); }catch(e){}
-  list.sort(function(a,b){ return new Date(b.created_at||0)-new Date(a.created_at||0); });
+  list.sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });   // oldest first -> front of the queue (FIFO), so nothing goes out late
   swVids=list; swIdx=0;
   for(var i=0;i<Math.min(3,swVids.length);i++){ var v=swVids[i]; if(!signed[v.id]){ var s=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); if(s&&s.data&&s.data.signedUrl) signed[v.id]=s.data.signedUrl; } }
   swRender();
