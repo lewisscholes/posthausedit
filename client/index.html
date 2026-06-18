@@ -4622,6 +4622,7 @@ function ccConnect(){
   // Open the tab SYNCHRONOUSLY on tap so the browser doesn't block the popup (any await before
   // window.open loses the user-gesture -> the OAuth window never opens, which is the "just loading" bug).
   var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
+  state.ccWindow=w;
   toast('Opening TikTok connect...');
   state.ccBefore={}; state.ccStart=Date.now(); state.ccClaiming=false;
   (async function(){
@@ -4629,7 +4630,7 @@ function ccConnect(){
     try{
       var r=await ccPP({action:'connect',platform:'tiktok'}); var url=r&&r.body&&r.body.url;
       if(!url){ if(w){try{w.close();}catch(e){}} toast('Could not start TikTok connect','err'); return; }
-      if(w){ try{ w.location.href=url; }catch(e){ window.open(url,'_blank'); } } else { window.open(url,'_blank'); }
+      if(w){ try{ w.location.href=url; }catch(e){ state.ccWindow=window.open(url,'_blank'); } } else { state.ccWindow=window.open(url,'_blank'); }
       state.ccConnecting=true; loadCDash();
       // auto-detect + claim the account they just authorized when they come back
       for(var i=1;i<=12;i++){ setTimeout(function(){ if(state.ccConnecting) ccPickList(); }, i*3000); }
@@ -4656,7 +4657,14 @@ async function ccClaim(accId,handle,displayName){
   var r=await sb.from('ed_member_accounts').insert({member_id:ME.id, account_id:accId, handle:handle, display_name:displayName||handle, connected_at:new Date().toISOString()});
   state.ccClaiming=false;
   if(r.error){ toast('Failed: '+r.error.message,'err'); return; }
-  state.ccConnecting=false; state.myAccounts=null; toast('TikTok connected','ok'); loadCDash();
+  state.ccConnecting=false; state.myAccounts=null;
+  try{ if(state.ccWindow){ state.ccWindow.close(); state.ccWindow=null; } }catch(e){}   // close the PostPeer success page -> back to the dashboard
+  toast('TikTok connected','ok'); loadCDash();
+}
+// When the client returns to the app after the TikTok page, finish the connect + show it connected.
+if(!window.__ccVisBound){ window.__ccVisBound=true;
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && state && state.ccConnecting){ ccPickList(); } });
+  window.addEventListener('focus', function(){ if(state && state.ccConnecting){ ccPickList(); } });
 }
 async function ccDisconnect(accId){
   if(!confirm('Disconnect this TikTok account?')) return;
