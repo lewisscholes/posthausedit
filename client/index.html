@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#000000" />
-<title>Editor Studio</title>
+<title>The Post Haus</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@300..900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -469,7 +469,7 @@
   .mte-pv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:2}
   .mte-pv video.off{z-index:1}   /* standby sits BEHIND (both opaque) so it keeps decoding -> warm, hitch-free cut swaps */
   .mte-ovs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:5}
-  .mte-ov{position:absolute;pointer-events:auto;cursor:move;touch-action:none;font-family:var(--ovfont);text-align:center;line-height:1.2;letter-spacing:-0.01em;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;padding:1px 5px;white-space:pre-wrap}
+  .mte-ov{position:absolute;pointer-events:auto;cursor:move;touch-action:none;font-family:var(--ovfont);text-align:center;line-height:1.2;letter-spacing:-0.025em;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;padding:1px 5px;white-space:pre-wrap}
   .mte-boxtxt{position:relative;z-index:1}   /* banner text sits above the smooth SVG shape */
   .mte-bsvg{position:absolute;left:0;top:0;overflow:visible;z-index:0;pointer-events:none}
   .mte-guide-v,.mte-guide-h{position:absolute;background:#fe2c55;opacity:0;transition:opacity .08s;pointer-events:none;z-index:6}
@@ -542,7 +542,7 @@
   .mte-colors2::-webkit-scrollbar{display:none}
   .mte-sheet-body{flex:1;display:flex;align-items:flex-start;justify-content:center;position:relative;padding:9% 60px 0 22px}
   .mte-ta-wrap{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);max-width:84%;text-align:center;max-height:60vh;overflow-y:auto}
-  .mte-ta{display:inline;position:relative;z-index:1;outline:0;border:0;background:transparent;color:#fff;font-family:var(--ovfont);font-weight:600;font-size:28px;letter-spacing:-0.01em;-webkit-text-stroke:0;line-height:1.2;-webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;cursor:text}
+  .mte-ta{display:inline;position:relative;z-index:1;outline:0;border:0;background:transparent;color:#fff;font-family:var(--ovfont);font-weight:600;font-size:28px;letter-spacing:-0.025em;-webkit-text-stroke:0;line-height:1.2;-webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;cursor:text}
   .mte-ta:empty:before{content:attr(data-ph);opacity:.55}
   .mte-sizewrap{position:absolute;right:16px;top:50%;transform:translateY(-50%);height:44%;display:flex;align-items:center}
   .mte-size{-webkit-appearance:slider-vertical;appearance:slider-vertical;writing-mode:vertical-lr;direction:rtl;width:24px;height:100%;background:transparent;accent-color:#fff;cursor:pointer;touch-action:none}
@@ -731,16 +731,52 @@
     body:not(.ph-client) .ed-admintop{display:flex;position:fixed;top:0;left:0;right:0;z-index:66;align-items:center;gap:12px;background:var(--grad);color:#fff;padding:calc(11px + env(safe-area-inset-top)) 16px 11px}
     body:not(.ph-client) .drawer-btn{display:none}
   }
+</style><link rel="icon" type="image/png" href="favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="ph-brand">
+:root{
+  --bg:#F4ECDC; --sidebar:#FBF6EC; --panel:#FBF6EC; --ink:#2A211C; --muted:#857669;
+  --line:#E8DCC8; --line2:#F0E8D9; --blue:#D7342C; --blue-d:#B0211A; --blue-soft:#FBE9E7;
+  --grad:linear-gradient(135deg,#E0463C,#B0211A);
+  --shadow:0 8px 24px rgba(26,21,18,.08); --shadow-lg:0 16px 40px -18px rgba(26,21,18,.45);
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+h1,h2,.h-title,.hi,.ph-hi,.ph-ttl,.ed-admttl,.dval,.tf-hero h2,.ph-display{font-family:'Archivo Black','Inter',sans-serif !important;letter-spacing:-.2px;color:#1A1512}
+.ph-hi{font-size:22px;margin:2px 2px 2px}
+.ph-accent{color:#D7342C !important}
+a{color:#B0211A}
+/* header bars: near-black + red underline + real logo + cream wordmark + tagline */
+.ph-top{background:#1A1512 !important;border-bottom:3px solid #D7342C !important;color:#F4ECDC !important}
+.ph-top .ph-ttl{color:#F4ECDC !important;display:flex;flex-direction:column;line-height:1.05;font-size:16px}
+.ph-top .ph-tag{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;letter-spacing:.3px;color:#CDBFA8;margin-top:2px}
+.ph-top .ph-who{background:rgba(255,255,255,.12) !important;color:#F4ECDC !important;align-self:center}
+.ph-top .ph-logo{width:38px !important;height:38px !important;border-radius:50% !important;object-fit:cover;background:#F4ECDC !important;border:2px solid rgba(255,255,255,.18);padding:0 !important}
+.ed-admintop{background:#1A1512 !important;border-bottom:3px solid #D7342C !important;color:#F4ECDC !important}
+.ed-admintop .ed-admttl{color:#F4ECDC !important}
+.ed-admintop .ed-admmenu{background:rgba(255,255,255,.14) !important;color:#F4ECDC !important}
+/* primary buttons -> red pills with a soft shadow */
+.btn{background:#D7342C !important;color:#F4ECDC !important;border-radius:999px !important;box-shadow:0 12px 26px -14px rgba(176,33,26,.65) !important}
+.btn:hover{background:#B0211A !important}
+.btn.ghost{background:#FBF6EC !important;color:#B0211A !important;border:1px solid #E8DCC8 !important;box-shadow:none !important}
+.es-send{background:#D7342C !important;border-radius:999px !important;box-shadow:0 12px 26px -14px rgba(176,33,26,.6) !important}
+.edf.on{background:#D7342C !important;border-color:transparent !important;color:#F4ECDC !important}
+/* light surfaces -> cream cards */
+.card,.tf-card,.tf2-card,.metric,.modal,.uam-block,.uam-drop,.uam-info,.es-card{background:#FBF6EC !important;border-color:#E8DCC8 !important}
+/* login branding */
+.ph-loginlogo{display:block;width:92px;height:92px;border-radius:50%;margin:0 auto 12px;box-shadow:0 14px 32px -16px rgba(26,21,18,.55)}
+.ph-logintag{text-align:center;color:#857669;font-size:12px;margin-top:12px;letter-spacing:.2px}
 </style></head>
 <body><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-down" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol><symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol><symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.5 2 6 2s6-1 6-2v-5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-corner" viewBox="0 0 24 24"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol><symbol id="i-film" viewBox="0 0 24 24"><rect x="2.5" y="3" width="19" height="18" rx="2"/><line x1="7.5" y1="3" x2="7.5" y2="21"/><line x1="16.5" y1="3" x2="16.5" y2="21"/><line x1="2.5" y1="12" x2="21.5" y2="12"/><line x1="2.5" y1="7.5" x2="7.5" y2="7.5"/><line x1="2.5" y1="16.5" x2="7.5" y2="16.5"/><line x1="16.5" y1="16.5" x2="21.5" y2="16.5"/><line x1="16.5" y1="7.5" x2="21.5" y2="7.5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.41L12 12l-4.41 4.42A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.41L12 12l4.41-4.42A2 2 0 0 0 17 6.17V2"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></symbol><symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol><symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol><symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20" fill="currentColor" stroke="none"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-7.7L21 8"/><path d="M21 3v5h-5"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/></symbol><symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/></symbol><symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8L4.3 10.7l5.8 1.9L12 18.4l1.9-5.8 5.8-1.9-5.8-1.9z" fill="currentColor" stroke="none"/><path d="M19 4v3"/><path d="M17.5 5.5h3"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" fill="currentColor" stroke="none"/></symbol><symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol><symbol id="i-volume-x" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></symbol><symbol id="i-wand" viewBox="0 0 24 24"><path d="m3 21 18-18"/><path d="M14 7l3 3"/><path d="M5 6v3"/><path d="M3.5 7.5h3"/><path d="M19 14v3"/><path d="M17.5 15.5h3"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol></svg>
 <div id="authgate">
   <div class="authbox">
     <div class="authlogo"><span class="logo"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg></span> Editor Studio</div>
+    <img src="posthaus-logo-512.png" alt="The Post Haus" class="ph-loginlogo">
     <div class="authsub" id="authSub">Enter your access code</div>
     <input id="authCode" type="text" placeholder="Access code" autocomplete="off" onkeydown="if(event.key==='Enter') doLogin()">
     <div id="authMsg" class="authmsg"></div>
     <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()">Continue</button>
     <div class="authnote">Admins use your workspace code. Creators use the invite code your editor gave you.</div>
+    <div class="ph-logintag">Creators create, we edit</div>
   </div>
 </div>
 <div id="pendinggate" class="hide">
@@ -1203,9 +1239,9 @@
       <div id="scraperEmpty" class="h-sub hide" style="padding:18px 0">Nothing scraped yet. Create a run to populate this.</div>
     </section>
   <section id="view-clients" class="hide"><div style="max-width:780px;margin:0 auto;padding:18px"><div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800">Clients</div><div class="h-sub">Everyone you are creating content for.</div></div><div id="clientsBody"></div></div></section>
-  <section id="view-cdash" class="hide"><div class="ph-top"><span class="ph-logo">PH</span><span class="ph-ttl">Post Haus</span><span class="ph-who" id="phWho"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="cdashBody"></div></div></section>
-  <section id="view-upload" class="hide"><div class="ph-top"><span class="ph-logo">PH</span><span class="ph-ttl">Post Haus</span><span class="ph-who"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="uploadBody"></div></div></section>
-  <section id="view-board" class="hide"><div class="ph-top"><span class="ph-logo">PH</span><span class="ph-ttl">Post Haus</span><span class="ph-who"></span></div><div style="max-width:1100px;margin:0 auto;padding:16px"><div id="boardBody"></div></div></section>
+  <section id="view-cdash" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who" id="phWho"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="cdashBody"></div></div></section>
+  <section id="view-upload" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="uploadBody"></div></div></section>
+  <section id="view-board" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:1100px;margin:0 auto;padding:16px"><div id="boardBody"></div></div></section>
   <section id="view-analytics" class="hide"><div style="max-width:780px;margin:0 auto;padding:16px"><div id="analyticsBody"></div></div></section>
   </main>
 
@@ -3003,6 +3039,7 @@ function mteKbBind(){ if(window.visualViewport){ window.visualViewport.addEventL
 function mteKbUnbind(){ if(window.visualViewport){ window.visualViewport.removeEventListener('resize',mteSyncKb); window.visualViewport.removeEventListener('scroll',mteSyncKb); } const sh=document.getElementById('mteSheet'); if(sh){ sh.style.height=''; sh.style.top=''; } }
 
 let mteActive=0, mteRunIdx=0, mteRolling=false, mteSbReady=false;
+let mtePaintTs=0, mteKickTs=0, mtePaintEl=null;   // frame-stall watchdog (audio keeps going but the picture freezes)
 function mteV(){ return document.getElementById(mteActive?'mteVideo2':'mteVideo'); }   // active (visible) video
 function mteVB(){ return document.getElementById(mteActive?'mteVideo':'mteVideo2'); }  // standby buffer
 
@@ -3175,8 +3212,45 @@ function mteAdvance(){
   // next clip never appears mid-decode. Hard deadline so we can never stall on the boundary.
   if(mteRolling && t>=run.end-0.012 && (mteSbReady || t>=run.end+0.06)){ mteSwapTo(ni); }
 }
-function mteStartTick(){ if(mteRaf)return; const loop=()=>{ if(!mtePlaying){ mteRaf=0; return; } mteAdvance(); mteUpdScroll(); mteUpdTime(); mteApplyVideoZoom(); mteUpdMediaVis(); mteUpdCaptions(); mteRenderWave(); mteRaf=requestAnimationFrame(loop); }; mteRaf=requestAnimationFrame(loop); }
-function mteStopTick(){ if(mteRaf){ cancelAnimationFrame(mteRaf); mteRaf=0; } }
+// ---- Frame-stall watchdog ---------------------------------------------------
+// On iOS the visible <video> sometimes keeps its clock + audio running but stops
+// PRESENTING new frames (the picture freezes), usually when the standby buffer is
+// decoding in parallel just before a cut and starves the single hardware decoder.
+// requestVideoFrameCallback only fires when a frame is actually painted, so we use
+// it as a liveness signal: if the clock is moving but no frame has landed for a
+// while, we nudge the decoder (pause+play, which keeps the audio position) to make
+// it resume painting. No-op on browsers without rVFC.
+function mteArmPaint(){
+  const el=mteV();
+  if(!el || !el.requestVideoFrameCallback){ mtePaintTs=performance.now(); return; }
+  if(mtePaintEl===el && el.__mtePaintArmed) return;   // already watching this element
+  mtePaintEl=el; el.__mtePaintArmed=true; mtePaintTs=performance.now();
+  const cb=()=>{
+    if(el!==mteV()){ el.__mtePaintArmed=false; return; }   // a cut swap moved us to the other buffer
+    mtePaintTs=performance.now();
+    try{ el.requestVideoFrameCallback(cb); }catch(e){ el.__mtePaintArmed=false; }
+  };
+  try{ el.requestVideoFrameCallback(cb); }catch(e){ el.__mtePaintArmed=false; }
+}
+function mteResetPaint(){
+  mtePaintTs=0; mteKickTs=0; mtePaintEl=null;
+  ['mteVideo','mteVideo2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.__mtePaintArmed=false; });
+}
+function mteWatchStall(){
+  if(!mtePlaying || mteSeeking) return;
+  const el=mteV(); if(!el || el.paused || el.seeking) return;
+  if(!el.requestVideoFrameCallback) return;   // can't tell frames apart -> nothing to do
+  mteArmPaint();
+  const now=performance.now();
+  // Picture frozen: clock/audio still running but no painted frame for >360ms, and we
+  // haven't just kicked it. pause()+play() restarts presentation without losing position.
+  if(mtePaintTs && (now-mtePaintTs)>360 && (now-mteKickTs)>900){
+    mteKickTs=now; mtePaintTs=now;   // give the kick room before re-judging
+    try{ el.pause(); const p=el.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
+  }
+}
+function mteStartTick(){ if(mteRaf)return; mteResetPaint(); const loop=()=>{ if(!mtePlaying){ mteRaf=0; return; } mteAdvance(); mteWatchStall(); mteUpdScroll(); mteUpdTime(); mteApplyVideoZoom(); mteUpdMediaVis(); mteUpdCaptions(); mteRenderWave(); mteRaf=requestAnimationFrame(loop); }; mteRaf=requestAnimationFrame(loop); }
+function mteStopTick(){ if(mteRaf){ cancelAnimationFrame(mteRaf); mteRaf=0; } mteResetPaint(); }
 
 function mteFmt(s){ s=Math.max(0,Math.round(s||0)); const m=Math.floor(s/60); const ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
 function mteTotalKept(){ return mteSegments.reduce((a,s)=>a+(s.end-s.start),0); }
@@ -3601,9 +3675,9 @@ function mteFontCss(key){ if(key==='elegance')return "Georgia,'Times New Roman',
 // TikTok-style outline: a rounded, gap-filling black halo (the union of the glyph offset around
 // rings = a rounded dilation). Unlike -webkit-text-stroke it has round corners, merges the gaps
 // between close letters, and sits BEHIND the fill so the white letters keep their full thickness.
-const MTE_OUTLINE_R=0.07;  // halo radius in em (scales with font size) -- locked to TikTok match
+const MTE_OUTLINE_R=0.072;  // halo radius in em (scales with font size) -- locked to TikTok match
 const MTE_WEIGHT=600;          // banner + plain text weight (locked to TikTok match)
-const MTE_OUTLINE_WEIGHT=700;  // TikTok's classic bordered text is BOLD (matched 1:1 against the TikTok editor)
+const MTE_OUTLINE_WEIGHT=530;  // matched 1:1 against the TikTok editor (lighter than a true bold)
 // Banner (box) style -- one smooth continuous shape (not per-line boxes), locked to TikTok match.
 const MTE_BOX_RAD=0.24, MTE_BOX_PADX=0.30, MTE_BOX_PADY=0.14, MTE_BOX_LH=1.18;
 function mteBoxTextColor(bg){ var c=mteContrast(bg); return (c==='#000')?'#161823':c; }   // softer near-black on a light banner
@@ -3616,15 +3690,15 @@ function mteOvParts(o,H){
   var sz=(o.size||24)*((H||640)/640);
   var sty=o.style||(o.box?'box':(o.outline===false?'plain':'outline'));
   var wght=(sty==='outline')?MTE_OUTLINE_WEIGHT:MTE_WEIGHT;
-  var wcss='font-weight:'+wght+";font-variation-settings:'wght' "+wght+';';
+  var wcss='font-weight:'+wght+";font-variation-settings:'wght' "+wght+';font-synthesis:none;';
   var pos='left:'+o.x+'%;top:'+o.y+'%;transform:translate(-50%,-50%) scale('+(o.scale||1)+');';
-  var base='font-family:'+fam+';'+wcss+'font-style:'+fst+';font-size:'+sz+'px;text-align:center;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;white-space:pre-wrap;letter-spacing:-0.01em;padding:0;';
+  var base='font-family:'+fam+';'+wcss+'font-style:'+fst+';font-size:'+sz+'px;text-align:center;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;white-space:pre-wrap;letter-spacing:-0.025em;padding:0;';
   if(sty==='box'){
     var tc=mteBoxTextColor(o.color);
-    var bstyle=pos+'font-family:'+fam+";font-weight:"+MTE_WEIGHT+";font-variation-settings:'wght' "+MTE_WEIGHT+';font-style:'+fst+';font-size:'+sz+'px;text-align:center;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;white-space:pre-wrap;letter-spacing:-0.01em;line-height:'+MTE_BOX_LH+';padding:'+MTE_BOX_PADY+'em '+MTE_BOX_PADX+'em;color:'+tc+';';
+    var bstyle=pos+'font-family:'+fam+";font-weight:"+MTE_WEIGHT+";font-variation-settings:'wght' "+MTE_WEIGHT+';font-style:'+fst+';font-size:'+sz+'px;text-align:center;width:max-content;max-width:84%;overflow-wrap:break-word;word-break:normal;white-space:pre-wrap;letter-spacing:-0.025em;line-height:'+MTE_BOX_LH+';padding:'+MTE_BOX_PADY+'em '+MTE_BOX_PADX+'em;color:'+tc+';';
     return {style:bstyle, inner:'<span class="mte-boxtxt">'+mteWrapEmoji(o.text)+'</span>', box:true, bg:o.color};
   }
-  var shadow=(sty==='outline')?mteOutline(MTE_OUTLINE_R):'';
+  var shadow=(sty==='outline')?(mteOutline(MTE_OUTLINE_R)+',0 0.033em 0.065em rgba(0,0,0,0.36)'):'';   // halo + soft drop shadow (TikTok match); emoji spans override to none
   if(o.font==='neon') shadow=(shadow?shadow+',':'')+'0 0 6px '+o.color+',0 0 13px '+o.color;
   var sh=shadow?('text-shadow:'+shadow+';'):'text-shadow:none;';
   return {style:pos+base+'color:'+o.color+';-webkit-text-stroke:0;paint-order:normal;'+sh+'line-height:1.2',
@@ -4654,7 +4728,7 @@ async function enterApp(){
   var sn=document.getElementById('sideName'); if(sn) sn.textContent=(ME?ME.name:'')+(state.isAdmin?' (admin)':' (creator)');
   edApplyRole();
   edSetWho((ME&&ME.name)||'');
-  if(!state.isAdmin){ showView('cdash'); if(!ME.name_set){ edAskName(); } return; }
+  if(!state.isAdmin){ showView('cdash'); try{ duResume(); }catch(e){} if(!ME.name_set){ edAskName(); } return; }
   showView('clients');
 }
 function edSetWho(n){ try{ var els=document.querySelectorAll('.ph-who'); for(var i=0;i<els.length;i++) els[i].textContent=n||''; }catch(e){} }
@@ -4827,7 +4901,7 @@ async function loadCDash(){
   if(!vids.length){ up+='<div class="h-sub" style="margin-top:6px">Nothing uploaded yet.</div>'; }
   else { up+=vids.map(function(v){ var st=(v.posted_at||v.status==='posted')?'Posted':((v.kind==='edited'||v.status==='edited')?'Edited':'Uploaded'); return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="opacity:.5"><use href="#i-film"></use></svg><div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||v.filename||'clip')+'</div><div class="h-sub" style="font-size:12px">'+new Date(v.created_at).toLocaleString()+'</div></div><span class="tf-pill">'+st+'</span></div>'; }).join(''); }
   up+='</div>';
-  var hi='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Hi '+esc((ME&&ME.name)||'there')+'</div><div class="h-sub" style="margin:0 2px 4px">Connect your TikTok, then upload your clips. Your editor takes care of the rest.</div>';
+  var hi='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 4px">Connect your TikTok, then upload your clips. Your editor takes care of the rest.</div>';
   root.innerHTML=hi+statsHtml+conn+up;
   if(state.ccConnecting) ccPickList();
 }
@@ -4875,7 +4949,7 @@ function ufRender(){
   var root=document.getElementById('uploadBody'); if(!root) return;
   var seg='<div class="uam-seg"><button class="'+(ufState.mode==='single'?'on':'')+'" onclick="ufSetMode(\'single\')">Single upload<span class="s">1 video + extras</span></button>'
     +'<button class="'+(ufState.mode==='bulk'?'on':'')+'" onclick="ufSetMode(\'bulk\')">Bulk upload<span class="s">many at once</span></button></div>';
-  var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Hi '+esc((ME&&ME.name)||'there')+'</div><div class="h-sub" style="margin:0 2px 14px">Upload your clips for Aaron to edit.</div>';
+  var head='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 14px">Upload your clips for Aaron to edit.</div>';
   root.innerHTML=head+seg+(ufState.mode==='single'?ufSingle():ufBulk())+ufInputs();
 }
 function ufSingle(){
@@ -4945,8 +5019,49 @@ function ufSubmitBulk(){
 
 // ===== Background upload queue with a live ETA (keeps running while you add more) =====
 var uq={items:[],active:false,total:0,done:0,curSent:0,start:0,count:0,idx:0,tick:null};
+
+// ===== Durable uploads: an accidental swipe-off PAUSES (never loses) an upload =====
+// The picked file vanishes from memory when iOS kills the web app, so we stash the bytes
+// in IndexedDB the moment it's queued. The tus transfer separately remembers its resume
+// URL. On reopen we rebuild the File from IndexedDB and resume from the last byte.
+var DU_DB='phaus_uploads', DU_STORE='jobs', _duDB=null, _duWake=null, _duActive={}, _duResuming=false;
+function duOpen(){ return new Promise(function(res,rej){ if(_duDB) return res(_duDB); try{ var r=indexedDB.open(DU_DB,1); r.onupgradeneeded=function(){ var db=r.result; if(!db.objectStoreNames.contains(DU_STORE)) db.createObjectStore(DU_STORE,{keyPath:'id'}); }; r.onsuccess=function(){ _duDB=r.result; res(_duDB); }; r.onerror=function(){ rej(r.error); }; }catch(e){ rej(e); } }); }
+function duPut(rec){ return duOpen().then(function(db){ return new Promise(function(res,rej){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).put(rec); tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);}; }catch(e){ rej(e); } }); }).catch(function(){}); }
+function duDel(id){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).delete(id); tx.oncomplete=function(){res(true);}; tx.onerror=function(){res(false);}; }catch(e){ res(false); } }); }).catch(function(){}); }
+function duAll(){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var r=db.transaction(DU_STORE,'readonly').objectStore(DU_STORE).getAll(); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){res([]);}; }catch(e){ res([]); } }); }).catch(function(){ return []; }); }
+function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
+// keep the screen awake during uploads so iOS is less likely to sleep mid-transfer (best-effort)
+function duWakeOn(){ try{ if('wakeLock' in navigator && !_duWake){ navigator.wakeLock.request('screen').then(function(w){ _duWake=w; w.addEventListener('release',function(){ _duWake=null; }); }).catch(function(){}); } }catch(e){} }
+function duWakeOff(){ try{ if(_duWake){ _duWake.release(); _duWake=null; } }catch(e){} }
+// On reopen / return to foreground: re-feed any unfinished jobs (tus resumes from the last byte).
+async function duResume(){
+  if(_duResuming) return; _duResuming=true;
+  try{
+    var recs=await duAll(); if(!recs||!recs.length) return;
+    recs.sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+    var n=0;
+    recs.forEach(function(rec){
+      if(_duActive[rec.id]) return;   // already queued / uploading this session
+      try{
+        var f=new File([rec.file],rec.fileName||'video.mp4',{type:rec.fileType||'video/mp4'});
+        var imgs=(rec.images||[]).map(function(im){ return new File([im.blob],im.name||'image.jpg',{type:im.type||'image/jpeg'}); });
+        var voice=rec.voice?new File([rec.voice.blob],rec.voice.name||'voice.mp3',{type:(rec.voice.type||'audio/mpeg')}):null;
+        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
+        n++;
+      }catch(e){}
+    });
+    if(n){ try{ toast('Resuming '+n+' upload'+(n===1?'':'s')+' you had in progress','ok'); }catch(e){} }
+  } finally { _duResuming=false; }
+}
+try{ document.addEventListener('visibilitychange',function(){ if(!document.hidden && typeof ME!=='undefined' && ME && !state.isAdmin) duResume(); }); }catch(e){}
+
 function uqFmtETA(sec){ if(!isFinite(sec)||sec<0) return 'calculating...'; sec=Math.round(sec); if(sec<60) return '~'+sec+'s left'; var m=Math.floor(sec/60), s=sec%60; return '~'+m+'m '+(s<10?'0':'')+s+'s left'; }
 function uqEnqueue(item){
+  if(!item.duId) item.duId='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  if(!item.path){ var cid=(ME&&ME.id)||'root'; var safe=((item.file&&item.file.name)||'video.mp4').replace(/[^\w.\-]+/g,'_'); item.path=cid+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe; }
+  if(!item.createdAt) item.createdAt=Date.now();
+  _duActive[item.duId]=true;
+  if(!item.__restored) duPersist(item);   // stash the bytes immediately so a swipe-off can't lose it
   uq.items.push(item);
   uq.total+=(item.file&&item.file.size||0);
   (item.images||[]).forEach(function(f){ uq.total+=f.size||0; });
@@ -4956,10 +5071,10 @@ function uqEnqueue(item){
   uqRender(); uqStartTick(); uqRun();
 }
 function uqStartTick(){ if(uq.tick) return; uq.tick=setInterval(function(){ if(uq.active||uq.items.length){ uqRender(); } else { clearInterval(uq.tick); uq.tick=null; } },1000); }
-async function uqUploadVideo(file,onProg,account){
-  var safe=file.name.replace(/[^\w.\-]+/g,'_'); var cid=(ME&&ME.id);
-  var path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe;
-  await tusUpload(file,path,onProg);
+async function uqUploadVideo(file,onProg,account,path,fp){
+  var cid=(ME&&ME.id);
+  if(!path){ var safe=file.name.replace(/[^\w.\-]+/g,'_'); path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe; }
+  await tusUpload(file,path,onProg,fp);
   var row={creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'};
   if(account&&account.id){ row.account_id=account.id; row.account_handle=account.handle||''; }   // tag the TikTok account the client chose
   var ins=await sb.from('ed_videos').insert(row).select('id').single();
@@ -4967,18 +5082,23 @@ async function uqUploadVideo(file,onProg,account){
 }
 async function uqProcess(item){
   uq.curSent=0; uqRender();
-  var vid=await uqUploadVideo(item.file,function(sent,total){ uq.curSent=sent; uqRender(); }, item.account);
+  var vid=item.vid;
+  if(!vid){
+    vid=await uqUploadVideo(item.file,function(sent,total){ uq.curSent=sent; uqRender(); }, item.account, item.path, item.duId);
+    item.vid=vid; duPersist(item);   // remember the row id so a resume can't insert a duplicate
+  }
   uq.done+=(item.file&&item.file.size||0); uq.curSent=0; uqRender();
-  for(var i=0;i<(item.images||[]).length;i++){ try{ await uploadAsset(item.images[i],vid,'image'); }catch(e){} uq.done+=(item.images[i].size||0); uqRender(); }
-  if(item.voice){ try{ await uploadAsset(item.voice,vid,'voiceover'); }catch(e){} uq.done+=(item.voice.size||0); uqRender(); }
+  for(var i=(item.imgDone||0);i<(item.images||[]).length;i++){ try{ await uploadAsset(item.images[i],vid,'image'); }catch(e){} item.imgDone=i+1; duPersist(item); uq.done+=(item.images[i].size||0); uqRender(); }
+  if(item.voice && !item.voiceDone){ try{ await uploadAsset(item.voice,vid,'voiceover'); }catch(e){} item.voiceDone=true; duPersist(item); uq.done+=(item.voice.size||0); uqRender(); }
   if(item.notes){ try{ await sb.from('ed_videos').update({notes:item.notes}).eq('id',vid); }catch(e){} }
   if(item.inspo){ try{ await sb.from('ed_videos').update({inspo_url:item.inspo}).eq('id',vid); }catch(e){} }
+  try{ await duDel(item.duId); }catch(e){} if(item.duId) delete _duActive[item.duId];   // fully done -> drop the durable copy
   try{ if(state.currentView==='cdash') loadCDash(); }catch(e){}
 }
 async function uqRun(){
-  if(uq.active) return; uq.active=true;
-  while(uq.items.length){ uq.idx++; var item=uq.items.shift(); try{ await uqProcess(item); }catch(e){ toast('An upload failed: '+((e&&e.message)||e),'err'); } }
-  uq.active=false; uqRender();
+  if(uq.active) return; uq.active=true; duWakeOn();
+  while(uq.items.length){ uq.idx++; var item=uq.items.shift(); try{ await uqProcess(item); }catch(e){ toast('An upload failed: '+((e&&e.message)||e)+' -- it will resume when you reopen','err'); } }
+  uq.active=false; duWakeOff(); uqRender();
   toast('All uploads finished','ok'); try{ loadCDash(); }catch(e){}
   setTimeout(function(){ if(!uq.active&&!uq.items.length){ uq.total=0; uq.done=0; uq.curSent=0; uq.start=0; uq.count=0; uq.idx=0; uqRender(); } },3000);
 }
@@ -4992,7 +5112,7 @@ function uqRender(){
   el.innerHTML='<div style="display:flex;align-items:center;gap:8px"><span class="ph-spin"></span><div style="font-weight:700;font-size:13px;flex:1;min-width:0">Uploading '+Math.min(uq.idx,uq.count)+' of '+uq.count+'</div></div>'
     +'<div style="font-size:12px;color:#9fb4e6;font-weight:700;margin-top:5px">'+uqFmtETA(remain)+'</div>'
     +'<div style="height:6px;background:#2a2f37;border-radius:4px;margin:8px 0 7px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#2f6df6,#6d28d9);border-radius:4px;transition:width .25s"></div></div>'
-    +'<div style="font-size:10.5px;color:#ff9b9b;font-weight:700;line-height:1.35">Please do not close the app while uploading</div>';
+    +'<div style="font-size:10.5px;color:#9fb4e6;font-weight:600;line-height:1.35">Safe to leave -- if you close the app, uploads resume automatically when you reopen.</div>';
 }
 
 // ===== Aaron side: client attachments flow into the editor =====
@@ -5075,7 +5195,7 @@ function mtePickFromRoll(){ closeModal(); var inp=document.getElementById('mteOv
 })();
 
 // ---- upload pipeline (anon token + workspace/creator stamping) ----
-function tusUpload(file,objectPath,onProgress){ return new Promise(function(res,rej){ if(!window.tus)return rej(new Error('tus')); var token=SUPABASE_KEY; var up=new tus.Upload(file,{endpoint:SUPABASE_URL+'/storage/v1/upload/resumable',retryDelays:[0,1000,3000,5000,10000],headers:{authorization:'Bearer '+token,apikey:SUPABASE_KEY,'x-upsert':'true'},uploadDataDuringCreation:false,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:BUCKET,objectName:objectPath,contentType:'video/mp4',cacheControl:'3600'},onError:rej,onProgress:function(s,t){ if(onProgress)onProgress(s,t); },onSuccess:res}); up.findPreviousUploads().then(function(p){ if(p&&p.length)up.resumeFromPreviousUpload(p[0]); up.start(); }).catch(function(){ up.start(); }); }); }
+function tusUpload(file,objectPath,onProgress,fp){ return new Promise(function(res,rej){ if(!window.tus)return rej(new Error('tus')); var token=SUPABASE_KEY; var opts={endpoint:SUPABASE_URL+'/storage/v1/upload/resumable',retryDelays:[0,1000,3000,5000,10000,30000],headers:{authorization:'Bearer '+token,apikey:SUPABASE_KEY,'x-upsert':'true'},uploadDataDuringCreation:false,storeFingerprintForResuming:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:BUCKET,objectName:objectPath,contentType:'video/mp4',cacheControl:'3600'},onError:rej,onProgress:function(s,t){ if(onProgress)onProgress(s,t); },onSuccess:res}; if(fp){ opts.fingerprint=function(){ return Promise.resolve('phaus-'+fp); }; }   /* stable id so the transfer resumes after a reload, not restarts */ var up=new tus.Upload(file,opts); up.findPreviousUploads().then(function(p){ if(p&&p.length)up.resumeFromPreviousUpload(p[0]); up.start(); }).catch(function(){ up.start(); }); }); }
 async function uploadOne(file,prodId,onProgress){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
   var cid = state.isAdmin ? (state.creatorFilter||null) : (ME&&ME.id);
@@ -5213,14 +5333,21 @@ async function edDoSend(id){
   var v=swVids.find(function(x){ return x.id===id; }); if(!v) return;
   var acct=window.edSchedAcct;
   if(!acct||!acct.id){ toast('Pick which account to post to','err'); return; }
-  var cap=val('edCap');
-  var target=v; try{ var ed=await swResolveEdited(id); if(ed&&ed.storage_path) target=ed; }catch(e){}
-  var ins=await sb.from('ed_send_jobs').insert({video_id:target.id, source_video_id:id, account_tag:'@'+(acct.handle||''), account_id:acct.id, caption:cap, draft:true, status:'queued'});
-  if(ins.error){ toast('Could not queue: '+ins.error.message,'err'); return; }
-  var ids=[id]; if(target.id!==id) ids.push(target.id);
-  try{ await sb.from('ed_videos').update({status:'scheduled'}).in('id',ids); }catch(e){}
-  closeModal(); toast('Queued to @'+(acct.handle||'client')+' inbox','ok');
-  swAdvance();
+  if(window.__edSending){ return; } window.__edSending=true;   // guard: a double-tap must not queue two jobs
+  try{
+    // don't queue a second job for the same clip+account if one is already in flight
+    try{ var dup=await sb.from('ed_send_jobs').select('id').eq('source_video_id',id).eq('account_id',acct.id).in('status',['queued','waiting','sending']).limit(1);
+      if(dup&&dup.data&&dup.data.length){ toast('Already queued for @'+(acct.handle||'client'),'ok'); closeModal(); return; } }catch(e){}
+    var cap=val('edCap');
+    var target=v, haveEdit=false; try{ var ed=await swResolveEdited(id); if(ed&&ed.storage_path){ target=ed; haveEdit=true; } }catch(e){}
+    var ins=await sb.from('ed_send_jobs').insert({video_id:target.id, source_video_id:id, account_tag:'@'+(acct.handle||''), account_id:acct.id, caption:cap, draft:true, status:'queued'});
+    if(ins.error){ toast('Could not queue: '+ins.error.message,'err'); return; }
+    var ids=[id]; if(target.id!==id) ids.push(target.id);
+    try{ await sb.from('ed_videos').update({status:'scheduled'}).in('id',ids); }catch(e){}
+    closeModal();
+    toast(haveEdit ? ('Queued to @'+(acct.handle||'client')+' inbox') : 'Queued -- it will send the edited version as soon as it finishes rendering','ok');
+    swAdvance();
+  } finally { window.__edSending=false; }
 }
 
 // ===================== JOB BOARD (Uploaded / Edited / Posted) =====================
