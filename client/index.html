@@ -4711,7 +4711,7 @@ async function loadCDash(){
 function edCreatorUpload(){ showView('upload'); }
 
 // ===== Client uploader: single / bulk + Notion-style attachments (matches the mockup) =====
-var ufState={mode:'single',video:null,images:[],voice:null,notes:'',bulk:[],account:null};
+var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null};
 function ufMB(b){ b=b||0; return (b>=1048576)?((b/1048576).toFixed(1)+' MB'):(Math.max(1,Math.round(b/1024))+' KB'); }
 function ufShort(n){ n=n||'clip'; return n.length>14?(n.slice(0,11)+'...'):n; }
 var UF_FILM='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
@@ -4720,6 +4720,7 @@ var UF_PLAY='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
 var UF_IMG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>';
 var UF_AUD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
 var UF_NOTE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
+var UF_LINK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
 function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; ufRender(); edRefreshAccounts(); }
 async function edRefreshAccounts(){ try{ var ar=await sb.from('ed_member_accounts').select('account_id,handle').eq('member_id',ME.id).order('created_at'); state.myAccounts=(ar.data||[]).map(function(a){ return {id:a.account_id, handle:a.handle}; }); if(state.myAccounts.length===1 && !ufState.account) ufState.account=state.myAccounts[0]; ufRender(); }catch(e){} }
 function ufSetMode(m){ ufState.mode=m; ufRender(); }
@@ -4767,8 +4768,9 @@ function ufSingle(){
     :('<div class="uam-drop" style="padding:14px" onclick="ufPickVoice()"><b>Add a voiceover MP3</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file</div></div>');
   var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover <span class="o">MP3</span></div><div class="uam-bdesc">Upload an audio file to use as the voiceover</div></div><div class="uam-bplus" onclick="ufPickVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
+  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
-  return ufAcctPicker()+vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+noteBlock+btn;
+  return ufAcctPicker()+vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+noteBlock+inspoBlock+btn;
 }
 function ufBulk(){
   var b=ufState.bulk||[];
@@ -4802,8 +4804,10 @@ function ufSubmitSingle(){
   if(accs.length && !ufState.account){ toast('Pick which account this is for','err'); return; }
   var acct=ufState.account||null;
   var notes=(document.getElementById('uf_notes')&&document.getElementById('uf_notes').value)||ufState.notes||'';
-  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,notes:notes,account:acct});
-  ufState={mode:'single',video:null,images:[],voice:null,notes:'',bulk:[],account:(accs.length===1?accs[0]:acct)}; ufRender();
+  var inspo=(document.getElementById('uf_inspo')&&document.getElementById('uf_inspo').value)||ufState.inspo||'';
+  inspo=inspo.trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;   // normalise so the link works on Aaron's side
+  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,notes:notes,inspo:inspo,account:acct});
+  ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:(accs.length===1?accs[0]:acct)}; ufRender();
   toast('Added to the upload queue -- keep going if you like','ok');
 }
 function ufSubmitBulk(){
@@ -4845,6 +4849,7 @@ async function uqProcess(item){
   for(var i=0;i<(item.images||[]).length;i++){ try{ await uploadAsset(item.images[i],vid,'image'); }catch(e){} uq.done+=(item.images[i].size||0); uqRender(); }
   if(item.voice){ try{ await uploadAsset(item.voice,vid,'voiceover'); }catch(e){} uq.done+=(item.voice.size||0); uqRender(); }
   if(item.notes){ try{ await sb.from('ed_videos').update({notes:item.notes}).eq('id',vid); }catch(e){} }
+  if(item.inspo){ try{ await sb.from('ed_videos').update({inspo_url:item.inspo}).eq('id',vid); }catch(e){} }
   try{ if(state.currentView==='cdash') loadCDash(); }catch(e){}
 }
 async function uqRun(){
@@ -4877,12 +4882,13 @@ async function edLoadClipAssets(id){
     for(var i=0;i<arr.length;i++){ if(arr[i].kind==='image'){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(arr[i].storage_path,3600); arr[i].url=s&&s.data&&s.data.signedUrl; }catch(e){} } }
     state.clipAssets=arr;
   }catch(e){}
-  try{ var nr=await sb.from('ed_videos').select('notes').eq('id',vid).maybeSingle(); state.clipNote=(nr.data&&nr.data.notes)||''; }catch(e){}
+  state.clipInspo='';
+  try{ var nr=await sb.from('ed_videos').select('notes,inspo_url').eq('id',vid).maybeSingle(); state.clipNote=(nr.data&&nr.data.notes)||''; state.clipInspo=(nr.data&&nr.data.inspo_url)||''; }catch(e){}
   edRenderBrief();
 }
 function edRenderBrief(){
   var bar=document.getElementById('mteBar'); if(!bar) return;
-  var has=(state.clipAssets&&state.clipAssets.length)||state.clipNote;
+  var has=(state.clipAssets&&state.clipAssets.length)||state.clipNote||state.clipInspo;
   var btn=document.getElementById('edBriefBtn');
   if(!has){ if(btn&&btn.parentNode) btn.parentNode.removeChild(btn); return; }
   if(!btn){ btn=document.createElement('button'); btn.id='edBriefBtn'; btn.type='button'; btn.onclick=edOpenBrief;
@@ -4905,8 +4911,9 @@ function edOpenBrief(){
     var added=(state.clipVoiceover&&state.clipVoiceover===voice.storage_path);
     h+='<div class="lbl-ed">Voiceover</div><div style="display:flex;gap:8px"><button class="btn" style="flex:1;justify-content:center" onclick="edAddVoiceover(\''+voice.id+'\')">'+(added?'Voiceover added':'Add voiceover')+'</button><button class="btn ghost" style="flex:0 0 auto;justify-content:center" onclick="edDownloadAsset(\''+voice.id+'\')">Download</button></div><div class="h-sub" style="font-size:11.5px;margin-top:6px">Adds the voiceover to the final export (mixed over the clip on render).</div>';
   }
-  if(state.clipNote){ h+='<div class="lbl-ed" style="margin-top:'+((imgs.length||voice)?'14px':'6px')+'">Notes</div><div class="card" style="white-space:pre-wrap;font-size:13px">'+esc(state.clipNote)+'</div>'; }
-  if(!state.clipNote&&!imgs.length&&!voice){ h+='<div class="h-sub">No attachments on this clip.</div>'; }
+  if(state.clipInspo){ h+='<div class="lbl-ed">Video inspiration</div><a href="'+esc(state.clipInspo)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;background:#fff0e6;border:1px solid #f6c9a8;border-radius:10px;padding:11px 12px;color:#c2410c;font-weight:700;font-size:12.5px;text-decoration:none;word-break:break-all;margin-bottom:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 auto"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'+esc(state.clipInspo)+'</a><div class="h-sub" style="font-size:11px;margin-top:-2px;margin-bottom:6px">Tap to open on TikTok.</div>'; }
+  if(state.clipNote){ h+='<div class="lbl-ed" style="margin-top:'+((imgs.length||voice||state.clipInspo)?'14px':'6px')+'">Notes</div><div class="card" style="white-space:pre-wrap;font-size:13px">'+esc(state.clipNote)+'</div>'; }
+  if(!state.clipNote&&!imgs.length&&!voice&&!state.clipInspo){ h+='<div class="h-sub">No attachments on this clip.</div>'; }
   h+='<div class="actions"><button class="btn ghost" onclick="closeModal()">Close</button></div>';
   showModal(h);
 }
