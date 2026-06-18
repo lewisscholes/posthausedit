@@ -4620,32 +4620,43 @@ async function ccPP(body){
 }
 async function ccConnect(){
   toast('Opening TikTok connect...');
-  try{ var r=await ccPP({action:'connect',platform:'tiktok'}); var url=r&&r.body&&r.body.url; if(!url){ toast('Could not start TikTok connect','err'); return; } state.ccConnecting=true; loadCDash(); window.open(url,'_blank');
-    // auto-detect the new account when they come back (PostPeer shows a JSON page; no manual refresh needed)
-    for(var i=1;i<=6;i++){ setTimeout(function(){ if(state.ccConnecting) ccPickList(); }, i*3000); }
+  try{
+    // snapshot the integrations that exist BEFORE this client authorizes, so we only ever
+    // claim the ONE account they connect now -- never another client's account on PostPeer.
+    state.ccBefore={}; state.ccStart=Date.now(); state.ccClaiming=false;
+    try{ var pre=await ccPP({action:'integrations'}); var pib=pre&&pre.body; var parr=Array.isArray(pib)?pib:((pib&&(pib.data||pib.integrations||pib.items))||[]); parr.forEach(function(a){ if(a&&a.id) state.ccBefore[String(a.id)]=true; }); }catch(e){}
+    var r=await ccPP({action:'connect',platform:'tiktok'}); var url=r&&r.body&&r.body.url; if(!url){ toast('Could not start TikTok connect','err'); return; }
+    state.ccConnecting=true; loadCDash(); window.open(url,'_blank');
+    // auto-detect + claim the account they just authorized when they come back (PostPeer shows a JSON page)
+    for(var i=1;i<=10;i++){ setTimeout(function(){ if(state.ccConnecting) ccPickList(); }, i*3000); }
   }
   catch(e){ toast('Connect failed -- try again','err'); }
 }
 async function ccPickList(){
-  var box=document.getElementById('ccPickBox'); if(box && !box.innerHTML) box.innerHTML='<div class="h-sub">Looking for your account...</div>';
+  var box=document.getElementById('ccPickBox'); if(box && !box.innerHTML) box.innerHTML='<div class="h-sub">Finishing connect...</div>';
   try{
     var r=await ccPP({action:'integrations'}); var ib=r&&r.body; var arr=Array.isArray(ib)?ib:((ib&&(ib.data||ib.integrations||ib.items))||[]);
     var claimed={}; try{ var mm=await sb.from('ed_member_accounts').select('account_id').eq('workspace_id',WS); (mm.data||[]).forEach(function(a){ if(a.account_id) claimed[String(a.account_id)]=true; }); }catch(e){}
-    var list=arr.filter(function(a){ return a.platform==='tiktok' && !claimed[String(a.id)]; });
-    if(!box) return;
-    if(!list.length){ box.innerHTML='<div class="h-sub">No new TikTok account yet. Finish signing in on TikTok, then tap Refresh.</div>'; return; }
-    box.innerHTML=list.map(function(a){ var h=String(a.username||a.displayName||'tiktok').replace(/^@/,''); var dn=String(a.displayName||a.username||''); return '<button class="btn ghost" style="width:100%;justify-content:flex-start;margin-top:8px" onclick="ccClaim(\''+esc(String(a.id))+'\',\''+esc(h.replace(/\x27/g,""))+'\',\''+esc(dn.replace(/\x27/g,""))+'\')">Use @'+esc(h)+'</button>'; }).join('');
-  }catch(e){ if(box) box.innerHTML='<div class="h-sub">Could not load accounts -- tap Refresh.</div>'; }
+    var before=state.ccBefore||{};
+    // ONLY the account that appeared since this client tapped Connect (their own OAuth) -- never the shared list
+    var fresh=arr.filter(function(a){ return a.platform==='tiktok' && !claimed[String(a.id)] && !before[String(a.id)]; });
+    if(!fresh.length){ if(box) box.innerHTML='<div class="h-sub">Finishing connect... once you approve on TikTok this updates automatically. (Tap Refresh if needed.)</div>'; return; }
+    if(state.ccClaiming) return; state.ccClaiming=true; state.ccConnecting=false;
+    var a=fresh[0]; var h=String(a.username||a.displayName||'tiktok').replace(/^@/,''); var dn=String(a.displayName||a.username||'');
+    ccClaim(String(a.id), h, dn);
+  }catch(e){ if(box) box.innerHTML='<div class="h-sub">Could not finish connect -- tap Refresh.</div>'; }
 }
 async function ccClaim(accId,handle,displayName){
   handle=String(handle||'').replace(/^@/,'');
-  try{ var ex=await sb.from('ed_member_accounts').select('id').eq('account_id',accId).limit(1); if(ex.data&&ex.data.length){ state.ccConnecting=false; toast('That account is already connected','ok'); loadCDash(); return; } }catch(e){}
+  try{ var ex=await sb.from('ed_member_accounts').select('id').eq('account_id',accId).limit(1); if(ex.data&&ex.data.length){ state.ccConnecting=false; state.ccClaiming=false; toast('That account is already connected','ok'); loadCDash(); return; } }catch(e){}
   var r=await sb.from('ed_member_accounts').insert({member_id:ME.id, account_id:accId, handle:handle, display_name:displayName||handle, connected_at:new Date().toISOString()});
+  state.ccClaiming=false;
   if(r.error){ toast('Failed: '+r.error.message,'err'); return; }
   state.ccConnecting=false; state.myAccounts=null; toast('TikTok connected','ok'); loadCDash();
 }
 async function ccDisconnect(accId){
   if(!confirm('Disconnect this TikTok account?')) return;
+  try{ await ccPP({action:'disconnect', integrationId:accId}); }catch(e){}   // also remove it from PostPeer so it can be reconnected from scratch
   await sb.from('ed_member_accounts').delete().eq('account_id',accId).eq('member_id',ME.id);
   state.myAccounts=null; toast('Disconnected'); loadCDash();
 }
