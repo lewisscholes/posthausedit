@@ -4618,19 +4618,23 @@ async function ccPP(body){
   var r=await fetch(SUPABASE_URL+'/functions/v1/postpeer',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},body:JSON.stringify(body)});
   return r.json();
 }
-async function ccConnect(){
+function ccConnect(){
+  // Open the tab SYNCHRONOUSLY on tap so the browser doesn't block the popup (any await before
+  // window.open loses the user-gesture -> the OAuth window never opens, which is the "just loading" bug).
+  var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
   toast('Opening TikTok connect...');
-  try{
-    // snapshot the integrations that exist BEFORE this client authorizes, so we only ever
-    // claim the ONE account they connect now -- never another client's account on PostPeer.
-    state.ccBefore={}; state.ccStart=Date.now(); state.ccClaiming=false;
+  state.ccBefore={}; state.ccStart=Date.now(); state.ccClaiming=false;
+  (async function(){
     try{ var pre=await ccPP({action:'integrations'}); var pib=pre&&pre.body; var parr=Array.isArray(pib)?pib:((pib&&(pib.data||pib.integrations||pib.items))||[]); parr.forEach(function(a){ if(a&&a.id) state.ccBefore[String(a.id)]=true; }); }catch(e){}
-    var r=await ccPP({action:'connect',platform:'tiktok'}); var url=r&&r.body&&r.body.url; if(!url){ toast('Could not start TikTok connect','err'); return; }
-    state.ccConnecting=true; loadCDash(); window.open(url,'_blank');
-    // auto-detect + claim the account they just authorized when they come back (PostPeer shows a JSON page)
-    for(var i=1;i<=10;i++){ setTimeout(function(){ if(state.ccConnecting) ccPickList(); }, i*3000); }
-  }
-  catch(e){ toast('Connect failed -- try again','err'); }
+    try{
+      var r=await ccPP({action:'connect',platform:'tiktok'}); var url=r&&r.body&&r.body.url;
+      if(!url){ if(w){try{w.close();}catch(e){}} toast('Could not start TikTok connect','err'); return; }
+      if(w){ try{ w.location.href=url; }catch(e){ window.open(url,'_blank'); } } else { window.open(url,'_blank'); }
+      state.ccConnecting=true; loadCDash();
+      // auto-detect + claim the account they just authorized when they come back
+      for(var i=1;i<=12;i++){ setTimeout(function(){ if(state.ccConnecting) ccPickList(); }, i*3000); }
+    }catch(e){ if(w){try{w.close();}catch(_){}} toast('Connect failed -- try again','err'); }
+  })();
 }
 async function ccPickList(){
   var box=document.getElementById('ccPickBox'); if(box && !box.innerHTML) box.innerHTML='<div class="h-sub">Finishing connect...</div>';
