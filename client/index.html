@@ -659,7 +659,7 @@
   /* ---- job board (kanban: Uploaded / Edited / Posted) ---- */
   .jb-wrap{display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 24px;scrollbar-width:none}
   .jb-wrap::-webkit-scrollbar{display:none}
-  .jb-col{flex:0 0 80%;max-width:330px;background:#f1f4f9;border:1px solid var(--line);border-radius:14px;padding:10px;align-self:flex-start}
+  .jb-col{flex:1 1 0;min-width:150px;background:#f1f4f9;border:1px solid var(--line);border-radius:14px;padding:10px;align-self:flex-start}
   .jb-colh{font-weight:800;font-size:13px;display:flex;align-items:center;gap:7px;margin:2px 2px 10px}
   .jb-cnt{background:#dfe5ee;color:#56606e;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:auto}
   .jb-card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px;margin-bottom:9px;display:flex;gap:9px;cursor:pointer}
@@ -5145,8 +5145,8 @@ async function edDoSend(id){
 
 // ===================== JOB BOARD (Uploaded / Edited / Posted) =====================
 function jbColOf(v){
+  // Only two stages: a clip stays in Uploaded (even while Aaron edits) and moves to Posted once scheduled/sent.
   if(v.posted_at || v.status==='posted' || v.status==='scheduled') return 'posted';
-  if(v.status==='editing' || v.status==='edited' || (state.jbEditedRoots && state.jbEditedRoots[v.id])) return 'edited';
   return 'uploaded';
 }
 async function loadBoard(){
@@ -5157,16 +5157,15 @@ async function loadBoard(){
   if(!state.isAdmin) q=q.eq('creator_id',ME.id);
   else if(state.creatorFilter) q=q.eq('creator_id',state.creatorFilter);
   var res=await q; var all=res.data||[];
-  state.jbEditedRoots={}; all.forEach(function(v){ if(v.kind==='edited'&&v.source_video_id) state.jbEditedRoots[v.source_video_id]=true; });
   var roots=all.filter(function(v){ return v.kind!=='edited'; });
   var assetMap={}; try{ var ids=roots.map(function(v){return v.id;}); if(ids.length){ var ar=await sb.from('ed_video_assets').select('video_id,kind').in('video_id',ids); (ar.data||[]).forEach(function(a){ (assetMap[a.video_id]=assetMap[a.video_id]||{})[a.kind]=true; }); } }catch(e){}
   if(!state.jbUrls) state.jbUrls={};
   for(var i=0;i<roots.length;i++){ var v=roots[i]; var pth=v.proxy_path||v.storage_path; if(pth && !state.jbUrls[v.id]){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(pth,3600); if(s&&s.data&&s.data.signedUrl) state.jbUrls[v.id]=s.data.signedUrl; }catch(e){} } }
-  var cols={uploaded:[],edited:[],posted:[]};
+  var cols={uploaded:[],posted:[]};
   roots.forEach(function(v){ v._assets=assetMap[v.id]||{}; cols[jbColOf(v)].push(v); });
   function colHtml(key,label,dot){ var list=cols[key]; var cards=list.length?list.map(jbCard).join(''):'<div class="jb-empty">Nothing here.</div>'; return '<div class="jb-col"><div class="jb-colh"><span style="width:9px;height:9px;border-radius:50%;background:'+dot+'"></span>'+label+'<span class="jb-cnt">'+list.length+'</span></div>'+cards+'</div>'; }
   var hi='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Job board</div><div class="h-sub" style="margin:0 2px 14px">'+(state.isAdmin?'Every client clip from upload to posted. Tap a clip to edit or view its brief.':'Track your clips. Tap an Uploaded clip to add overlays, voiceover, inspiration or notes.')+'</div>';
-  root.innerHTML=hi+'<div class="jb-wrap">'+colHtml('uploaded','Uploaded','#2f6df6')+colHtml('edited','Edited','#b45309')+colHtml('posted','Posted','#16a34a')+'</div>';
+  root.innerHTML=hi+'<div class="jb-wrap">'+colHtml('uploaded','Uploaded','#2f6df6')+colHtml('posted','Posted','#16a34a')+'</div>';
   [].slice.call(document.querySelectorAll('#boardBody .jb-thumb[data-vid]')).forEach(function(el){ var id=el.dataset.vid; var c=jbThumbGet(id); if(c){ el.innerHTML='<img src="'+c+'" alt="">'; return; } var u=state.jbUrls&&state.jbUrls[id]; if(u) jbQueueThumb(id,u); });
   jbStartLive();
 }
@@ -5263,7 +5262,7 @@ async function jbView(id){
 function jbDl(aid,name){ sb.from('ed_video_assets').select('storage_path').eq('id',aid).maybeSingle().then(function(r){ if(r.data){ sb.storage.from(BUCKET).createSignedUrl(r.data.storage_path,300,{download:name||'file'}).then(function(s){ if(s&&s.data&&s.data.signedUrl){ var el=document.createElement('a'); el.href=s.data.signedUrl; el.download=name||'file'; document.body.appendChild(el); el.click(); el.remove(); } }); } }); }
 // ---- Aaron: open a clip from the board ----
 function jbAaronOpen(id){ showModal('<h3>Clip</h3><div class="actions" style="flex-direction:column;gap:8px;align-items:stretch"><button class="btn" style="justify-content:center" onclick="jbAaronEdit(\''+id+'\')">Edit this clip</button><button class="btn ghost" style="justify-content:center" onclick="jbView(\''+id+'\')">View client brief</button><button class="btn ghost" style="justify-content:center" onclick="closeModal()">Cancel</button></div>'); }
-async function jbAaronEdit(id){ try{ await sb.from('ed_videos').update({status:'editing'}).eq('id',id); }catch(e){} closeModal(); showView('editor'); }
+function jbAaronEdit(id){ closeModal(); showView('editor'); }   // editing no longer changes status; clip stays in Uploaded until scheduled
 
 // ===================== ANALYTICS (admin) =====================
 function anStartOfDay(d){ var x=new Date(d); x.setHours(0,0,0,0); return x; }
@@ -5303,8 +5302,8 @@ function anChart(vids,sends,idCreator,r,cf){
   if(!days.length) return '';
   var rows=days.map(function(day){ var s=anStartOfDay(day).getTime(), e=s+86399999;
     var u=vids.filter(function(v){ return v.kind!=='edited'&&anInDay(v.created_at,s,e)&&(cf?v.creator_id===cf:true); }).length;
-    var ed=vids.filter(function(v){ return v.kind==='edited'&&anInDay(v.created_at,s,e)&&(cf?v.creator_id===cf:true); }).length;
-    var p=sends.filter(function(x){ var c=idCreator[x.source_video_id]||idCreator[x.video_id]; return anInDay(x.created_at,s,e)&&(cf?c===cf:true); }).length;
+    var ed=sends.filter(function(x){ var c=idCreator[x.source_video_id]||idCreator[x.video_id]; return anInDay(x.created_at,s,e)&&(cf?c===cf:true); }).length;
+    var p=vids.filter(function(v){ return v.posted_at&&anInDay(v.posted_at,s,e)&&(cf?v.creator_id===cf:true); }).length;
     return {d:day,u:u,e:ed,p:p};
   });
   var max=1; rows.forEach(function(x){ max=Math.max(max,x.u,x.e,x.p); });
@@ -5315,13 +5314,13 @@ async function loadAnalytics(){
   var root=document.getElementById('analyticsBody'); if(!root) return;
   if(!root.innerHTML) root.innerHTML='<div class="h-sub">Loading...</div>';
   var mq=await sb.from('ed_members').select('id,name').eq('workspace_id',WS).eq('role','creator').order('created_at'); var members=mq.data||[];
-  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at').eq('workspace_id',WS); var vids=vq.data||[];
+  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at,posted_at').eq('workspace_id',WS); var vids=vq.data||[];
   var sq=await sb.from('ed_send_jobs').select('id,source_video_id,video_id,created_at').eq('workspace_id',WS); var sends=sq.data||[];
   var idCreator={}; vids.forEach(function(v){ idCreator[v.id]=v.creator_id; });
   var r=anRange(); var cf=state.anClient||null;
   function up(c){ return vids.filter(function(v){ return v.kind!=='edited'&&anInRange(v.created_at,r)&&(c?v.creator_id===c:true); }).length; }
-  function ed(c){ return vids.filter(function(v){ return v.kind==='edited'&&anInRange(v.created_at,r)&&(c?v.creator_id===c:true); }).length; }
-  function po(c){ return sends.filter(function(s){ var cr=idCreator[s.source_video_id]||idCreator[s.video_id]; return anInRange(s.created_at,r)&&(c?cr===c:true); }).length; }
+  function ed(c){ return sends.filter(function(s){ var cr=idCreator[s.source_video_id]||idCreator[s.video_id]; return anInRange(s.created_at,r)&&(c?cr===c:true); }).length; }   // Edited = scheduled/sent by Aaron
+  function po(c){ return vids.filter(function(v){ return v.posted_at&&anInRange(v.posted_at,r)&&(c?v.creator_id===c:true); }).length; }   // Posted = actually posted (confirmed)
   var U=up(cf),E=ed(cf),P=po(cf);
   var clientChips='<div class="edf'+(!cf?' on':'')+'" onclick="anSetClient(null)">All clients</div>'+members.map(function(m){ return '<div class="edf'+(cf===m.id?' on':'')+'" onclick="anSetClient(\''+m.id+'\')">'+esc(m.name||'Creator')+'</div>'; }).join('');
   var presets=[['today','Today'],['yesterday','Yesterday'],['last7','Last 7 days'],['last14','Last 14 days'],['last30','Last 30 days'],['custom','Custom']];
