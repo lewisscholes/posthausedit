@@ -572,10 +572,22 @@
   .edf{flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit;white-space:nowrap}
   .edf.on{background:var(--grad);color:#fff;border-color:transparent}
   .lbl-ed{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:10px}
-  .ph-top{display:flex;align-items:center;gap:10px;padding:14px 16px 12px;background:#fff;border-bottom:1px solid var(--line2)}
-  .ph-top .ph-logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
-  .ph-top .ph-ttl{font-weight:800;font-size:17px}
-  .ph-top .ph-who{margin-left:auto;font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--line);padding:4px 10px;border-radius:20px}
+  .ph-top{display:flex;align-items:center;gap:10px;padding:calc(15px + env(safe-area-inset-top)) 16px 15px;background:var(--grad);color:#fff;border-bottom:0}
+  .ph-top .ph-logo{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
+  .ph-top .ph-ttl{font-weight:800;font-size:17px;color:#fff}
+  .ph-top .ph-who{margin-left:auto;font-size:12px;color:#fff;background:rgba(255,255,255,.16);border:0;padding:5px 12px;border-radius:20px}
+  /* client (creator) views fill the screen: no reserved top/side padding, banner flush + full width */
+  body.ph-client .main{padding:0 0 calc(86px + env(safe-area-inset-bottom)) !important}
+  /* client personal stat cards (under the greeting) */
+  .ph-statwrap{max-width:620px;margin:0 auto;padding:0 16px}
+  .ph-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+  .ph-stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 14px;display:flex;flex-direction:column}
+  .ph-stat-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .ph-stat.up .ph-stat-ic{background:#eaf3ff;color:#2f6df6}
+  .ph-stat.po .ph-stat-ic{background:#eafaf0;color:#16a34a}
+  .ph-stat-num{font-size:30px;font-weight:800;line-height:1}
+  .ph-stat.up .ph-stat-num{color:#2f6df6}.ph-stat.po .ph-stat-num{color:#16a34a}
+  .ph-stat-cap{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
   .tt-badge{width:46px;height:46px;border-radius:13px;background:#010101;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
   .tt-badge svg{width:24px;height:24px}
   .cc-head{display:flex;align-items:center;gap:12px}
@@ -4595,6 +4607,7 @@ async function loadProducts(){ state.products=[]; }
 
 function edApplyRole(){
   var admin=!!state.isAdmin;
+  try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
   var show={'nav-clients':admin,'nav-bank':admin,'nav-editor':admin,'nav-schedule':admin,'nav-analytics':admin,'nav-upload':!admin,'nav-cdash':!admin,'nav-board':true};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
@@ -4759,13 +4772,17 @@ async function loadCDash(){
   }
   var q=await sb.from('ed_videos').select('*').eq('workspace_id',WS).eq('creator_id',ME.id).order('created_at',{ascending:false});
   var vids=q.data||[];
+  // this client's own stats (their uploads + their posted), shown under the greeting
+  var statUp=vids.filter(function(v){ return v.kind!=='edited'; }).length;
+  var statPo=vids.filter(function(v){ return v.kind!=='edited' && (v.posted_at||v.status==='posted'||v.status==='scheduled'); }).length;
+  var statsHtml='<div class="ph-stats"><div class="ph-stat up"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V6M5 12l7-7 7 7"/></svg></div><div class="ph-stat-num">'+statUp+'</div><div class="ph-stat-cap">Videos uploaded</div></div><div class="ph-stat po"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div><div class="ph-stat-num">'+statPo+'</div><div class="ph-stat-cap">Videos posted</div></div></div>';
   var up='<div class="card"><div class="lbl-ed">Step 2 - your videos</div><div class="up-dash" onclick="showView(\'upload\')"><div class="big">Upload videos</div><div class="sm">Add raw clips for Aaron to edit</div></div>';
   up+='<div style="margin-top:14px;font-weight:700;font-size:13px">Uploads ('+vids.length+')</div>';
   if(!vids.length){ up+='<div class="h-sub" style="margin-top:6px">Nothing uploaded yet.</div>'; }
   else { up+=vids.map(function(v){ var st=(v.posted_at||v.status==='posted')?'Posted':((v.kind==='edited'||v.status==='edited')?'Edited':'Uploaded'); return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="opacity:.5"><use href="#i-film"></use></svg><div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||v.filename||'clip')+'</div><div class="h-sub" style="font-size:12px">'+new Date(v.created_at).toLocaleString()+'</div></div><span class="tf-pill">'+st+'</span></div>'; }).join(''); }
   up+='</div>';
-  var hi='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Hi '+esc((ME&&ME.name)||'there')+'</div><div class="h-sub" style="margin:0 2px 16px">Connect your TikTok, then upload your clips. Your editor takes care of the rest.</div>';
-  root.innerHTML=hi+conn+up;
+  var hi='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Hi '+esc((ME&&ME.name)||'there')+'</div><div class="h-sub" style="margin:0 2px 4px">Connect your TikTok, then upload your clips. Your editor takes care of the rest.</div>';
+  root.innerHTML=hi+statsHtml+conn+up;
   if(state.ccConnecting) ccPickList();
 }
 function edCreatorUpload(){ showView('upload'); }
