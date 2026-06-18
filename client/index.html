@@ -341,6 +341,7 @@
   .sw-btn.del{color:#ef4444;border-color:#fca5a5}.sw-btn.del:hover{background:#fef2f2}
   .sw-btn.go{color:#22c55e;border-color:#86efac}.sw-btn.go:hover{background:#f0fdf4}
   .sw-btn.ed{width:68px;height:68px;font-size:15px;font-weight:700;color:var(--blue);border-color:var(--blue)}.sw-btn.ed:hover{background:#eff4ff}
+  .sw-btn.skip{color:#b45309;border-color:#fcd9a8}.sw-btn.skip:hover{background:#fff7ed}
   .sw-count{color:var(--muted);font-size:13px;margin-top:10px}
   .sw-empty{text-align:center;padding:4rem 2rem;color:var(--muted)}
   .sw-empty .big{font-size:46px;margin-bottom:12px}
@@ -2684,6 +2685,7 @@ function swRender(){
       </div>
       <div class="sw-actions">
         <button class="sw-btn del" title="Delete" onclick="swDelete()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"></use></svg></button>
+        <button class="sw-btn skip" title="Skip (move a few back)" onclick="swSkip()"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 4l10 8-10 8z" fill="currentColor"/><rect x="18" y="4" width="2.4" height="16" rx="1" fill="currentColor"/></svg></button>
         <button class="sw-btn ed" title="Edit" onclick="swEdit()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pencil"></use></svg> Edit</button>
         <button class="sw-btn go" title="Approve for TikTok" onclick="swApprove()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg></button>
       </div>
@@ -2794,6 +2796,20 @@ function swAdvance(){
   const next=swVids[swIdx+2];
   if(next&&!signed[next.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(next),3600).then(({data:s})=>{if(s?.signedUrl)signed[next.id]=s.signedUrl;});
   swRender();
+}
+// Skip: move the front clip ~4 places back in the pile (not to the very end), so something else can jump the queue.
+function swSkip(){
+  if(swVids.length - swIdx < 2){ try{ toast('Nothing to skip past','ok'); }catch(e){} return; }
+  const card=document.querySelector('.sw-card.is-top');
+  const doMove=()=>{
+    const cur=swVids.splice(swIdx,1)[0];
+    const insertAt=Math.min(swVids.length, swIdx+4);   // 4 spots back from the front
+    swVids.splice(insertAt,0,cur);
+    for(let i=0;i<3;i++){ const v=swVids[swIdx+i]; if(v&&!signed[v.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600).then(({data:s})=>{ if(s&&s.signedUrl){ signed[v.id]=s.signedUrl; swRender(); } }).catch(()=>{}); }
+    swRender();
+    try{ toast('Skipped -- it will come back round shortly','ok'); }catch(e){}
+  };
+  if(card){ card.classList.add('fly-left'); setTimeout(doMove,360); } else { doMove(); }
 }
 
 async function swDelete(){
@@ -4619,13 +4635,15 @@ async function loadProducts(){ state.products=[]; }
 function edApplyRole(){
   var admin=!!state.isAdmin;
   try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
-  var show={'nav-clients':admin,'nav-bank':admin,'nav-editor':admin,'nav-schedule':admin,'nav-analytics':admin,'nav-upload':!admin,'nav-cdash':!admin,'nav-board':true};
+  // Hamburger (sidebar): Clients + Board (the less-used). Quick-access lives in the bottom bar.
+  var show={'nav-clients':admin,'nav-board':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
   var ag=document.getElementById('adminGroup'); if(ag) ag.style.display='none';
   var tl=document.getElementById('teamLink'); if(tl) tl.style.display='none';
-  var bshow={'bnav-clients':admin,'bnav-bank':admin,'bnav-editor':admin,'bnav-schedule':admin,'bnav-analytics':admin,'bnav-upload':!admin,'bnav-cdash':!admin,'bnav-board':true};
+  // Bottom bar (quick access): admin = Analytics, Video bank, Editor, Scheduler; creator = Dashboard, Upload, Board.
+  var bshow={'bnav-clients':false,'bnav-bank':admin,'bnav-editor':admin,'bnav-schedule':admin,'bnav-analytics':admin,'bnav-upload':!admin,'bnav-cdash':!admin,'bnav-board':!admin};
   Object.keys(bshow).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=bshow[id]?'':'none'; });
   var bd=document.getElementById('bnav-dashboard'); if(bd) bd.style.display='none';
   var plus=document.querySelector('.bnav-plus'); if(plus) plus.style.display='none';
@@ -4647,7 +4665,7 @@ function showView(v){
   state.currentView=v;
   ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   try{ closeDrawer(); }catch(e){} try{ closeToolsSheet(); }catch(e){}
-  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics'})[v]||'Editor Studio'; }catch(e){}
+  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics'})[v]||'Editor Studio'; }catch(e){}
   if(v==='clients') loadClients();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
