@@ -5124,14 +5124,34 @@ async function loadBoard(){
   var roots=all.filter(function(v){ return v.kind!=='edited'; });
   var assetMap={}; try{ var ids=roots.map(function(v){return v.id;}); if(ids.length){ var ar=await sb.from('ed_video_assets').select('video_id,kind').in('video_id',ids); (ar.data||[]).forEach(function(a){ (assetMap[a.video_id]=assetMap[a.video_id]||{})[a.kind]=true; }); } }catch(e){}
   if(!state.jbUrls) state.jbUrls={};
-  for(var i=0;i<roots.length;i++){ var v=roots[i]; if(v.proxy_path && !state.jbUrls[v.id]){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(v.proxy_path,3600); if(s&&s.data&&s.data.signedUrl) state.jbUrls[v.id]=s.data.signedUrl; }catch(e){} } }
+  for(var i=0;i<roots.length;i++){ var v=roots[i]; var pth=v.proxy_path||v.storage_path; if(pth && !state.jbUrls[v.id]){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(pth,3600); if(s&&s.data&&s.data.signedUrl) state.jbUrls[v.id]=s.data.signedUrl; }catch(e){} } }
   var cols={uploaded:[],edited:[],posted:[]};
   roots.forEach(function(v){ v._assets=assetMap[v.id]||{}; cols[jbColOf(v)].push(v); });
   function colHtml(key,label,dot){ var list=cols[key]; var cards=list.length?list.map(jbCard).join(''):'<div class="jb-empty">Nothing here.</div>'; return '<div class="jb-col"><div class="jb-colh"><span style="width:9px;height:9px;border-radius:50%;background:'+dot+'"></span>'+label+'<span class="jb-cnt">'+list.length+'</span></div>'+cards+'</div>'; }
   var hi='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Job board</div><div class="h-sub" style="margin:0 2px 14px">'+(state.isAdmin?'Every client clip from upload to posted. Tap a clip to edit or view its brief.':'Track your clips. Tap an Uploaded clip to add overlays, voiceover, inspiration or notes.')+'</div>';
   root.innerHTML=hi+'<div class="jb-wrap">'+colHtml('uploaded','Uploaded','#2f6df6')+colHtml('edited','Edited','#b45309')+colHtml('posted','Posted','#16a34a')+'</div>';
-  [].slice.call(document.querySelectorAll('#boardBody .jb-thumb[data-vid]')).forEach(function(el){ var u=state.jbUrls&&state.jbUrls[el.dataset.vid]; if(u) el.innerHTML='<video src="'+esc(u)+'" muted playsinline preload="metadata"></video>'; });
+  [].slice.call(document.querySelectorAll('#boardBody .jb-thumb[data-vid]')).forEach(function(el){ var id=el.dataset.vid; var c=jbThumbGet(id); if(c){ el.innerHTML='<img src="'+c+'" alt="">'; return; } var u=state.jbUrls&&state.jbUrls[id]; if(u) jbQueueThumb(id,u); });
   jbStartLive();
+}
+// ---- fast cached thumbnails: one frame -> tiny JPEG -> cached (memory + localStorage), built one at a time ----
+function jbThumbGet(id){ if(state.jbThumbs && state.jbThumbs[id]) return state.jbThumbs[id]; try{ var v=localStorage.getItem('jbt_'+id); if(v){ if(!state.jbThumbs)state.jbThumbs={}; state.jbThumbs[id]=v; return v; } }catch(e){} return ''; }
+function jbThumbSet(id,data){ if(!state.jbThumbs) state.jbThumbs={}; state.jbThumbs[id]=data; try{ localStorage.setItem('jbt_'+id,data); }catch(e){} }
+function jbQueueThumb(id,u){ if(!state.jbTQ) state.jbTQ=[]; if(jbThumbGet(id)) return; state.jbTQ.push({id:id,u:u}); jbDrainThumbs(); }
+async function jbDrainThumbs(){ if(state.jbTBusy) return; state.jbTBusy=true; while(state.jbTQ && state.jbTQ.length){ var j=state.jbTQ.shift(); try{ await jbGenThumb(j.id,j.u); }catch(e){} } state.jbTBusy=false; }
+async function jbGenThumb(id,url){
+  if(!url || jbThumbGet(id)) return;
+  var v=document.createElement('video'); v.crossOrigin='anonymous'; v.muted=true; v.playsInline=true; v.preload='auto'; v.src=url;
+  var release=function(){ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){} };
+  try{
+    await new Promise(function(res,rej){ v.onloadeddata=function(){res();}; v.onerror=function(){rej();}; setTimeout(rej,9000); });
+    try{ v.currentTime=Math.min(0.3,(v.duration||1)/2); }catch(e){}
+    await new Promise(function(res){ v.onseeked=function(){res();}; setTimeout(res,1500); });
+    var cv=document.createElement('canvas'); cv.width=90; cv.height=160; var ctx=cv.getContext('2d');
+    ctx.drawImage(v,0,0,cv.width,cv.height);
+    var data=cv.toDataURL('image/jpeg',0.5);
+    release();
+    if(data && data.length>120){ jbThumbSet(id,data); var el=document.querySelector('#boardBody .jb-thumb[data-vid="'+id+'"]'); if(el) el.innerHTML='<img src="'+data+'" alt="">'; }
+  }catch(e){ release(); }
 }
 function jbCard(v){
   var a=v._assets||{}; var chips='';
