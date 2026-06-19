@@ -4592,6 +4592,7 @@ function acctColors(a){
   if(a==='@LinkedByYas') return ['#e1f5ee','#0f6e56'];
   return ['#fceeee','#a32d2d'];   // no account set
 }
+function fmtDLTime(iso){ if(!iso) return ''; try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+', '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',hour12:false}); }catch(e){ return (iso||'').slice(0,10); } }
 function fileRow(f){
   const size=f.size_bytes?fmtMB(f.size_bytes):'';
   const date=(f.created_at||'').slice(0,10);
@@ -4602,7 +4603,7 @@ function fileRow(f){
     +'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><use href="#i-send"></use></svg>'
     +(f.account?esc(f.account):'No account set')
     +' <svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px;opacity:.6"><use href="#i-pencil"></use></svg></span>';
-  const sub=done?('Downloaded '+(f.downloaded_at||'').slice(0,10)+(f.downloaded_by?(' by '+esc(f.downloaded_by)):'')):(size+(date?(' &middot; '+date):''));
+  const sub=done?('Downloaded '+fmtDLTime(f.downloaded_at)+(f.downloaded_by?(' by '+esc(f.downloaded_by)):'')):(size+(date?(' &middot; '+date):''));
   return '<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px">'
     +'<div style="flex:0 0 auto;color:var(--blue-d)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px"><use href="#i-film"></use></svg></div>'
     +'<div style="flex:1;min-width:0">'
@@ -4654,10 +4655,10 @@ async function shareToCameraRoll(storage_path, filename){
   try{ await navigator.share({files:[file]}); return true; }              // share sheet -> "Save Video" -> camera roll
   catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file); return true; }   // activation expired -> fresh tap
 }
-function promptShareGeneric(file){
+function promptShareGeneric(file, onSaved){
   showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareGenNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
   const b=document.getElementById('shareGenNow');
-  if(b) b.onclick=async()=>{ try{ await navigator.share({files:[file]}); closeModal(); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
+  if(b) b.onclick=async()=>{ try{ await navigator.share({files:[file]}); closeModal(); if(onSaved)onSaved(); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 async function markTempDownloaded(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
@@ -4670,14 +4671,31 @@ async function markTempDownloaded(id){
 }
 async function downloadTempFile(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
-  const handled=await shareToCameraRoll(f.storage_path, f.filename);   // phone -> camera roll via share sheet
-  if(!handled){
-    try{
-      const {data}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,300,{download:f.filename||'video.mp4'});
-      if(data&&data.signedUrl){ const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); }
-    }catch(e){ toast('Download failed','err'); return; }
+  // CRITICAL: a file only moves to "Downloaded" once it is ACTUALLY saved (the share sheet
+  // completes / "Save Video" tapped). Cancelling, or the sheet not appearing, must leave it
+  // in Download so it can be retried -- otherwise videos get "lost".
+  const onSaved=()=>markTempDownloaded(id);
+  if(isMobileDevice() && navigator.canShare){
+    toast('Preparing video...');
+    let file=null; try{ file=await getMediaFile(f.storage_path, f.filename); }catch(e){ file=null; }
+    if(file && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file]});   // resolves ONLY when the user completes the save
+        onSaved();
+      }catch(err){
+        if(err && err.name==='AbortError') return;   // cancelled -> stays in Download, NOT moved
+        promptShareGeneric(file, onSaved);            // activation expired -> fresh-tap modal; marks on its success
+      }
+      return;
+    }
+    if(!file){ toast('Could not prepare the video -- try again','err'); return; }   // never silently move it
   }
-  await markTempDownloaded(id);
+  // desktop / share unavailable -> normal download, mark once the download is actually triggered
+  try{
+    const {data}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,300,{download:f.filename||'video.mp4'});
+    if(data&&data.signedUrl){ const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); onSaved(); }
+    else { toast('Download failed','err'); }
+  }catch(e){ toast('Download failed','err'); }
 }
 async function deleteTempFile(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
