@@ -800,6 +800,15 @@ a{color:#B0211A}
 .acc-sub{font-size:12.5px;color:var(--muted)}
 .acc-link{display:flex;gap:8px;align-items:center;flex:0 0 auto}
 .acc-link select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;background:#fff;max-width:150px}
+</style><style>
+.sf-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 2px 14px}
+.sf{border:1px solid var(--ph-line,#E8DCC8);background:var(--ph-cream-card,#FBF6EC);color:var(--ph-ink,#2A211C);font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer}
+.sf.on{background:var(--ph-black,#1A1512);color:var(--ph-cream,#F4ECDC);border-color:var(--ph-black,#1A1512)}
+.sf b{font-weight:800;opacity:.7;margin-left:2px}
+.send-card{background:var(--ph-cream-card,#FBF6EC);border:1px solid var(--ph-line,#E8DCC8);border-radius:14px;padding:13px 15px;margin:0 2px 10px}
+.send-pill{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;letter-spacing:.2px;white-space:nowrap}
+.send-pulse{animation:sendpulse 1.1s ease-in-out infinite}
+@keyframes sendpulse{0%,100%{opacity:1}50%{opacity:.45}}
 </style></head>
 <body><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-down" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol><symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol><symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.5 2 6 2s6-1 6-2v-5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-corner" viewBox="0 0 24 24"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol><symbol id="i-film" viewBox="0 0 24 24"><rect x="2.5" y="3" width="19" height="18" rx="2"/><line x1="7.5" y1="3" x2="7.5" y2="21"/><line x1="16.5" y1="3" x2="16.5" y2="21"/><line x1="2.5" y1="12" x2="21.5" y2="12"/><line x1="2.5" y1="7.5" x2="7.5" y2="7.5"/><line x1="2.5" y1="16.5" x2="7.5" y2="16.5"/><line x1="16.5" y1="16.5" x2="21.5" y2="16.5"/><line x1="16.5" y1="7.5" x2="21.5" y2="7.5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.41L12 12l-4.41 4.42A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.41L12 12l4.41-4.42A2 2 0 0 0 17 6.17V2"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></symbol><symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol><symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol><symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20" fill="currentColor" stroke="none"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-7.7L21 8"/><path d="M21 3v5h-5"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/></symbol><symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/></symbol><symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8L4.3 10.7l5.8 1.9L12 18.4l1.9-5.8 5.8-1.9-5.8-1.9z" fill="currentColor" stroke="none"/><path d="M19 4v3"/><path d="M17.5 5.5h3"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" fill="currentColor" stroke="none"/></symbol><symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol><symbol id="i-volume-x" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></symbol><symbol id="i-wand" viewBox="0 0 24 24"><path d="m3 21 18-18"/><path d="M14 7l3 3"/><path d="M5 6v3"/><path d="M3.5 7.5h3"/><path d="M19 14v3"/><path d="M17.5 15.5h3"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol></svg>
 <div id="authgate">
@@ -839,6 +848,7 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
       <button class="nav-btn" id="nav-accts" onclick="showView('accts')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> TikTok accounts</button>
+      <button class="nav-btn" id="nav-sends" onclick="showView('sends')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span> Send tracker</button>
       <button class="nav-btn" id="nav-bank" onclick="showView('bank')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span> Video bank</button>
       <button class="nav-btn" id="nav-editor" onclick="showView('editor')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span> Editor</button>
       <button class="nav-btn" id="nav-schedule" onclick="showView('schedule')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg></span> Content Schedule</button>
@@ -1283,6 +1293,7 @@ a{color:#B0211A}
   <section id="view-analytics" class="hide"><div style="max-width:780px;margin:0 auto;padding:16px"><div id="analyticsBody"></div></div></section>
   <section id="view-imgov" class="hide"><div style="max-width:980px;margin:0 auto;padding:16px"><div id="imgovBody"></div></div></section>
   <section id="view-accts" class="hide"><div style="max-width:820px;margin:0 auto;padding:16px"><div id="acctsBody"></div></div></section>
+  <section id="view-sends" class="hide"><div style="max-width:860px;margin:0 auto;padding:16px"><div id="sendsBody"></div></div></section>
   </main>
 
   <nav class="bottomnav">
@@ -4841,7 +4852,7 @@ function edApplyRole(){
   var admin=!!state.isAdmin;
   try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
   // Hamburger (sidebar): Clients + Board (the less-used). Quick-access lives in the bottom bar.
-  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-accts':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
+  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-accts':admin,'nav-sends':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
@@ -4868,9 +4879,9 @@ async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter yo
 function showView(v){
   if(!state.isAdmin && v!=='upload' && v!=='cdash' && v!=='board') v='cdash';
   state.currentView=v;
-  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','accts'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
+  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','accts','sends'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   try{ closeDrawer(); }catch(e){} try{ closeToolsSheet(); }catch(e){}
-  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays',accts:'TikTok accounts'})[v]||'Editor Studio'; }catch(e){}
+  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays',accts:'TikTok accounts',sends:'Send tracker'})[v]||'Editor Studio'; }catch(e){}
   if(v==='clients') loadClients();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
@@ -4881,6 +4892,7 @@ function showView(v){
   if(v==='analytics') loadAnalytics();
   if(v==='imgov') loadImgOverlays();
   if(v==='accts') loadAccountsSync();
+  if(v==='sends'){ loadSends(); sendsLive(); }
 }
 
 // ---- Clients (admin) ----
@@ -5715,6 +5727,86 @@ async function acctUnlink(rowId){
   if(del.error){ toast('Could not unlink: '+del.error.message,'err'); return; }
   toast('Unlinked','ok'); loadAccountsSync();
 }
+// ===================== SEND TRACKER (admin) =====================
+// Live status of every "Send to inbox" job: queued -> rendering -> sending -> sent / failed.
+var SEND_STUCK_MS=8*60*1000;
+function sendAge(j){ try{ return Date.now()-new Date(j.created_at).getTime(); }catch(e){ return 0; } }
+function sendIsStuck(j){ var s=j.status||'queued'; return (s==='queued'||s==='waiting'||s==='sending') && sendAge(j)>SEND_STUCK_MS; }
+function sendErrFriendly(msg){
+  var m=String(msg||'');
+  if(/spam_risk_too_many_pending_share/i.test(m)) return 'TikTok limit: this account has too many unposted drafts (max 5 in 24h). Open TikTok, post or delete a few drafts, then retry.';
+  if(/spam_risk_too_many_posts/i.test(m)) return 'TikTok limit: too many posts in a short window. Wait a while, then retry.';
+  if(/spam_risk_text/i.test(m)) return 'TikTok flagged the caption text. Edit the caption on the clip, then send again.';
+  if(/rate.?limit/i.test(m)) return 'TikTok is rate-limiting this account. Wait a few minutes, then retry.';
+  if(/502|application failed to respond|timeout|timed out/i.test(m)) return 'Temporary upload hiccup. A retry usually fixes it.';
+  if(!m) return 'Send failed. Tap Retry to try again.';
+  return m.slice(0,180);
+}
+function sendStatusMeta(j){
+  var s=j.status||'queued';
+  if(s==='done') return {label:'Sent to inbox',bg:'#e7f7ee',fg:'#0f6e56',sub:'Delivered. Open TikTok to review and post the draft.'};
+  if(s==='error') return {label:'Failed',bg:'#fdecec',fg:'#b3261e',sub:sendErrFriendly(j.message)};
+  if(s==='sending') return {label:'Sending',bg:'#e8f0ff',fg:'#1d4ed8',sub:'Uploading to the TikTok inbox right now.'};
+  if(s==='waiting') return {label:'Rendering edit',bg:'#fff4e0',fg:'#9a6b00',sub:'Finishing the edited version before it sends.'};
+  return {label:'Queued',bg:'#fff4e0',fg:'#9a6b00',sub:'Waiting in line to send.'};
+}
+function sendGroup(j){ var s=j.status||'queued'; if(s==='done') return 'sent'; if(s==='error') return 'failed'; return 'prog'; }
+async function loadSends(){
+  var root=document.getElementById('sendsBody'); if(!root) return;
+  if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading sends...</div>'; root.dataset.init='1'; }
+  var jobs=[]; try{ var r=await sb.from('ed_send_jobs').select('id,account_tag,caption,status,message,postpeer_post_id,source_video_id,video_id,created_at,finished_at').eq('workspace_id',WS).is('cleared_at',null).order('created_at',{ascending:false}).limit(80); jobs=r.data||[]; }catch(e){ jobs=[]; }
+  var vids={}, names={};
+  try{ var sids=jobs.map(function(j){return j.source_video_id||j.video_id;}).filter(Boolean); if(sids.length){ var vr=await sb.from('ed_videos').select('id,filename,creator_id').in('id',sids); (vr.data||[]).forEach(function(v){ vids[v.id]=v; }); var cids=(vr.data||[]).map(function(v){return v.creator_id;}).filter(Boolean); if(cids.length){ var mr=await sb.from('ed_members').select('id,name').in('id',cids); (mr.data||[]).forEach(function(m){ names[m.id]=m.name; }); } } }catch(e){}
+  state.sendJobs=jobs; state.sendVids=vids; state.sendNames=names;
+  sendsRender();
+}
+function sendsRender(){
+  var root=document.getElementById('sendsBody'); if(!root) return;
+  var jobs=state.sendJobs||[]; var f=state.sendFilter||'all';
+  var nP=0,nS=0,nF=0; jobs.forEach(function(j){ var g=sendGroup(j); if(g==='prog')nP++; else if(g==='sent')nS++; else nF++; });
+  function chip(key,lbl,n){ return '<button class="sf'+(f===key?' on':'')+'" onclick="sendSetFilter(\x27'+key+'\x27)">'+lbl+'<b>'+n+'</b></button>'; }
+  var head='<div style="font-size:22px;font-weight:800;margin:2px 2px 2px">Send tracker</div>'
+    +'<div class="h-sub" style="margin:0 2px 12px">Every clip you sent to a TikTok inbox, and exactly where it is. Updates by itself every few seconds.</div>'
+    +'<div class="sf-bar"><button class="btn ghost sm" onclick="loadSends()">Refresh</button>'
+    +chip('all','All ',jobs.length)+chip('prog','In progress ',nP)+chip('sent','Sent ',nS)+chip('failed','Failed ',nF)+'</div>';
+  var rows=jobs.filter(function(j){ return f==='all' || sendGroup(j)===f; });
+  if(!rows.length){ root.innerHTML=head+'<div class="empty">Nothing here yet. When you tap "Send to inbox" on a clip, it shows up here so you can watch it land.</div>'; return; }
+  root.innerHTML=head+rows.map(sendCard).join('');
+}
+function sendCard(j){
+  var m=sendStatusMeta(j); var stuck=sendIsStuck(j);
+  var v=(state.sendVids||{})[j.source_video_id]||(state.sendVids||{})[j.video_id]||{};
+  var who=(v.creator_id&&(state.sendNames||{})[v.creator_id])||'';
+  var fn=v.filename?String(v.filename):'';
+  var acct=j.account_tag||'';
+  var when=new Date(j.created_at).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  var done=(j.status==='done'&&j.finished_at)?('<div class="h-sub" style="font-size:12px;margin-bottom:6px">Sent '+esc(new Date(j.finished_at).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))+'</div>'):'';
+  var pulse=(j.status==='sending')?' send-pulse':'';
+  var pill='<span class="send-pill'+pulse+'" style="background:'+m.bg+';color:'+m.fg+'">'+esc(m.label)+'</span>';
+  var meta='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px"><span style="font-weight:800;font-size:14px">'+esc(acct||'@account')+'</span>'+(who?'<span class="h-sub" style="font-size:12.5px">'+esc(who)+'</span>':'')+pill+'<span style="flex:1"></span><span class="h-sub" style="font-size:12px">'+esc(when)+'</span></div>';
+  var sub='<div class="h-sub" style="font-size:13px;margin-bottom:'+(j.status==='error'?'2px':'6px')+';color:'+(j.status==='error'?'#b3261e':'var(--muted)')+'">'+esc(m.sub)+'</div>';
+  var stuckNote=(stuck&&j.status!=='error')?'<div class="h-sub" style="font-size:12.5px;color:#9a6b00;margin-bottom:6px">Taking longer than usual -- you can give it a nudge with Retry.</div>':'';
+  var clip=fn?'<div class="h-sub" style="font-size:12px;margin-bottom:6px">Clip: '+esc(fn)+'</div>':'';
+  var btns='<div style="display:flex;gap:7px;flex-wrap:wrap">';
+  if(j.status==='error'||stuck) btns+='<button class="btn sm" onclick="sendRetry(\x27'+esc(j.id)+'\x27)">Retry</button>';
+  if(j.caption) btns+='<button class="btn ghost sm" onclick="sendCopyCap(\x27'+esc(j.id)+'\x27)">Copy caption</button>';
+  if(j.status==='done'||j.status==='error') btns+='<button class="btn ghost sm" onclick="sendClear(\x27'+esc(j.id)+'\x27)">Dismiss</button>';
+  btns+='</div>';
+  return '<div class="send-card">'+meta+sub+stuckNote+clip+done+btns+'</div>';
+}
+function sendSetFilter(k){ state.sendFilter=k; sendsRender(); }
+function sendCopyCap(id){ var j=(state.sendJobs||[]).find(function(x){return x.id===id;}); if(!j){ toast('Not found','err'); return; } copyText(j.caption||'','caption'); }
+async function sendClear(id){ var r=await sb.from('ed_send_jobs').update({cleared_at:new Date().toISOString()}).eq('id',id); if(r.error){ toast('Failed: '+r.error.message,'err'); return; } state.sendJobs=(state.sendJobs||[]).filter(function(x){return x.id!==id;}); sendsRender(); }
+async function sendRetry(id){
+  var r=await sb.from('ed_send_jobs').update({status:'queued',message:null,finished_at:null,cleared_at:null}).eq('id',id);
+  if(r.error){ toast('Could not retry: '+r.error.message,'err'); return; }
+  toast('Re-queued -- it will try again shortly','ok'); loadSends();
+}
+function sendsLive(){
+  if(state.sendTimer) return;
+  state.sendTimer=setInterval(function(){ if(state.currentView!=='sends'){ clearInterval(state.sendTimer); state.sendTimer=null; return; } loadSends(); }, 7000);
+}
+
 // ---- Aaron: open a clip from the board ----
 function jbAaronOpen(id){ showModal('<h3>Clip</h3><div class="actions" style="flex-direction:column;gap:8px;align-items:stretch"><button class="btn" style="justify-content:center" onclick="jbAaronEdit(\''+id+'\')">Edit this clip</button><button class="btn ghost" style="justify-content:center" onclick="jbView(\''+id+'\')">View client brief</button><button class="btn ghost" style="justify-content:center" onclick="closeModal()">Cancel</button></div>'); }
 function jbAaronEdit(id){ closeModal(); showView('editor'); }   // editing no longer changes status; clip stays in Uploaded until scheduled
