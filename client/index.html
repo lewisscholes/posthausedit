@@ -5342,6 +5342,8 @@ async function loadEditor(){
   all.forEach(function(v){ if(v.kind==='edited'){ var rid=rootOf(v).id; var cur=editedByRoot[rid]; if(!cur || new Date(v.created_at||0)>new Date(cur.created_at||0)) editedByRoot[rid]=v; } });
   var rootIds=Array.from(new Set(all.map(function(v){ return v.kind==='edited'?rootOf(v).id:v.id; })));
   var list=rootIds.map(function(id){ return byId[id]; }).filter(Boolean);
+  // a posted/scheduled clip is done -- never show it in the editor even if it still has older non-posted edits pointing at it
+  list=list.filter(function(v){ return !(v.posted_at || v.status==='posted' || v.status==='scheduled'); });
   list.forEach(function(v){ var er=editedByRoot[v.id]; if(er){ v._editedId=er.id; v._editedAt=er.created_at; } v._srcProxy=null; v._srcES=null; v._rootId=null; });
   try{ var dres=await sb.from('ed_video_downloads').select('video_id').eq('user_id',state.user.id); var dset=new Set((dres.data||[]).map(function(d){ return d.video_id; })); list=list.filter(function(v){ return (v._editedId||(v.edit_state&&v.edit_state.segments))?true:!dset.has(v.id); }); }catch(e){}
   list.sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });   // oldest first -> front of the queue (FIFO), so nothing goes out late
