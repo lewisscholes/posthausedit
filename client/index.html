@@ -4611,6 +4611,7 @@ function fileRow(f){
       +'<div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">'+acctTag+'<span class="h-sub" style="font-size:12px">'+sub+'</span></div>'
     +'</div>'
     +'<button class="btn sm" onpointerdown="prefetchTempFile(\''+f.id+'\')" onclick="downloadTempFile(\''+f.id+'\')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(done?'Re-download':'Download')+'</button>'
+    +(done?'<button class="btn ghost sm" onclick="recoverTempFile(\''+f.id+'\')" title="Move back to Download (if it did not actually save)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg></button>':'')
     +'<button class="btn ghost sm" onclick="deleteTempFile(\''+f.id+'\')" aria-label="Delete"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"></use></svg></button>'
     +'</div>';
 }
@@ -4655,6 +4656,9 @@ async function shareToCameraRoll(storage_path, filename){
   try{ await navigator.share({files:[file]}); return true; }              // share sheet -> "Save Video" -> camera roll
   catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file); return true; }   // activation expired -> fresh tap
 }
+function dlShowLoading(){
+  showModal('<div style="text-align:center;padding:10px 4px 4px"><div class="inline-loader" style="margin:4px auto 16px"></div><h3 style="margin:0 0 7px">Preparing your video</h3><p class="h-sub" style="margin:0;font-size:13.5px;line-height:1.5">Hang tight -- the <b>Save</b> sheet will pop up in a moment.<br>Keep the app open; don\'t swipe away.</p></div>');
+}
 function promptShareGeneric(file, onSaved){
   showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareGenNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
   const b=document.getElementById('shareGenNow');
@@ -4676,18 +4680,19 @@ async function downloadTempFile(id){
   // in Download so it can be retried -- otherwise videos get "lost".
   const onSaved=()=>markTempDownloaded(id);
   if(isMobileDevice() && navigator.canShare){
-    toast('Preparing video...');
+    dlShowLoading();   // visible "Preparing..." overlay so the user knows to wait (not swipe off) until the save sheet appears
     let file=null; try{ file=await getMediaFile(f.storage_path, f.filename); }catch(e){ file=null; }
     if(file && navigator.canShare({files:[file]})){
       try{
         await navigator.share({files:[file]});   // resolves ONLY when the user completes the save
-        onSaved();
+        closeModal(); onSaved();
       }catch(err){
-        if(err && err.name==='AbortError') return;   // cancelled -> stays in Download, NOT moved
-        promptShareGeneric(file, onSaved);            // activation expired -> fresh-tap modal; marks on its success
+        if(err && err.name==='AbortError'){ closeModal(); return; }   // cancelled -> stays in Download, NOT moved
+        promptShareGeneric(file, onSaved);            // activation expired -> fresh-tap modal (replaces the loading overlay)
       }
       return;
     }
+    closeModal();
     if(!file){ toast('Could not prepare the video -- try again','err'); return; }   // never silently move it
   }
   // desktop / share unavailable -> normal download, mark once the download is actually triggered
@@ -4696,6 +4701,11 @@ async function downloadTempFile(id){
     if(data&&data.signedUrl){ const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); onSaved(); }
     else { toast('Download failed','err'); }
   }catch(e){ toast('Download failed','err'); }
+}
+async function recoverTempFile(id){
+  const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
+  try{ await sb.from('temp_files').update({downloaded_at:null,downloaded_by:null}).eq('id',id); }catch(e){ toast('Failed: '+(e&&e.message||e),'err'); return; }
+  f.downloaded_at=null; f.downloaded_by=null; renderFiles(); toast('Moved back to Download','ok');
 }
 async function deleteTempFile(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
