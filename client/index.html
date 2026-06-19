@@ -5473,7 +5473,7 @@ async function openScheduler(id){
   var acctBlock;
   if(chosen){ acctBlock='<div class="h-sub" style="font-size:13px;margin:-4px 0 10px">Posts a <b>draft</b> to <b>@'+esc(chosen.handle||'client')+'</b> -- the account the client tagged on this clip.</div>'; }
   else { acctBlock='<div class="h-sub" style="font-size:13px;margin:-4px 0 8px">This clip was not tagged with an account. Pick one:</div><div id="edAcctPills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+creatorAccs.map(function(a){ return '<button type="button" class="edf" data-id="'+esc(String(a.account_id))+'" data-h="'+esc(a.handle||'')+'" onclick="edSchedPick(this)">@'+esc(a.handle||'tiktok')+'</button>'; }).join('')+'</div>'; }
-  showModal('<h3>Send to TikTok</h3>'+acctBlock+'<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Caption</label><textarea id="edCap" rows="3" style="'+inp+'">'+esc(cap)+'</textarea><button class="btn ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="swPreview(\''+id+'\')">&#9658; Preview video</button><div class="actions" style="display:flex;gap:8px;margin-top:14px"><button class="btn ghost" style="flex:1;justify-content:center" onclick="closeModal()">Cancel</button><button class="btn" style="flex:1;justify-content:center" onclick="edDoSend(\''+id+'\')">Send to inbox</button></div>');
+  showModal('<h3>Send to TikTok</h3>'+acctBlock+'<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Caption</label><textarea id="edCap" rows="3" style="'+inp+'">'+esc(cap)+'</textarea><div class="actions" style="display:flex;gap:8px;margin-top:14px"><button class="btn ghost" style="flex:1;justify-content:center" onclick="closeModal()">Cancel</button><button class="btn" style="flex:1;justify-content:center" onclick="edDoSend(\''+id+'\')">Send to inbox</button></div>');
 }
 function edSchedPick(btn){ window.edSchedAcct={id:btn.getAttribute('data-id'), handle:String(btn.getAttribute('data-h')||'').replace(/^@/,'')}; var box=document.getElementById('edAcctPills'); if(box)[].slice.call(box.children).forEach(function(b){ b.classList.toggle('on',b===btn); }); }
 async function edDoSend(id){
@@ -5500,22 +5500,9 @@ async function edDoSend(id){
     try{ if(state.currentView==='board') loadBoard(); }catch(e){}
   } finally { window.__edSending=false; }
 }
-// Preview the actual video (the edited render that will be sent) before committing -- check the cuts + audio.
-async function swPreview(id){
-  var v=(swVids||[]).find(function(x){ return x.id===id; });
-  toast('Loading preview...');
-  var target=v, haveEdit=false;
-  try{ var ed=await swResolveEdited(id); if(ed&&ed.storage_path){ target=ed; haveEdit=true; } }catch(e){}
-  if(!target||!target.storage_path){ toast('No video to preview yet','err'); return; }
-  var url='';
-  try{ var s=await sb.storage.from(BUCKET).createSignedUrl(target.storage_path,3600); url=s&&s.data&&s.data.signedUrl; }catch(e){}
-  if(!url){ toast('Could not load the video','err'); return; }
-  showModal('<h3>Preview'+(haveEdit?' &middot; final edit':'')+'</h3>'
-    +(haveEdit?'':'<div class="h-sub" style="margin:-2px 0 8px;font-size:13px">The edited version is still rendering -- showing the original for now. Check again shortly for the final cut.</div>')
-    +'<video src="'+esc(url)+'" controls autoplay playsinline style="width:100%;max-height:60vh;background:#000;border-radius:12px;display:block"></video>'
-    +'<div class="h-sub" style="margin-top:8px;font-size:12.5px">Watch the cuts and listen for any audio glitch. If something is off, close and re-edit before sending.</div>'
-    +'<div class="actions" style="margin-top:12px"><button class="btn" style="width:100%;justify-content:center" onclick="closeModal()">Done</button></div>');
-}
+// (The in-modal "Preview video" button was removed -- it opened a modal-on-modal and depended on the
+//  edited render already existing, so it was unreliable. The finished cut is verified by the corrected
+//  render pipeline instead. A standalone preview can be re-added later if wanted.)
 
 // ===================== JOB BOARD (Uploaded / Edited / Posted) =====================
 function jbColOf(v){
