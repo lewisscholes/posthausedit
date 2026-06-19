@@ -8,8 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#000000" />
 <title>The Post Haus</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="posthaus-icon-180.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="posthaus-icon-512.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@300..900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -793,6 +791,15 @@ a{color:#B0211A}
 .iov-thumb{width:100%;aspect-ratio:9/16;background:#11131f center/cover no-repeat;background-size:cover}
 .iov-meta{padding:9px 10px;display:flex;flex-direction:column;gap:8px}
 .iov-nm{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* TikTok accounts sync */
+.acc-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.acc-row.acc-orphan{border-color:#e6b8b8;background:#fff6f4}
+.acc-tt{width:38px;height:38px;border-radius:11px;background:#010101;color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.acc-main{flex:1;min-width:0}
+.acc-h{font-weight:700;font-size:14px;color:var(--ink)}
+.acc-sub{font-size:12.5px;color:var(--muted)}
+.acc-link{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.acc-link select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;background:#fff;max-width:150px}
 </style></head>
 <body><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-arrow-down" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol><symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol><symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.5 2 6 2s6-1 6-2v-5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-corner" viewBox="0 0 24 24"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol><symbol id="i-film" viewBox="0 0 24 24"><rect x="2.5" y="3" width="19" height="18" rx="2"/><line x1="7.5" y1="3" x2="7.5" y2="21"/><line x1="16.5" y1="3" x2="16.5" y2="21"/><line x1="2.5" y1="12" x2="21.5" y2="12"/><line x1="2.5" y1="7.5" x2="7.5" y2="7.5"/><line x1="2.5" y1="16.5" x2="7.5" y2="16.5"/><line x1="16.5" y1="16.5" x2="21.5" y2="16.5"/><line x1="16.5" y1="7.5" x2="21.5" y2="7.5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.41L12 12l-4.41 4.42A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.41L12 12l4.41-4.42A2 2 0 0 0 17 6.17V2"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></symbol><symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol><symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol><symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20" fill="currentColor" stroke="none"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-7.7L21 8"/><path d="M21 3v5h-5"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/></symbol><symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/></symbol><symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8L4.3 10.7l5.8 1.9L12 18.4l1.9-5.8 5.8-1.9-5.8-1.9z" fill="currentColor" stroke="none"/><path d="M19 4v3"/><path d="M17.5 5.5h3"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" fill="currentColor" stroke="none"/></symbol><symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol><symbol id="i-volume-x" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></symbol><symbol id="i-wand" viewBox="0 0 24 24"><path d="m3 21 18-18"/><path d="M14 7l3 3"/><path d="M5 6v3"/><path d="M3.5 7.5h3"/><path d="M19 14v3"/><path d="M17.5 15.5h3"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol></svg>
 <div id="authgate">
@@ -831,6 +838,7 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-board" onclick="showView('board')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span> Job board</button>
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
+      <button class="nav-btn" id="nav-accts" onclick="showView('accts')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> TikTok accounts</button>
       <button class="nav-btn" id="nav-bank" onclick="showView('bank')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span> Video bank</button>
       <button class="nav-btn" id="nav-editor" onclick="showView('editor')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span> Editor</button>
       <button class="nav-btn" id="nav-schedule" onclick="showView('schedule')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg></span> Content Schedule</button>
@@ -1274,6 +1282,7 @@ a{color:#B0211A}
   <section id="view-board" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:1100px;margin:0 auto;padding:16px"><div id="boardBody"></div></div></section>
   <section id="view-analytics" class="hide"><div style="max-width:780px;margin:0 auto;padding:16px"><div id="analyticsBody"></div></div></section>
   <section id="view-imgov" class="hide"><div style="max-width:980px;margin:0 auto;padding:16px"><div id="imgovBody"></div></div></section>
+  <section id="view-accts" class="hide"><div style="max-width:820px;margin:0 auto;padding:16px"><div id="acctsBody"></div></div></section>
   </main>
 
   <nav class="bottomnav">
@@ -4804,7 +4813,7 @@ function edApplyRole(){
   var admin=!!state.isAdmin;
   try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
   // Hamburger (sidebar): Clients + Board (the less-used). Quick-access lives in the bottom bar.
-  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
+  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-accts':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
@@ -4831,9 +4840,9 @@ async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter yo
 function showView(v){
   if(!state.isAdmin && v!=='upload' && v!=='cdash' && v!=='board') v='cdash';
   state.currentView=v;
-  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
+  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','accts'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   try{ closeDrawer(); }catch(e){} try{ closeToolsSheet(); }catch(e){}
-  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays'})[v]||'Editor Studio'; }catch(e){}
+  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays',accts:'TikTok accounts'})[v]||'Editor Studio'; }catch(e){}
   if(v==='clients') loadClients();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
@@ -4843,6 +4852,7 @@ function showView(v){
   if(v==='board') loadBoard();
   if(v==='analytics') loadAnalytics();
   if(v==='imgov') loadImgOverlays();
+  if(v==='accts') loadAccountsSync();
 }
 
 // ---- Clients (admin) ----
@@ -5600,6 +5610,60 @@ function imgovRender(){
 function imgovThumb(a){
   var el=document.getElementById('iovt-'+a.id); if(!el||el.__done) return; el.__done=true;
   sb.storage.from(BUCKET).createSignedUrl(a.storage_path,3600).then(function(s){ if(s&&s.data&&s.data.signedUrl){ el.style.backgroundImage='url('+s.data.signedUrl+')'; } }).catch(function(){});
+}
+
+// ===================== TIKTOK ACCOUNTS SYNC (admin) =====================
+// Every TikTok connected to PostPeer + which client it's linked to. Fixes the "connected on
+// TikTok but the app says not connected" case (an authorised account that never got claimed).
+var TT_ICON='<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M16.5 3c.3 2.1 1.6 3.6 3.7 3.8v2.4c-1.3.1-2.5-.3-3.7-1v5.9c0 3.5-2.6 5.9-5.9 5.4-2.8-.5-4.4-3.1-3.9-5.9.4-2.3 2.5-4 4.8-3.8v2.5c-.4-.1-.8-.1-1.2 0-1 .3-1.7 1.2-1.5 2.3.2 1.1 1.3 1.8 2.4 1.5.9-.2 1.5-1 1.5-2V3h3.5z"/></svg>';
+async function loadAccountsSync(){
+  var root=document.getElementById('acctsBody'); if(!root) return;
+  root.innerHTML='<div class="h-sub">Loading TikTok accounts from PostPeer...</div>';
+  var ints=[], linked=[], members=[];
+  try{ var r=await sb.functions.invoke('postpeer',{body:{action:'integrations'}}); ints=(r&&r.data&&r.data.body&&r.data.body.integrations)||[]; }catch(e){}
+  try{ var lr=await sb.from('ed_member_accounts').select('id,member_id,account_id,handle,display_name'); linked=lr.data||[]; }catch(e){}
+  try{ var mr=await sb.from('ed_members').select('id,name').eq('workspace_id',WS).order('name'); members=mr.data||[]; }catch(e){}
+  state.acctsInts=ints; state.acctsLinked=linked; state.acctsMembers=members;
+  acctsRender();
+}
+function acctsRender(){
+  var root=document.getElementById('acctsBody'); if(!root) return;
+  var ints=state.acctsInts||[], linked=state.acctsLinked||[], members=state.acctsMembers||[];
+  var memName={}; members.forEach(function(m){ memName[m.id]=m.name||'Creator'; });
+  var byAcct={}; linked.forEach(function(l){ byAcct[l.account_id]=l; });
+  var memberOpts=members.map(function(m){ return '<option value="'+esc(m.id)+'">'+esc(m.name||'Creator')+'</option>'; }).join('');
+  var head='<div style="font-size:22px;font-weight:800;margin:2px 2px 2px">TikTok accounts</div><div class="h-sub" style="margin:0 2px 14px">Every TikTok connected to PostPeer, and which client it is linked to. If a client connected on TikTok but their clips say "not connected", pick the client and tap Link.</div><div style="margin:0 2px 14px"><button class="btn ghost sm" onclick="loadAccountsSync()">Refresh</button></div>';
+  if(!ints.length){ root.innerHTML=head+'<div class="empty">No PostPeer accounts found (or could not reach PostPeer). Tap Refresh to retry.</div>'; return; }
+  var linkedRows=[], orphanRows=[];
+  ints.forEach(function(i){
+    var L=byAcct[i.id]; var handle=String(i.username||'').replace(/^@/,'')||String(i.displayName||'tiktok');
+    if(L){
+      linkedRows.push('<div class="acc-row"><div class="acc-tt">'+TT_ICON+'</div><div class="acc-main"><div class="acc-h">@'+esc(handle)+'</div><div class="acc-sub">Linked to <b>'+esc(memName[L.member_id]||L.display_name||'a client')+'</b></div></div><button class="btn ghost sm" onclick="acctUnlink(\x27'+esc(L.id)+'\x27)">Unlink</button></div>');
+    } else {
+      orphanRows.push('<div class="acc-row acc-orphan"><div class="acc-tt">'+TT_ICON+'</div><div class="acc-main"><div class="acc-h">@'+esc(handle)+'</div><div class="acc-sub">Not linked to any client yet</div></div><div class="acc-link"><select id="acclink-'+esc(i.id)+'"><option value="">Pick client...</option>'+memberOpts+'</select><button class="btn sm" onclick="acctLink(\x27'+esc(i.id)+'\x27)">Link</button></div></div>');
+    }
+  });
+  var html=head;
+  if(orphanRows.length){ html+='<div class="lbl-ed" style="color:#a32d2d">Needs linking ('+orphanRows.length+')</div>'+orphanRows.join(''); }
+  html+='<div class="lbl-ed" style="margin-top:18px">Linked ('+linkedRows.length+')</div>'+(linkedRows.length?linkedRows.join(''):'<div class="h-sub">None linked yet.</div>');
+  root.innerHTML=html;
+}
+async function acctLink(accountId){
+  var sel=document.getElementById('acclink-'+accountId); var mid=sel?sel.value:''; if(!mid){ toast('Pick which client this account belongs to','err'); return; }
+  var i=(state.acctsInts||[]).find(function(x){return x.id===accountId;}); if(!i){ toast('Account not found','err'); return; }
+  var handle=String(i.username||'').replace(/^@/,'')||String(i.displayName||'tiktok'); var display=String(i.displayName||handle);
+  try{ var ex=await sb.from('ed_member_accounts').select('id').eq('account_id',accountId).limit(1); if(ex.data&&ex.data.length){ toast('That account is already linked','err'); loadAccountsSync(); return; } }catch(e){}
+  var ins=await sb.from('ed_member_accounts').insert({member_id:mid, account_id:accountId, handle:handle, display_name:display, connected_at:new Date().toISOString()});
+  if(ins.error){ toast('Could not link: '+ins.error.message,'err'); return; }
+  try{ await sb.from('ed_members').update({tiktok_account_id:accountId, tiktok_handle:handle, tiktok_connected_at:new Date().toISOString()}).eq('id',mid); }catch(e){}
+  var m=members_find(mid); toast('Linked @'+handle+' to '+((m&&m.name)||'client'),'ok'); loadAccountsSync();
+}
+function members_find(mid){ return (state.acctsMembers||[]).find(function(x){return x.id===mid;}); }
+async function acctUnlink(rowId){
+  if(!confirm('Unlink this TikTok from the client? It stays connected on PostPeer -- this only unlinks it inside the app.')) return;
+  var del=await sb.from('ed_member_accounts').delete().eq('id',rowId);
+  if(del.error){ toast('Could not unlink: '+del.error.message,'err'); return; }
+  toast('Unlinked','ok'); loadAccountsSync();
 }
 // ---- Aaron: open a clip from the board ----
 function jbAaronOpen(id){ showModal('<h3>Clip</h3><div class="actions" style="flex-direction:column;gap:8px;align-items:stretch"><button class="btn" style="justify-content:center" onclick="jbAaronEdit(\''+id+'\')">Edit this clip</button><button class="btn ghost" style="justify-content:center" onclick="jbView(\''+id+'\')">View client brief</button><button class="btn ghost" style="justify-content:center" onclick="closeModal()">Cancel</button></div>'); }
