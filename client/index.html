@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#000000" />
 <title>The Post Haus</title>
+<link rel="apple-touch-icon" sizes="180x180" href="posthaus-icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="posthaus-icon-512.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=TikTok+Sans:wght@300..900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -946,10 +948,9 @@ a{color:#B0211A}
         </div>
       </div>
       <div class="tabs">
-        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> New <span class="cnt" id="cnt-new">0</span></button>
-        <button class="tab" id="tab-edited" onclick="setBankTab('edited')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg> Edited <span class="cnt" id="cnt-edited">0</span></button>
+        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> To do <span class="cnt" id="cnt-new">0</span></button>
+        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Sent to Post <span class="cnt" id="cnt-posted">0</span></button>
         <button class="tab" id="tab-downloaded" onclick="setBankTab('downloaded')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Downloaded <span class="cnt" id="cnt-downloaded">0</span></button>
-        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Posted <span class="cnt" id="cnt-posted">0</span></button>
       </div>
       <div id="bankEmpty" class="empty hide"><div class="big"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></div><div id="bankEmptyMsg">Nothing here yet.</div></div>
       <div id="bankCards" class="cards"></div>
@@ -2471,7 +2472,7 @@ function renderBank(){
   const list=b[state.bankTab];
   const wrap=document.getElementById('bankCards'); const empty=document.getElementById('bankEmpty');
   empty.classList.toggle('hide', list.length>0);
-  if(!list.length){ const msgs={new:'No new videos. Upload some, or they arrive from the Drive relay.',edited:'No edited videos yet. Edit a clip and tap the tick -- it renders here, ready to download.',downloaded:'Nothing downloaded yet.',posted:'Nothing posted yet.'}; document.getElementById('bankEmptyMsg').textContent=msgs[state.bankTab]||'Nothing here yet.'; wrap.innerHTML=''; wrap.dataset.sig=''; return; }
+  if(!list.length){ const msgs={new:'Nothing to do right now. All caught up.',edited:'',downloaded:'Nothing downloaded yet.',posted:'Nothing sent to post yet.'}; document.getElementById('bankEmptyMsg').textContent=msgs[state.bankTab]||'Nothing here yet.'; wrap.innerHTML=''; wrap.dataset.sig=''; return; }
   paintBank(list);
   hydrateBankUrls();
   // While anything is still 'Finalizing', quietly re-check so the card swaps to the
