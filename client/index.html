@@ -852,8 +852,6 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-board" onclick="showView('board')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span> Job board</button>
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
-      <button class="nav-btn" id="nav-accts" onclick="showView('accts')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> TikTok accounts</button>
-      <button class="nav-btn" id="nav-sends" onclick="showView('sends')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span> Send tracker</button>
       <button class="nav-btn" id="nav-bank" onclick="showView('bank')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span> Video bank</button>
       <button class="nav-btn" id="nav-editor" onclick="showView('editor')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span> Editor</button>
       <button class="nav-btn" id="nav-schedule" onclick="showView('schedule')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg></span> Content Schedule</button>
@@ -1298,8 +1296,6 @@ a{color:#B0211A}
   <section id="view-board" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:1100px;margin:0 auto;padding:16px"><div id="boardBody"></div></div></section>
   <section id="view-analytics" class="hide"><div style="max-width:780px;margin:0 auto;padding:16px"><div id="analyticsBody"></div></div></section>
   <section id="view-imgov" class="hide"><div style="max-width:980px;margin:0 auto;padding:16px"><div id="imgovBody"></div></div></section>
-  <section id="view-accts" class="hide"><div style="max-width:820px;margin:0 auto;padding:16px"><div id="acctsBody"></div></div></section>
-  <section id="view-sends" class="hide"><div style="max-width:860px;margin:0 auto;padding:16px"><div id="sendsBody"></div></div></section>
   <section id="view-ready" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="readyBody"></div></div></section>
   </main>
 
@@ -1307,8 +1303,8 @@ a{color:#B0211A}
     <button id="bnav-dashboard" onclick="showView('dashboard')" class="active"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"></use></svg></span>Dashboard</button>
     <button id="bnav-clients" onclick="showView('clients')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span>Clients</button>
     <button id="bnav-cdash" onclick="showView('cdash')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span>Dashboard</button>
-    <button id="bnav-ready" onclick="showView('ready')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span>To post</button>
     <button id="bnav-upload" onclick="showView('upload')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"></use></svg></span>Upload</button>
+    <button id="bnav-ready" onclick="showView('ready')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span>To post</button>
     <button id="bnav-board" onclick="showView('board')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span>Board</button>
     <button id="bnav-analytics" onclick="showView('analytics')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span>Analytics</button>
     <button id="bnav-bank" onclick="showView('bank')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span>Bank</button>
@@ -4916,7 +4912,7 @@ function edApplyRole(){
   var admin=!!state.isAdmin;
   try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
   // Hamburger (sidebar): Clients + Board (the less-used). Quick-access lives in the bottom bar.
-  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-accts':admin,'nav-sends':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
+  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
@@ -4943,9 +4939,9 @@ async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter yo
 function showView(v){
   if(!state.isAdmin && v!=='upload' && v!=='cdash' && v!=='board' && v!=='ready') v='cdash';
   state.currentView=v;
-  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','accts','sends','ready'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
+  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','ready'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   try{ closeDrawer(); }catch(e){} try{ closeToolsSheet(); }catch(e){}
-  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays',accts:'TikTok accounts',sends:'Send tracker'})[v]||'Editor Studio'; }catch(e){}
+  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays'})[v]||'Editor Studio'; }catch(e){}
   if(v==='clients') loadClients();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
@@ -4955,8 +4951,6 @@ function showView(v){
   if(v==='board') loadBoard();
   if(v==='analytics') loadAnalytics();
   if(v==='imgov') loadImgOverlays();
-  if(v==='accts') loadAccountsSync();
-  if(v==='sends'){ loadSends(); sendsLive(); }
   if(v==='ready') loadReady();
 }
 
@@ -5076,27 +5070,8 @@ async function loadCDash(){
   var root=document.getElementById('cdashBody'); if(!root) return;
   var me=null; try{ var mr=await sb.from('ed_members').select('*').eq('id',ME.id).maybeSingle(); me=mr.data; }catch(e){}
   edSetWho((ME&&ME.name)||'');
-  // load this client's connected TikTok accounts (multi-account); migrate any legacy single connection
-  var accs=[]; try{ var ar=await sb.from('ed_member_accounts').select('*').eq('member_id',ME.id).order('created_at'); accs=ar.data||[]; }catch(e){}
-  if(me && me.tiktok_account_id && !accs.some(function(a){return String(a.account_id)===String(me.tiktok_account_id);})){
-    try{ await sb.from('ed_member_accounts').insert({member_id:ME.id, account_id:me.tiktok_account_id, handle:String(me.tiktok_handle||'').replace(/^@/,''), display_name:me.tiktok_handle||'', connected_at:me.tiktok_connected_at||new Date().toISOString()}); accs.push({account_id:me.tiktok_account_id, handle:String(me.tiktok_handle||'').replace(/^@/,'')}); }catch(e){}
-  }
-  state.myAccounts=accs.map(function(a){ return {id:a.account_id, handle:a.handle}; });
-  var ttIcon='<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M16.5 3c.3 2.1 1.6 3.6 3.7 3.8v2.4c-1.3.1-2.5-.3-3.7-1v5.9c0 3.5-2.6 5.9-5.9 5.4-2.8-.5-4.4-3.1-3.9-5.9.4-2.3 2.5-4 4.8-3.8v2.5c-.4-.1-.8-.1-1.2 0-1 .3-1.7 1.2-1.5 2.3.2 1.1 1.3 1.8 2.4 1.5.9-.2 1.5-1 1.5-2V3h3.5z"/></svg>';
-  var infoIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-  var checkIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-  var conn;
-  if(accs.length){
-    var rows=accs.map(function(a){ return '<div class="cc-head" style="margin-top:10px"><span class="es-av" style="width:40px;height:40px;border-radius:50%;font-size:15px">'+esc(String(a.handle||'T').charAt(0).toUpperCase())+'</span><div class="t"><b>@'+esc(a.handle||'tiktok')+'</b><span>Connected</span></div><a onclick="ccDisconnect(\''+esc(String(a.account_id))+'\')" style="color:var(--blue-d);font-weight:700;cursor:pointer;font-size:13px">Disconnect</a></div>'; }).join('');
-    conn='<div class="card"><div class="lbl-ed">Your TikTok accounts</div>'+rows
-      +'<button class="btn" style="background:#010101;color:#fff;width:100%;justify-content:center;margin-top:14px" onclick="ccConnect()">Connect another TikTok</button>'
-      +(state.ccConnecting?'<div id="ccPickBox" style="margin-top:12px"></div><button class="btn ghost" style="margin-top:10px;width:100%;justify-content:center" onclick="ccPickList()">Refresh</button>':'')
-      +'<div class="ccnote">'+checkIco+'<span>When you upload, pick which account each video is for. Aaron sends each finished video to that account.</span></div></div>';
-  } else if(state.ccConnecting){
-    conn='<div class="card"><div class="lbl-ed">Step 1 - your TikTok</div><div class="cc-head"><span class="tt-badge"><span class="ph-spin"></span></span><div class="t"><b>Opening TikTok...</b><span>Sign in and approve access</span></div></div><div id="ccPickBox" style="margin-top:12px"></div><button class="btn ghost" style="margin-top:10px;width:100%;justify-content:center" onclick="ccPickList()">Refresh</button></div>';
-  } else {
-    conn='<div class="card"><div class="lbl-ed">Step 1 - your TikTok</div><div class="cc-head"><span class="tt-badge">'+ttIcon+'</span><div class="t"><b>Connect your TikTok</b><span>So Aaron can post your finished videos</span></div><span class="pl amber">Not connected</span></div><button class="btn" style="background:#010101;color:#fff;width:100%;justify-content:center;margin-top:14px" onclick="ccConnect()">Connect TikTok</button><div class="ccnote">'+infoIco+'<span>You will sign in to TikTok and approve access. Videos arrive as <b>drafts in your TikTok inbox</b> -- nothing posts publicly without you.</span></div></div>';
-  }
+  state.myAccounts=[];
+  var conn='';   // TikTok connect/disconnect removed -- finished videos are delivered in-app via "To post"
   var q=await sb.from('ed_videos').select('*').eq('workspace_id',WS).eq('creator_id',ME.id).order('created_at',{ascending:false});
   var vids=q.data||[];
   // this client's own stats (their uploads + their posted), with a date filter, shown under the greeting
@@ -5106,14 +5081,13 @@ async function loadCDash(){
   var cdOpts=[['all','All time'],['today','Today'],['yesterday','Yesterday'],['last7','Last 7 days'],['last14','Last 14 days'],['last30','Last 30 days']];
   var dateSel='<select class="ph-datesel" onchange="cdSetRange(this.value)">'+cdOpts.map(function(o){ return '<option value="'+o[0]+'"'+((state.cdRange||'all')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
   var statsHtml=dateSel+'<div class="ph-stats"><div class="ph-stat up"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V6M5 12l7-7 7 7"/></svg></div><div class="ph-stat-num">'+statUp+'</div><div class="ph-stat-cap">Videos uploaded</div></div><div class="ph-stat po"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div><div class="ph-stat-num">'+statPo+'</div><div class="ph-stat-cap">Videos posted</div></div></div>';
-  var up='<div class="card"><div class="lbl-ed">Step 2 - your videos</div><div class="up-dash" onclick="showView(\'upload\')"><div class="big">Upload videos</div><div class="sm">Add raw clips for Aaron to edit</div></div>';
+  var up='<div class="card"><div class="lbl-ed">Your videos</div><div class="up-dash" onclick="showView(\'upload\')"><div class="big">Upload videos</div><div class="sm">Add raw clips for Aaron to edit</div></div>';
   up+='<div style="margin-top:14px;font-weight:700;font-size:13px">Uploads ('+vids.length+')</div>';
   if(!vids.length){ up+='<div class="h-sub" style="margin-top:6px">Nothing uploaded yet.</div>'; }
   else { up+=vids.map(function(v){ var st=(v.posted_at||v.status==='posted')?'Posted':((v.kind==='edited'||v.status==='edited')?'Edited':'Uploaded'); return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="opacity:.5"><use href="#i-film"></use></svg><div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||v.filename||'clip')+'</div><div class="h-sub" style="font-size:12px">'+new Date(v.created_at).toLocaleString()+'</div></div><span class="tf-pill">'+st+'</span></div>'; }).join(''); }
   up+='</div>';
-  var hi='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 4px">Connect your TikTok, then upload your clips. Your editor takes care of the rest.</div>';
+  var hi='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 4px">Upload your clips and your editor takes care of the rest. Finished videos appear in <b>To post</b>.</div>';
   root.innerHTML=hi+statsHtml+conn+up;
-  if(state.ccConnecting) ccPickList();
 }
 function edCreatorUpload(){ showView('upload'); }
 
@@ -5128,7 +5102,7 @@ var UF_IMG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="
 var UF_AUD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
 var UF_NOTE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
 var UF_LINK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; ufRender(); edRefreshAccounts(); }
+function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); }
 async function edRefreshAccounts(){ try{ var ar=await sb.from('ed_member_accounts').select('account_id,handle').eq('member_id',ME.id).order('created_at'); state.myAccounts=(ar.data||[]).map(function(a){ return {id:a.account_id, handle:a.handle}; }); if(state.myAccounts.length===1 && !ufState.account) ufState.account=state.myAccounts[0]; ufRender(); }catch(e){} }
 function ufSetMode(m){ ufState.mode=m; ufRender(); }
 function ufAcctPicker(){
@@ -5177,7 +5151,7 @@ function ufSingle(){
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
-  return ufAcctPicker()+vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+btn;
+  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+btn;
 }
 function ufBulk(){
   var b=ufState.bulk||[];
@@ -5185,7 +5159,7 @@ function ufBulk(){
   var drop='<div class="uam-drop" onclick="ufPickBulk()"><div class="ic">'+UF_UP+'</div><b>Tap to choose multiple videos</b><div class="h-sub" style="margin-top:4px">Select as many as you like</div></div>';
   var info='<div class="uam-info">Attachments (overlays, voiceover, notes) are turned off in bulk mode - they are a per-video thing. Upload singly when a clip needs extras.</div>';
   var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBulk()">'+(b.length?('Upload '+b.length+' videos'):'Upload videos')+'</button>';
-  return ufAcctPicker()+'<div class="card"><div class="lbl-ed">Bulk upload</div>'+drop+grid+info+'</div>'+btn;
+  return '<div class="card"><div class="lbl-ed">Bulk upload</div>'+drop+grid+info+'</div>'+btn;
 }
 async function uploadVideoReturnId(file){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
