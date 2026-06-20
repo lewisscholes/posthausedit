@@ -3585,7 +3585,7 @@ function mteTlRoMove(cx){
   const rb=row.getBoundingClientRect(); if(cx<rb.left+34) row.scrollLeft-=14; else if(cx>rb.right-34) row.scrollLeft+=14;   // auto-scroll for many clips
   const tiles=[].slice.call(row.querySelectorAll('.mte-rotile')); if(!tiles.length) return;
   let target=tiles.length-1; for(let i=0;i<tiles.length;i++){ const r=tiles[i].getBoundingClientRect(); if(cx<r.left+r.width/2){ target=i; break; } }
-  if(target!==mteRoIdx){ const it=mteRoArr.splice(mteRoIdx,1)[0]; mteRoArr.splice(target,0,it); mteRoIdx=target; mteRenderRoStrip(); }
+  if(target!==mteRoIdx){ const it=mteRoArr.splice(mteRoIdx,1)[0]; const insertAt=(target>mteRoIdx)?target-1:target; if(insertAt!==mteRoIdx){ mteRoArr.splice(insertAt,0,it); mteRoIdx=insertAt; mteRenderRoStrip(); } else { mteRoArr.splice(mteRoIdx,0,it); } }   // -1 when moving right: removing the held tile shifts later indices down
   const dt=document.querySelector('#mteRoRow .mte-rotile.drag'); if(dt){ const r=dt.getBoundingClientRect(); dt.style.transform='translateX('+(cx-(r.left+r.width/2))+'px) scale(1.08)'; }
 }
 function mteExitReorder(commit){
