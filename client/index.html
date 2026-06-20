@@ -4698,7 +4698,9 @@ function getMediaFile(storage_path, filename){
   if(_mfCache[storage_path]) return _mfCache[storage_path];
   const p=(async()=>{
     try{
-      const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600); if(error) throw error;
+      let {data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600);
+      if(error || !(data&&data.signedUrl)){ try{ await sb.auth.refreshSession(); }catch(e){} ({data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600)); }   // stale/expired login -> refresh + retry
+      if(error || !(data&&data.signedUrl)) throw (error||new Error('no signed url'));
       const blob=await (await fetch(data.signedUrl)).blob();
       return new File([blob], filename||'video.mp4', {type: blob.type||'video/mp4'});
     }catch(e){ return null; }
@@ -4764,14 +4766,20 @@ async function downloadTempFile(id){
   }
   // desktop / share unavailable / large clip -> streamed download (no in-memory copy), mark once triggered
   try{
-    const {data}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,600,{download:f.filename||'video.mp4'});
+    const dlname=f.filename||'video.mp4';
+    let {data,error}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,600,{download:dlname});
+    if(error || !(data&&data.signedUrl)){ try{ await sb.auth.refreshSession(); }catch(e){} ({data,error}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,600,{download:dlname})); }   // stale/expired login -> refresh + retry
     if(data&&data.signedUrl){
-      const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove();
+      const a=document.createElement('a'); a.href=data.signedUrl; a.download=dlname; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();
       if(isMobileDevice()) toast('Large clip -- saving to Files. Open it there, then Share -> Save Video to add it to your camera roll.','ok');
       onSaved();
     }
-    else { toast('Download failed','err'); }
-  }catch(e){ toast('Download failed','err'); }
+    else {
+      const em=(error&&(error.message||error.error||''))||'';
+      const hint=/jwt|expired|token|unauthor|invalid/i.test(em)?' -- your session expired, please sign out and back in':'';
+      toast('Download failed'+(em?(': '+em):'')+hint,'err');
+    }
+  }catch(e){ toast('Download failed: '+((e&&e.message)||e),'err'); }
 }
 async function recoverTempFile(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
@@ -5077,7 +5085,7 @@ async function loadCDash(){
   // this client's own stats (their uploads + their posted), with a date filter, shown under the greeting
   var cr=cdRangeFor(state.cdRange);
   var statUp=vids.filter(function(v){ return v.kind!=='edited' && cdIn(v.created_at,cr); }).length;
-  var statPo=vids.filter(function(v){ return v.posted_at && cdIn(v.posted_at,cr); }).length;
+  var statPo=vids.filter(function(v){ return v.kind!=='edited' && v.posted_at && cdIn(v.posted_at,cr); }).length;
   var cdOpts=[['all','All time'],['today','Today'],['yesterday','Yesterday'],['last7','Last 7 days'],['last14','Last 14 days'],['last30','Last 30 days']];
   var dateSel='<select class="ph-datesel" onchange="cdSetRange(this.value)">'+cdOpts.map(function(o){ return '<option value="'+o[0]+'"'+((state.cdRange||'all')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
   var statsHtml=dateSel+'<div class="ph-stats"><div class="ph-stat up"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V6M5 12l7-7 7 7"/></svg></div><div class="ph-stat-num">'+statUp+'</div><div class="ph-stat-cap">Videos uploaded</div></div><div class="ph-stat po"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div><div class="ph-stat-num">'+statPo+'</div><div class="ph-stat-cap">Videos posted</div></div></div>';
@@ -5548,32 +5556,45 @@ function readyRender(){
 }
 function readyCard(v){
   var ready=!!(v._render&&v._render.storage_path);
+  var posted=!!v.posted_at;
   var cap=v.caption_suggested||'';
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
-  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+(ready?'Ready to post':'Preparing...')+'</span>'+(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>')+'</div>';
+  var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
+  var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
+  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
-    btns+='<button class="btn" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Save video</button>';
+    btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
     if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
-    btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyPosted(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Mark posted</button>';
   } else {
     btns+='<span class="h-sub" style="font-size:12.5px">Still rendering -- check back shortly.</span>';
   }
   btns+='</div>';
-  return '<div class="card" style="margin-bottom:12px">'+top+capBlock+btns+'</div>';
+  var note=posted?'<div class="h-sub" style="font-size:11.5px;margin-top:6px;color:#0f6e56">Counted as posted. Tap "Save again" if you need the file again.</div>':'';
+  return '<div class="card" style="margin-bottom:12px">'+top+capBlock+btns+note+'</div>';
 }
 function readyCopy(id){ var v=(state.readyList||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
 async function readySave(id){
   var v=(state.readyList||[]).find(function(x){return x.id===id;});
   if(!v||!v._render||!v._render.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
   var r=v._render; var fn=r.filename||'video.mp4';
+  var saved=false;
   var ok=false; try{ ok=await shareToCameraRoll(r.storage_path, fn); }catch(e){ ok=false; }   // small clips -> one-tap Save to camera roll
-  if(ok) return;
-  try{   // desktop / large clip -> streamed download (saves to Files; then Share -> Save Video)
-    var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
-    if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); toast(isMobileDevice()?'Saving to Files -- open it, then Share -> Save Video':'Downloading...','ok'); }
-    else { toast('Could not prepare the video','err'); }
-  }catch(e){ toast('Download failed','err'); }
+  if(ok){ saved=true; }
+  else {
+    try{   // desktop / large clip -> streamed download (saves to Files; then Share -> Save Video)
+      var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
+      if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); toast(isMobileDevice()?'Saving to Files -- open it, then Share -> Save Video':'Downloading...','ok'); saved=true; }
+      else { toast('Could not prepare the video','err'); }
+    }catch(e){ toast('Download failed','err'); }
+  }
+  // Saving the video counts as posted -> updates the creator's "Videos posted" and Aaron's analytics/board.
+  if(saved && !v.posted_at){
+    var who=''; try{ who=(ME&&ME.name)||''; }catch(e){}
+    var iso=new Date().toISOString();
+    try{ var ur=await sb.from('ed_videos').update({posted_at:iso, posted_by:who, status:'posted'}).eq('id',id); if(ur&&ur.error){ toast('Saved (count not updated: '+ur.error.message+')','err'); return; } }catch(e){ return; }
+    v.posted_at=iso; v.posted_by=who; readyRender(); toast('Saved -- counted as posted','ok');
+  }
 }
 async function readyPosted(id){
   if(!confirm('Mark this video as posted? It moves out of your Ready to post list.')) return;
@@ -5643,7 +5664,7 @@ async function loadBoard(){
   edSetWho((ME&&ME.name)||'');
   var root=document.getElementById('boardBody'); if(!root) return;
   if(!root.innerHTML) root.innerHTML='<div class="h-sub">Loading...</div>';
-  var q=sb.from('ed_videos').select('id,creator_id,kind,status,title,filename,storage_path,proxy_path,account_handle,source_video_id,posted_at,inspo_url,notes,created_at').eq('workspace_id',WS).order('created_at',{ascending:false});
+  var q=sb.from('ed_videos').select('id,creator_id,kind,status,title,filename,storage_path,proxy_path,account_handle,source_video_id,posted_at,posted_by,inspo_url,notes,created_at').eq('workspace_id',WS).order('created_at',{ascending:false});
   if(!state.isAdmin) q=q.eq('creator_id',ME.id);
   else if(state.creatorFilter) q=q.eq('creator_id',state.creatorFilter);
   var res=await q; var all=res.data||[];
@@ -5686,6 +5707,7 @@ function jbCard(v){
   if(v.inspo_url) chips+='<span class="jb-chip url">link</span>';
   if(v.notes) chips+='<span class="jb-chip note">note</span>';
   var acct=v.account_handle?('<span class="jb-tag">@'+esc(v.account_handle)+'</span>'):'';
+  if(v.posted_at) chips+='<span class="jb-chip" style="background:#e7f7ee;color:#0f6e56;border-color:#bfe6d2">posted'+(v.posted_by?(' by '+esc(v.posted_by)):'')+'</span>';
   var click;
   if(state.isAdmin) click='onclick="jbAaronOpen(\''+v.id+'\')"';
   else if(jbColOf(v)==='uploaded') click='onclick="jbEditExtras(\''+v.id+'\')"';
@@ -5959,14 +5981,14 @@ function anCalendar(){
   var note=(cs.start)?('Selected: '+anFmt(cs.start)+(cs.end?(' - '+anFmt(cs.end)):' (pick end day)')):'Tap a start day, then an end day';
   return '<div class="card"><div class="an-calhead"><div class="an-calnav" onclick="anCalNav(-1)">&#8249;</div><b>'+monthName+'</b><div class="an-calnav" onclick="anCalNav(1)">&#8250;</div></div><div class="an-calgrid">'+dow+grid+'</div><div class="an-rangenote">'+note+'</div></div>';
 }
-function anChart(vids,sends,idCreator,r,cf){
+function anChart(vids,r,cf){
   var days=[]; var d=new Date(r.start); var endDay=anStartOfDay(r.end); var guard=0;
   while(d.getTime()<=endDay.getTime() && guard<40){ days.push(new Date(d)); d.setDate(d.getDate()+1); guard++; }
   if(!days.length) return '';
   var rows=days.map(function(day){ var s=anStartOfDay(day).getTime(), e=s+86399999;
     var u=vids.filter(function(v){ return v.kind!=='edited'&&anInDay(v.created_at,s,e)&&(cf?v.creator_id===cf:true); }).length;
-    var ed=sends.filter(function(x){ var c=idCreator[x.source_video_id]||idCreator[x.video_id]; return anInDay(x.created_at,s,e)&&(cf?c===cf:true); }).length;
-    var p=vids.filter(function(v){ return v.posted_at&&anInDay(v.posted_at,s,e)&&(cf?v.creator_id===cf:true); }).length;
+    var ed=vids.filter(function(v){ return v.kind!=='edited'&&v.delivered_at&&anInDay(v.delivered_at,s,e)&&(cf?v.creator_id===cf:true); }).length;   // Edited = delivered to creator's "To post"
+    var p=vids.filter(function(v){ return v.kind!=='edited'&&v.posted_at&&anInDay(v.posted_at,s,e)&&(cf?v.creator_id===cf:true); }).length;   // Posted = creator saved/posted it
     return {d:day,u:u,e:ed,p:p};
   });
   var max=1; rows.forEach(function(x){ max=Math.max(max,x.u,x.e,x.p); });
@@ -5977,19 +5999,17 @@ async function loadAnalytics(){
   var root=document.getElementById('analyticsBody'); if(!root) return;
   if(!root.innerHTML) root.innerHTML='<div class="h-sub">Loading...</div>';
   var mq=await sb.from('ed_members').select('id,name').eq('workspace_id',WS).eq('role','creator').order('created_at'); var members=mq.data||[];
-  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at,posted_at').eq('workspace_id',WS); var vids=vq.data||[];
-  var sq=await sb.from('ed_send_jobs').select('id,source_video_id,video_id,created_at').eq('workspace_id',WS); var sends=sq.data||[];
-  var idCreator={}; vids.forEach(function(v){ idCreator[v.id]=v.creator_id; });
+  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at,posted_at,delivered_at').eq('workspace_id',WS); var vids=vq.data||[];
   var r=anRange(); var cf=state.anClient||null;
   function up(c){ return vids.filter(function(v){ return v.kind!=='edited'&&anInRange(v.created_at,r)&&(c?v.creator_id===c:true); }).length; }
-  function ed(c){ return sends.filter(function(s){ var cr=idCreator[s.source_video_id]||idCreator[s.video_id]; return anInRange(s.created_at,r)&&(c?cr===c:true); }).length; }   // Edited = scheduled/sent by Aaron
-  function po(c){ return vids.filter(function(v){ return v.posted_at&&anInRange(v.posted_at,r)&&(c?v.creator_id===c:true); }).length; }   // Posted = actually posted (confirmed)
+  function ed(c){ return vids.filter(function(v){ return v.kind!=='edited'&&v.delivered_at&&anInRange(v.delivered_at,r)&&(c?v.creator_id===c:true); }).length; }   // Edited = delivered to the creator's "To post"
+  function po(c){ return vids.filter(function(v){ return v.kind!=='edited'&&v.posted_at&&anInRange(v.posted_at,r)&&(c?v.creator_id===c:true); }).length; }   // Posted = creator saved/posted it
   var U=up(cf),E=ed(cf),P=po(cf);
   var clientChips='<div class="edf'+(!cf?' on':'')+'" onclick="anSetClient(null)">All clients</div>'+members.map(function(m){ return '<div class="edf'+(cf===m.id?' on':'')+'" onclick="anSetClient(\''+m.id+'\')">'+esc(m.name||'Creator')+'</div>'; }).join('');
   var presets=[['today','Today'],['yesterday','Yesterday'],['last7','Last 7 days'],['last14','Last 14 days'],['last30','Last 30 days'],['custom','Custom']];
   var dateChips=presets.map(function(p){ return '<div class="edf'+((state.anPreset||'last7')===p[0]?' on':'')+'" onclick="anSetPreset(\''+p[0]+'\')">'+p[1]+'</div>'; }).join('');
   var metrics='<div class="an-metrics"><div class="an-metric up"><div class="an-num">'+U+'</div><div class="an-cap">Uploaded</div></div><div class="an-metric ed"><div class="an-num">'+E+'</div><div class="an-cap">Edited</div></div><div class="an-metric po"><div class="an-num">'+P+'</div><div class="an-cap">Posted</div></div></div>';
-  var chart=anChart(vids,sends,idCreator,r,cf);
+  var chart=anChart(vids,r,cf);
   var cal=(state.anPreset==='custom')?anCalendar():'';
   var table='';
   if(!cf){ table='<div class="lbl-ed" style="margin-top:14px">Per client</div><div class="card" style="padding:6px 12px 8px"><table class="an-tbl"><thead><tr><th>Client</th><th>Up</th><th>Ed</th><th>Posted</th></tr></thead><tbody>'+(members.length?members.map(function(m){ return '<tr><td>'+esc(m.name||'Creator')+'</td><td>'+up(m.id)+'</td><td>'+ed(m.id)+'</td><td>'+po(m.id)+'</td></tr>'; }).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);font-weight:400">No clients yet</td></tr>')+'</tbody></table></div>'; }
