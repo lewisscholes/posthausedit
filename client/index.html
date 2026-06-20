@@ -4690,7 +4690,12 @@ async function downloadTempFile(id){
   // completes / "Save Video" tapped). Cancelling, or the sheet not appearing, must leave it
   // in Download so it can be retried -- otherwise videos get "lost".
   const onSaved=()=>markTempDownloaded(id);
-  if(isMobileDevice() && navigator.canShare){
+  // iOS can only hand a clip to the "Save to camera roll" share sheet if the whole file fits in
+  // memory (fetch -> blob -> File). For big clips (~180MB+) that allocation fails, so don't even
+  // try the share sheet for those -- go straight to a streamed download (saves to Files, then
+  // Share -> Save Video adds it to the camera roll). Small clips still use the one-tap share.
+  const tooBigForShare = (f.size_bytes||0) > 180*1024*1024;
+  if(isMobileDevice() && navigator.canShare && !tooBigForShare){
     dlShowLoading();   // visible "Preparing..." overlay so the user knows to wait (not swipe off) until the save sheet appears
     let file=null; try{ file=await getMediaFile(f.storage_path, f.filename); }catch(e){ file=null; }
     if(file && navigator.canShare({files:[file]})){
@@ -4704,12 +4709,17 @@ async function downloadTempFile(id){
       return;
     }
     closeModal();
-    if(!file){ toast('Could not prepare the video -- try again','err'); return; }   // never silently move it
+    // share couldn't be prepared (commonly a clip too large to hold in memory) -> fall through
+    // to the streamed download below instead of dead-ending with "Could not prepare the video".
   }
-  // desktop / share unavailable -> normal download, mark once the download is actually triggered
+  // desktop / share unavailable / large clip -> streamed download (no in-memory copy), mark once triggered
   try{
-    const {data}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,300,{download:f.filename||'video.mp4'});
-    if(data&&data.signedUrl){ const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); onSaved(); }
+    const {data}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,600,{download:f.filename||'video.mp4'});
+    if(data&&data.signedUrl){
+      const a=document.createElement('a'); a.href=data.signedUrl; a.download=f.filename||'video.mp4'; document.body.appendChild(a); a.click(); a.remove();
+      if(isMobileDevice()) toast('Large clip -- saving to Files. Open it there, then Share -> Save Video to add it to your camera roll.','ok');
+      onSaved();
+    }
     else { toast('Download failed','err'); }
   }catch(e){ toast('Download failed','err'); }
 }
