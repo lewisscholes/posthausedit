@@ -5606,6 +5606,31 @@ async function readyPosted(id){
   try{ var r=await sb.from('ed_videos').update({posted_at:new Date().toISOString(), status:'posted'}).eq('id',id); if(r.error){ toast('Failed: '+r.error.message,'err'); return; } }catch(e){ toast('Failed','err'); return; }
   state.readyList=(state.readyList||[]).filter(function(x){return x.id!==id;}); readyRender(); toast('Nice -- marked as posted','ok');
 }
+
+// Editor deck: swipe RIGHT delivers the clip straight to the creator's Ready-to-post (no modal).
+// The green check button still opens the review modal so the caption can be edited first.
+async function swDeliverTop(){
+  var card=document.querySelector('.sw-card.is-top'); if(!card) return;
+  var id=card.dataset.id; var v=swVids.find(function(x){ return x.id===id; });
+  if(!v){ swAdvance(); return; }
+  if(!v.creator_id){ card.classList.add('snap-back'); card.style.transform=''; setTimeout(function(){card.classList.remove('snap-back');},400); toast('Assign a client to this clip first','err'); return; }
+  if(window.__edSending) return; window.__edSending=true;
+  card.classList.add('fly-right');
+  var cap=''; try{ cap=await tfAutoCaption(v); }catch(e){}
+  var up={delivered_at:new Date().toISOString(), status:'ready'}; if(cap) up.caption_suggested=cap;
+  var ok=false;
+  try{ var r=await sb.from('ed_videos').update(up).eq('id',id); ok=!(r&&r.error); if(r&&r.error) toast('Could not deliver: '+r.error.message,'err'); }catch(e){ toast('Could not deliver','err'); }
+  window.__edSending=false;
+  if(ok){
+    var who=''; try{ var c=(state.creatorsList||[]).find(function(x){return String(x.id)===String(v.creator_id);}); if(c&&c.name) who=c.name; }catch(e){}
+    toast(who?('Sent to '+who+'\x27s Ready to post'):'Sent to Ready to post','ok');
+    setTimeout(function(){ var _rm=swVids.findIndex(function(x){ return x.id===id; }); if(_rm>=0){ swVids.splice(_rm,1); if(swIdx>_rm) swIdx--; if(swIdx>swVids.length) swIdx=swVids.length; } swRender(); try{ if(state.currentView==='board') loadBoard(); }catch(e){} }, 380);
+  } else {
+    setTimeout(function(){ swRender(); }, 380);   // delivery failed -> restore the card
+  }
+}
+function swSchedule(){ swDeliverTop(); }   // override: right-swipe goes straight to Ready to post
+function swApprove(){ var c=document.querySelector('.sw-card.is-top'); if(c) openScheduler(c.dataset.id); }   // green check -> review caption, then deliver
 async function edDoSend(id){
   var v=swVids.find(function(x){ return x.id===id; }); if(!v) return;
   var acct=window.edSchedAcct;
