@@ -5823,7 +5823,10 @@ async function loadReady(){
 function readyRender(){
   var root=document.getElementById('readyBody'); if(!root) return;
   var list=state.readyList||[];
-  var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Save each video and post it in TikTok. Once you save it, it greys out and drops to Downloaded below -- so you can always see what is left.</div>';
+  if(!state.rtpSelIds) state.rtpSelIds=new Set();
+  var anyReady=list.some(function(v){ return v._render&&v._render.storage_path; });
+  var ctrls=anyReady?(state.rtpSel?'<div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="rtpSelectAllTodo()" style="white-space:nowrap">Select all</button><button class="btn ghost sm" onclick="rtpToggleSelect()">Done</button></div>':'<button class="btn ghost sm" onclick="rtpToggleSelect()" style="white-space:nowrap">Select multiple</button>'):'';
+  var head='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 2px"><div style="font-size:21px;font-weight:800">Ready to post</div>'+ctrls+'</div><div class="h-sub" style="margin:4px 2px 14px">Save each video and post it in TikTok. Saved ones grey out and drop to Downloaded below.</div>';
   if(!list.length){ root.innerHTML=head+'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>'; return; }
   var todo=list.filter(function(v){ return !v.posted_at; });
   var done=list.filter(function(v){ return !!v.posted_at; });
@@ -5831,6 +5834,7 @@ function readyRender(){
   html+='<div class="h-sub" style="font-weight:800;color:#1A1512;margin:0 2px 8px">To download'+(todo.length?(' ('+todo.length+')'):'')+'</div>';
   html+= todo.length ? todo.map(readyCard).join('') : '<div class="empty" style="margin-bottom:14px">All caught up -- everything here has been downloaded.</div>';
   if(done.length){ html+='<div class="h-sub" style="font-weight:800;color:#0f6e56;margin:16px 2px 8px;display:flex;align-items:center;gap:6px"><svg class="svic" style="width:1em;height:1em" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded ('+done.length+')</div>'+done.map(readyCard).join(''); }
+  if(state.rtpSel){ var _n=state.rtpSelIds.size; html+='<div style="position:sticky;bottom:calc(72px + env(safe-area-inset-bottom));display:flex;justify-content:center;margin-top:12px;z-index:5"><div style="display:flex;align-items:center;gap:12px;background:#1A1512;color:#fff;border-radius:14px;padding:9px 9px 9px 15px;box-shadow:0 10px 26px rgba(0,0,0,.4)"><span style="font-weight:700;font-size:14px;white-space:nowrap">'+_n+' selected</span><button class="btn" style="background:var(--grad);border:0;'+(_n?'':'opacity:.5;pointer-events:none')+'" onclick="rtpSaveSelected()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Save'+(_n?(' '+_n):'')+'</button></div></div><div style="height:8px"></div>'; }
   root.innerHTML=html;
 }
 async function requeueRender(id){
@@ -5848,11 +5852,38 @@ async function requeueRender(id){
     try{ loadReady(); }catch(e){}
   }catch(e){ toast('Re-render failed','err'); }
 }
+function rtpToggleSelect(){ state.rtpSel=!state.rtpSel; if(!state.rtpSelIds||!state.rtpSel) state.rtpSelIds=new Set(); readyRender(); }
+function rtpToggleId(id){ if(!state.rtpSelIds) state.rtpSelIds=new Set(); if(state.rtpSelIds.has(id)) state.rtpSelIds.delete(id); else state.rtpSelIds.add(id); readyRender(); }
+function rtpSelectAllTodo(){ if(!state.rtpSelIds) state.rtpSelIds=new Set(); var todo=(state.readyList||[]).filter(function(v){ return v._render&&v._render.storage_path && !v.posted_at; }); var allSel=todo.length>0 && todo.every(function(v){ return state.rtpSelIds.has(v.id); }); todo.forEach(function(v){ if(allSel) state.rtpSelIds.delete(v.id); else state.rtpSelIds.add(v.id); }); readyRender(); }
+function dlShowMulti(n){ __dlBarOpen=true; showModal('<div style="text-align:center;padding:8px 4px 2px"><h3 style="margin:0 0 6px">Saving your videos</h3><div id="dlCount" style="font-weight:700;font-size:13px;margin-bottom:10px">Preparing 1 of '+n+'...</div><div style="height:10px;background:#e9e4d8;border-radius:6px;overflow:hidden;margin:0 2px 8px"><div id="dlBar" style="height:100%;width:0%;background:var(--grad);border-radius:6px;transition:width .15s"></div></div><div id="dlPct" style="font-weight:800;font-size:13px;margin-bottom:10px">0%</div><p class="h-sub" style="margin:0;font-size:12.5px;line-height:1.5">Please don\'t leave the app while these download. If you leave, it will pause and pick back up when you come back.</p></div>'); }
+function dlSetCount(i,n){ var c=document.getElementById('dlCount'); if(c) c.textContent='Preparing '+i+' of '+n+'...'; }
+async function rtpSaveSelected(){
+  if(!state.rtpSelIds||!state.rtpSelIds.size){ toast('Select some videos first','err'); return; }
+  var ids=Array.from(state.rtpSelIds);
+  var items=(state.readyList||[]).filter(function(v){ return ids.indexOf(v.id)>=0 && v._render && v._render.storage_path; });
+  if(!items.length){ toast('Nothing to save','err'); return; }
+  dlShowMulti(items.length);
+  var files=[];
+  for(var i=0;i<items.length;i++){ dlSetCount(i+1, items.length); dlSetProgress(0); try{ var f=await getMediaFile(items[i]._render.storage_path, items[i]._render.filename||'video.mp4'); if(f) files.push({file:f,v:items[i]}); }catch(e){} }
+  dlCloseProgress();
+  if(!files.length){ toast('Could not prepare the videos','err'); return; }
+  var fileArr=files.map(function(x){ return x.file; });
+  var saved=false;
+  if(isMobileDevice() && navigator.canShare && navigator.canShare({files:fileArr})){ try{ await navigator.share({files:fileArr}); saved=true; }catch(e){ if(e&&e.name==='AbortError') return; } }
+  if(!saved){ for(var k=0;k<fileArr.length;k++){ var a=document.createElement('a'); a.href=URL.createObjectURL(fileArr[k]); a.download=fileArr[k].name||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); await new Promise(function(r){ setTimeout(r,500); }); } saved=true; }
+  if(saved){ var iso=new Date().toISOString(); var who=((ME&&ME.name)||''); for(var m=0;m<files.length;m++){ var vv=files[m].v; if(!vv.posted_at){ try{ await sb.from('ed_videos').update({posted_at:iso,posted_by:who,status:'posted'}).eq('id',vv.id); }catch(e){} vv.posted_at=iso; vv.posted_by=who; } } state.rtpSel=false; state.rtpSelIds=new Set(); readyRender(); toast('Saved '+files.length+' video'+(files.length>1?'s':''),'ok'); }
+}
 function readyCard(v){
   var ready=!!(v._render&&v._render.storage_path);
   var done=!!v.posted_at;
   var cap=v.caption_suggested||'';
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
+  if(state.rtpSel && ready){
+    var _seld=state.rtpSelIds&&state.rtpSelIds.has(v.id);
+    var _box='<div style="flex:none;width:24px;height:24px;border-radius:50%;border:2px solid '+(_seld?'#0f6e56':'#cbb8a0')+';background:'+(_seld?'#0f6e56':'transparent')+';display:flex;align-items:center;justify-content:center">'+(_seld?'<svg class="svic" style="width:15px;height:15px;color:#fff" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg>':'')+'</div>';
+    var _lbl='<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.filename||'Video')+'</div><div class="h-sub" style="font-size:12px">'+(done?'Downloaded':'Ready to download')+'</div></div>';
+    return '<div class="card" onclick="rtpToggleId(\x27'+esc(v.id)+'\x27)" style="margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;'+(_seld?'outline:2px solid #0f6e56;outline-offset:-1px;':'')+(done?'opacity:.6':'')+'">'+_box+_lbl+'</div>';
+  }
   var label=done?'Downloaded':(ready?'Ready to post':'Rendering');
   var pill=done?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56"><svg class="svic" style="width:.95em;height:.95em;vertical-align:-2px" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
   var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
