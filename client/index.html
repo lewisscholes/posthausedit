@@ -4811,7 +4811,7 @@ async function markTempDownloaded(id){
 // Only active inside the native app once the Filesystem + Share plugins are installed; in a browser
 // or PWA these are absent, so everything falls through to the normal web download below.
 function isNativeApp(){ try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }catch(e){ return false; } }
-function nativeSaveReady(){ try{ return isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share; }catch(e){ return false; } }
+function nativeSaveReady(){ try{ return isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && (window.Capacitor.Plugins.Media || window.Capacitor.Plugins.Share); }catch(e){ return false; } }
 async function nativeSaveFromUrl(url, filename){
   const C=window.Capacitor.Plugins;
   const safe=(filename||'video.mp4').replace(/[^\w.\-]+/g,'_');
@@ -4822,8 +4822,13 @@ async function nativeSaveFromUrl(url, filename){
     const dl=await C.Filesystem.downloadFile({ url:url, path:safe, directory:'CACHE', progress:true });   // streams to disk with progress events
     let uri=(dl&&dl.uri)||(dl&&dl.path)||'';
     if(!uri){ try{ const g=await C.Filesystem.getUri({ path:safe, directory:'CACHE' }); uri=g.uri; }catch(e){} }
+    if(C.Media && C.Media.saveVideo){   // direct to camera roll (Photos) - one tap, no share sheet
+      var pm=document.getElementById('dlPct'); if(pm) pm.textContent='Saving to your camera roll...';
+      try{ await C.Media.saveVideo({ path: uri }); toast('Saved to your camera roll','ok'); return true; }
+      catch(e){ /* permission denied or unsupported - fall through to the share sheet */ }
+    }
     var p=document.getElementById('dlPct'); if(p) p.textContent='Opening the Save sheet...';
-    await C.Share.share({ title:filename||'Video', files:[uri] });   // iOS share sheet -> "Save Video" = camera roll, or Save to Files
+    await C.Share.share({ title:filename||'Video', url:uri, files:[uri] });   // fallback: iOS share sheet -> Save to Files / AirDrop
   } finally { if(lis&&lis.remove){ try{ await lis.remove(); }catch(e){} } }
   return true;
 }
