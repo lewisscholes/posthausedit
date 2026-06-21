@@ -4822,7 +4822,8 @@ async function nativeSaveFromUrl(url, filename){
     const dl=await C.Filesystem.downloadFile({ url:url, path:safe, directory:'CACHE', progress:true });   // streams to disk with progress events
     let uri=(dl&&dl.uri)||(dl&&dl.path)||'';
     if(!uri){ try{ const g=await C.Filesystem.getUri({ path:safe, directory:'CACHE' }); uri=g.uri; }catch(e){} }
-    if(C.Media && C.Media.saveVideo){   // direct to camera roll (Photos) - one tap, no share sheet
+    var mediaOk=false; try{ mediaOk=!!(window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Media') && C.Media && C.Media.saveVideo); }catch(e){ mediaOk=false; }
+    if(mediaOk){   // direct to camera roll (Photos) - one tap, no share sheet
       var pm=document.getElementById('dlPct'); if(pm) pm.textContent='Saving to your camera roll...';
       try{ await C.Media.saveVideo({ path: uri }); toast('Saved to your camera roll','ok'); return true; }
       catch(e){ /* permission denied or unsupported - fall through to the share sheet */ }
