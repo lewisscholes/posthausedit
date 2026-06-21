@@ -3625,6 +3625,7 @@ function mteBindTl(){
   let tapX=0,tapY=0,tapT=0,tapMoved=false,tapPinch=false;
   // any finger on the timeline pauses playback so the user can scrub the full length
   scroll.addEventListener('touchstart',(e)=>{
+    window.__sc=(window.__sc||0)+1;
     mteProgScroll=false;
     if(mtePlaying){ mteV().pause(); mtePlaying=false; mteStopTick(); mteSyncPlay(); }
     mteApplyBlob();   // now paused -> switch to the in-memory proxy so this scrub is instant
@@ -3667,7 +3668,7 @@ function mteBindTl(){
   if(gap){
     let gx=0,gy=0,gsl=0,gon=false,gmoved=false,gt=0;
     const gdist=(t)=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
-    gap.addEventListener('touchstart',(e)=>{ if(e.touches.length===2){ gon=false; mtePinchBase=gdist(e.touches); mtePinchPps=mtePps; return; } gon=true; gmoved=false; gx=e.touches[0].clientX; gy=e.touches[0].clientY; gsl=scroll.scrollLeft; gt=Date.now(); if(mtePlaying){ mteV().pause(); mtePlaying=false; mteStopTick(); mteSyncPlay(); } },{passive:true});
+    gap.addEventListener('touchstart',(e)=>{ window.__gp=(window.__gp||0)+1; if(e.touches.length===2){ gon=false; mtePinchBase=gdist(e.touches); mtePinchPps=mtePps; return; } gon=true; gmoved=false; gx=e.touches[0].clientX; gy=e.touches[0].clientY; gsl=scroll.scrollLeft; gt=Date.now(); if(mtePlaying){ mteV().pause(); mtePlaying=false; mteStopTick(); mteSyncPlay(); } },{passive:true});
     gap.addEventListener('touchmove',(e)=>{
       if(e.touches.length>=2){ gon=false; if(!mtePinchBase){ mtePinchBase=gdist(e.touches); mtePinchPps=mtePps; } if(e.cancelable)e.preventDefault(); mtePps=Math.min(MTE_PPS_MAX,Math.max(mtePpsFit,mtePinchPps*gdist(e.touches)/mtePinchBase)); if(!mtePinchRaf)mtePinchRaf=requestAnimationFrame(()=>{ mtePinchRaf=0; mteResizeTL(); }); return; }   // pinch the black area to zoom the timeline, just like pinching the strip
       if(!gon)return; if(Math.abs(e.touches[0].clientX-gx)+Math.abs(e.touches[0].clientY-gy)>8)gmoved=true; if(e.cancelable)e.preventDefault(); scroll.scrollLeft=gsl-(e.touches[0].clientX-gx); },{passive:false});
@@ -3711,8 +3712,9 @@ window.addEventListener('orientationchange', function(){ setTimeout(mteRelayout,
 try{ if(window.visualViewport){ window.visualViewport.addEventListener('resize', mteRelayout); } }catch(e){}
 // ---- TEMP editor touch diagnostic (build tag b5). Alfie only; removed once the editor is fixed. ----
 (function(){
-  var ts=0,tm=0,te=0,pd=0;
-  document.addEventListener('touchstart',function(){ts++;},true);
+  var ts=0,tm=0,te=0,pd=0,lastTgt='';
+  function tgtOf(e){ try{ var t=e.target, c=t.className; if(c&&c.baseVal!==undefined)c=c.baseVal; c=(''+(c||'')).trim().split(/\s+/)[0]||''; return (t.id?('#'+t.id):((t.tagName||'?').toLowerCase()+(c?('.'+c):''))); }catch(_){ return 'err'; } }
+  document.addEventListener('touchstart',function(e){ts++; lastTgt=tgtOf(e); },true);
   document.addEventListener('touchmove',function(){tm++;},true);
   document.addEventListener('touchend',function(){te++;},true);
   document.addEventListener('pointerdown',function(){pd++;},true);
@@ -3725,9 +3727,11 @@ try{ if(window.visualViewport){ window.visualViewport.addEventListener('resize',
     var sc=document.getElementById('mteTlScroll');
     var cw=sc?sc.clientWidth:-1, sw=sc?Math.round(sc.scrollWidth):-1;
     var NL=String.fromCharCode(10);
-    d.textContent=['b5  native:'+(isNativeApp()?'YES':'no')+'  open:'+(open?1:0),
+    d.textContent=['b6  native:'+(isNativeApp()?'YES':'no')+'  open:'+(open?1:0),
       'w:'+cw+' sw:'+sw+' pps:'+(Math.round(mtePps*10)/10)+' fit:'+(Math.round(mtePpsFit*10)/10)+' seg:'+(mteSegments?mteSegments.length:-1),
-      'touch ts:'+ts+' tm:'+tm+' te:'+te+'  ptr pd:'+pd].join(NL);
+      'touch ts:'+ts+' tm:'+tm+' te:'+te+'  ptr pd:'+pd,
+      'hdl sc:'+(window.__sc||0)+' gp:'+(window.__gp||0)+' ov:'+(window.__ov||0),
+      'tgt:'+lastTgt].join(NL);
   },400);
 })();
 
@@ -4145,7 +4149,7 @@ function mteOvDrag(el,o){
     if(Math.abs(ny-50)<3.5){ ny=50; if(gh)gh.classList.add('on'); } else if(gh)gh.classList.remove('on');
     o.x=nx; o.y=ny; el.style.left=nx+'%'; el.style.top=ny+'%'; if(e.cancelable)e.preventDefault(); };
   const up=(e)=>{ if(e&&e.touches&&e.touches.length>0) return; document.removeEventListener('mousemove',move); document.removeEventListener('touchmove',move); document.removeEventListener('mouseup',up); document.removeEventListener('touchend',up); if(gv)gv.classList.remove('on'); if(gh)gh.classList.remove('on'); if(mode==='drag'&&!moved){ if(o.type==='caption') mteEditCaptions(o); else mteOpenTextSheet(o); } mode=null; };
-  const down=(e)=>{ mtePushUndo(); if(e.touches&&e.touches.length===2){ mode='pinch'; baseDist=dist(e.touches)||1; baseScale=o.scale||1; } else { mode='drag'; const p=e.touches?e.touches[0]:e; sx=p.clientX; sy=p.clientY; ox=o.x; oy=o.y; moved=false; } document.addEventListener('mousemove',move); document.addEventListener('touchmove',move,{passive:false}); document.addEventListener('mouseup',up); document.addEventListener('touchend',up); if(e.cancelable)e.preventDefault(); };
+  const down=(e)=>{ window.__ov=(window.__ov||0)+1; mtePushUndo(); if(e.touches&&e.touches.length===2){ mode='pinch'; baseDist=dist(e.touches)||1; baseScale=o.scale||1; } else { mode='drag'; const p=e.touches?e.touches[0]:e; sx=p.clientX; sy=p.clientY; ox=o.x; oy=o.y; moved=false; } document.addEventListener('mousemove',move); document.addEventListener('touchmove',move,{passive:false}); document.addEventListener('mouseup',up); document.addEventListener('touchend',up); if(e.cancelable)e.preventDefault(); };
   el.addEventListener('mousedown',down); el.addEventListener('touchstart',down,{passive:false});
 }
 
