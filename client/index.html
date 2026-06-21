@@ -2825,6 +2825,7 @@ function swApplySegments(){
 // swApplyOverlaySizes() once the cards are in the DOM (so o.size scales by the card's real height/640,
 // matching the editor and the export exactly).
 function swOverlayHtml(v){
+ try{
   // Text is burned into edited renders -- don't draw it again... EXCEPT when the card is
   // previewing via the raw source's proxy (no text in those pixels), where we draw the
   // saved overlays so the card still shows what was written.
@@ -2835,6 +2836,7 @@ function swOverlayHtml(v){
   else if(v.caption_suggested) ovs=[{text:mteClampLines(v.caption_suggested),x:50,y:MTE_OV_TOP,color:'#ffffff',size:24,style:'outline',font:'classic'}];
   if(!ovs) return '';
   return ovs.filter(o=>o.type!=='caption').map(o=>{ const p=mteOvParts(o,640); return '<div class="sw-text'+(p.box?' sw-box':'')+'" data-osize="'+(o.size||24)+'"'+(p.box?(' data-bg="'+esc(p.bg)+'"'):'')+' style="position:absolute;'+p.style+'">'+p.inner+'</div>'; }).join('');
+ }catch(_e){ return ''; }   // a single clip with bad overlay data must never throw out of swRender and freeze the deck (skip/advance would silently fail)
 }
 // Lock each preview overlay's size to the card height (same 640 reference as the editor + worker).
 function swApplyOverlaySizes(){
