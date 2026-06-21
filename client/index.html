@@ -3155,47 +3155,6 @@ function mteAttachSource(el, v, fallbackUrl){
   }
   el.src=fallbackUrl||'';
 }
-// ===== Phase 1 auto-trim silence -- DEMO ACCOUNT ONLY, client-side, non-destructive =====
-// Reads the audio peaks the editor already loads (mteWavePeaks) + the live duration and
-// pre-fills the trim segments with the spoken parts, cutting silent gaps. Nothing is saved
-// until Save; every cut is a normal draggable segment and Undo restores the full clip.
-const AUTOTRIM_CREATOR='bac7f943-1234-4aa7-93cc-facd5787a1f7';
-let mteAutoTrimDone=false;
-function autoTrimSegments(peaks,dur){
-  if(!peaks||!peaks.length||!(dur>0)) return null;
-  const n=peaks.length; let mx=0; for(let i=0;i<n;i++){ if(peaks[i]>mx) mx=peaks[i]; }
-  if(mx<=0) return null;
-  const thr=mx*0.08;            // silence = below 8% of the loudest peak (relative -> scale-independent)
-  const spp=dur/n;             // seconds per peak
-  const minSil=0.5, pad=0.15;  // only cut gaps >= 0.5s; keep 0.15s of air around speech
-  const loud=new Array(n); for(let i=0;i<n;i++) loud[i]=peaks[i]>thr;
-  const keep=loud.slice();
-  let i=0; while(i<n){ if(loud[i]){ i++; continue; } let j=i; while(j<n&&!loud[j]) j++; if((j-i)*spp<minSil){ for(let k=i;k<j;k++) keep[k]=true; } i=j; }
-  const padn=Math.max(0,Math.round(pad/spp));
-  const padded=keep.slice();
-  for(let k=0;k<n;k++){ if(keep[k]){ for(let d=-padn;d<=padn;d++){ const q=k+d; if(q>=0&&q<n) padded[q]=true; } } }
-  const segs=[]; let k=0;
-  while(k<n){ if(padded[k]){ const a=k; while(k<n&&padded[k]) k++; const st=a*spp, en=Math.min(dur,k*spp); if(en-st>0.3) segs.push({start:+st.toFixed(2),end:+en.toFixed(2),zoom:1}); } else { k++; } }
-  return segs;
-}
-function mteMaybeAutoTrim(){
-  try{
-    if(mteAutoTrimDone) return;
-    const cv=(swVids&&swVids.find&&swVids.find(x=>x.id===mteId))||(state.videos&&state.videos.find&&state.videos.find(x=>x.id===mteId));
-    if(!cv || cv.creator_id!==AUTOTRIM_CREATOR) return;                                 // gate: demo account clips only
-    if(cv.edit_state&&cv.edit_state.segments&&cv.edit_state.segments.length) return;    // already edited -> keep saved trims
-    if(!(mteWavePeaks&&mteWavePeaks.length>20)||!(mteDuration>2)) return;
-    if(!(mteSegments.length===1&&mteSegments[0].start<=0.05&&Math.abs(mteSegments[0].end-mteDuration)<0.2)) return;   // only while pristine
-    const segs=autoTrimSegments(mteWavePeaks,mteDuration);
-    if(!segs||!segs.length) return;
-    const kept=segs.reduce((a,sg)=>a+(sg.end-sg.start),0);
-    if(kept<1||(mteDuration-kept)<0.4) return;                                          // nothing worth cutting
-    mtePushUndo();                                                                      // snapshot full clip -> Undo restores every gap
-    mteSegments=segs; mteAutoTrimDone=true;
-    try{ mteRenderTL(); mteRenderOverlays(); mteUpdTime(); }catch(e){}
-    try{ toast('Auto-trimmed ~'+Math.round(mteDuration-kept)+'s of silence -- drag a handle or tap Undo to restore','ok'); }catch(e){}
-  }catch(e){}
-}
 async function mteOpen(id){
   let v=swVids.find(x=>x.id===id); if(!v) return;
   // NEVER edit a burned render -- its text is baked into the pixels, so editing it again
@@ -3208,7 +3167,7 @@ async function mteOpen(id){
     if(swVids.indexOf(src)<0) swVids.push(src);
     v=src; id=src.id;
   }
-  mteId=id; mteSelSeg=-1; mteThumbs=[]; mtePlaying=false; mteTexts=[]; mteSegments=[]; mteMedia=[]; mteMovSeq=0; mteSelMedia=null; mteSelText=null; mtePps=0; mteMuted=false; mteResetUndo(); mteAutoTrimDone=false;
+  mteId=id; mteSelSeg=-1; mteThumbs=[]; mtePlaying=false; mteTexts=[]; mteSegments=[]; mteMedia=[]; mteMovSeq=0; mteSelMedia=null; mteSelText=null; mtePps=0; mteMuted=false; mteResetUndo();
   mteRenderOverlays(); mteRenderMedia();   // clear any overlays left on screen from the previous video right away
   let url=signed[id];
   if(!url){ const {data:s}=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); url=s&&s.signedUrl; if(url)signed[id]=url; }
@@ -3230,7 +3189,7 @@ async function mteOpen(id){
   vid.onloadedmetadata=()=>{
     mteDuration=vid.duration||0;
     if(es&&es.segments&&es.segments.length){ mteSegments=es.segments.map(s=>({start:Math.max(0,s.start),end:Math.min(mteDuration,s.end),zoom:s.zoom||1})).filter(s=>s.end-s.start>0.05); }
-    if(!mteSegments.length) mteSegments=[{start:0,end:mteDuration}]; mteMaybeAutoTrim();
+    if(!mteSegments.length) mteSegments=[{start:0,end:mteDuration}];
     mteRenderTL(); mteRenderOverlays(); mteUpdTime(); setTimeout(mteBuildThumbs,450);   // let the preview load first, then build the filmstrip
     mteMedia=[]; if(es&&es.media&&es.media.length){ const tot=mteTotalKept()||0.001; es.media.forEach(m=>{ const item={id:++mteMovSeq,path:m.path,x:m.x,y:m.y,wfrac:m.wfrac||0.5,start:(m.start!=null?m.start:0),end:(m.end!=null?m.end:tot),url:''}; mteMedia.push(item); mteMediaUrl(m.path).then((u)=>{ if(u){ item.url=u; mteRenderMedia(); mteRenderOTrack(); } }).catch(()=>{}); }); }
     mteRenderMedia(); mteRenderOTrack();   // always render (clears any overlay/track left from the previous video, even when this one has none)
@@ -3440,7 +3399,7 @@ async function mteDecodeWave(id, blob){
     const N=1600; const peaks=new Float32Array(N); const step=Math.max(1,Math.floor(ch0.length/N)); let mx=0.0001;
     for(let i=0;i<N;i++){ let p=0; const s=i*step, e=Math.min(ch0.length,s+step); for(let j=s;j<e;j+=8){ const a=ch0[j]<0?-ch0[j]:ch0[j]; if(a>p)p=a; } peaks[i]=p; if(p>mx)mx=p; }
     for(let i=0;i<N;i++)peaks[i]=Math.min(1,peaks[i]/mx);
-    if(mteId===id){ mteWaveId=id; mteWavePeaks=peaks; mteWaveFailed=false; mteMaybeAutoTrim(); mteRenderWave(); requestAnimationFrame(mteRenderWave); setTimeout(mteRenderWave,250); setTimeout(mteRenderWave,800); }
+    if(mteId===id){ mteWaveId=id; mteWavePeaks=peaks; mteWaveFailed=false; mteRenderWave(); requestAnimationFrame(mteRenderWave); setTimeout(mteRenderWave,250); setTimeout(mteRenderWave,800); }
   }catch(e){ mteWaveFailed=true; try{mteRenderWave();}catch(_){ } }
   mteWaveBusy=false;
 }
