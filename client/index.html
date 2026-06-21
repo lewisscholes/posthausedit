@@ -4865,6 +4865,26 @@ async function saveAccount(id){
 // (e.g. on finger-down) so the bytes are already downloading before the tap completes -> the
 // "Save Video" sheet opens as soon as possible instead of waiting for the whole fetch on tap.
 const _mfCache={};
+// ----- download progress modal (creator "Save video" to camera roll) -----
+var __dlBarOpen=false;
+function dlShowProgress(){
+  __dlBarOpen=true;
+  showModal('<div style="text-align:center;padding:8px 4px 2px"><h3 style="margin:0 0 12px">Saving your video</h3>'
+    +'<div style="height:10px;background:#e9e4d8;border-radius:6px;overflow:hidden;margin:0 2px 8px"><div id="dlBar" style="height:100%;width:0%;background:var(--grad);border-radius:6px;transition:width .15s"></div></div>'
+    +'<div id="dlPct" style="font-weight:800;font-size:14px;margin-bottom:10px">0%</div>'
+    +'<p class="h-sub" style="margin:0;font-size:12.5px;line-height:1.5">Please don\'t leave the app while this downloads. If you leave, it will pause and pick back up when you come back.</p></div>');
+}
+function dlSetProgress(p){ if(!__dlBarOpen) return; var pct=Math.max(0,Math.min(100,Math.round((p||0)*100))); var b=document.getElementById('dlBar'); if(b) b.style.width=pct+'%'; var t=document.getElementById('dlPct'); if(t) t.textContent=pct+'%'; }
+function dlCloseProgress(){ if(!__dlBarOpen) return; __dlBarOpen=false; try{ closeModal(); }catch(e){} }
+async function __fetchFileProgress(url, filename){
+  var resp=await fetch(url);
+  var total=+(resp.headers.get('content-length')||0);
+  if(!resp.body||!resp.body.getReader||!total){ var b0=await resp.blob(); dlSetProgress(1); return new File([b0], filename||'video.mp4', {type:b0.type||'video/mp4'}); }
+  var reader=resp.body.getReader(); var chunks=[]; var recv=0;
+  for(;;){ var rd=await reader.read(); if(rd.done) break; chunks.push(rd.value); recv+=rd.value.length; dlSetProgress(recv/total); }
+  var blob=new Blob(chunks,{type:resp.headers.get('content-type')||'video/mp4'});
+  return new File([blob], filename||'video.mp4', {type:blob.type||'video/mp4'});
+}
 function getMediaFile(storage_path, filename){
   if(_mfCache[storage_path]) return _mfCache[storage_path];
   const p=(async()=>{
@@ -4872,8 +4892,7 @@ function getMediaFile(storage_path, filename){
       let {data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600);
       if(error || !(data&&data.signedUrl)){ try{ await sb.auth.refreshSession(); }catch(e){} ({data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600)); }   // stale/expired login -> refresh + retry
       if(error || !(data&&data.signedUrl)) throw (error||new Error('no signed url'));
-      const blob=await (await fetch(data.signedUrl)).blob();
-      return new File([blob], filename||'video.mp4', {type: blob.type||'video/mp4'});
+      return await __fetchFileProgress(data.signedUrl, filename);
     }catch(e){ return null; }
   })();
   _mfCache[storage_path]=p;
@@ -4886,6 +4905,7 @@ async function shareToCameraRoll(storage_path, filename){
   if(!(isMobileDevice() && navigator.canShare)) return false;
   let file=null;
   try{ file=await getMediaFile(storage_path, filename); }catch(e){ file=null; }   // reuses the prefetch if it was already started
+  dlCloseProgress();   // file is downloaded -> hide the % bar before the share sheet opens
   if(!(file && navigator.canShare({files:[file]}))) return false;
   try{ await navigator.share({files:[file]}); return true; }              // share sheet -> "Save Video" -> camera roll
   catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file); return true; }   // activation expired -> fresh tap
@@ -5790,9 +5810,9 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,edit_state').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
   for(var i=0;i<srcs.length;i++){
-    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||(srcs[i].storage_path?{id:srcs[i].id,storage_path:srcs[i].storage_path,filename:srcs[i].filename}:null); }catch(e){ srcs[i]._render=null; }
+    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||((srcs[i].storage_path&&!(srcs[i].edit_state&&srcs[i].edit_state.segments&&srcs[i].edit_state.segments.length))?{id:srcs[i].id,storage_path:srcs[i].storage_path,filename:srcs[i].filename}:null); }catch(e){ srcs[i]._render=null; }
   }
   state.readyList=srcs; readyRender();
 }
@@ -5828,6 +5848,7 @@ async function readySave(id){
   if(!v||!v._render||!v._render.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
   var r=v._render; var fn=r.filename||'video.mp4';
   var saved=false;
+  if(isMobileDevice() && navigator.canShare){ dlShowProgress(); }
   var ok=false; try{ ok=await shareToCameraRoll(r.storage_path, fn); }catch(e){ ok=false; }   // small clips -> one-tap Save to camera roll
   if(ok){ saved=true; }
   else {
