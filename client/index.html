@@ -5815,6 +5815,9 @@ async function loadReady(){
     try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||((srcs[i].storage_path&&!(srcs[i].edit_state&&srcs[i].edit_state.segments&&srcs[i].edit_state.segments.length))?{id:srcs[i].id,storage_path:srcs[i].storage_path,filename:srcs[i].filename}:null); }catch(e){ srcs[i]._render=null; }
   }
   state.readyList=srcs; readyRender();
+  clearTimeout(state.readyPollT);
+  var anyRendering=srcs.some(function(x){ return !(x._render&&x._render.storage_path) && !x.posted_at; });
+  if(anyRendering && state.currentView==='ready'){ state.readyPollT=setTimeout(function(){ if(state.currentView==='ready') loadReady(); }, 8000); }   // auto-refresh so 'rendering' flips to 'ready' on its own
 }
 function readyRender(){
   var root=document.getElementById('readyBody'); if(!root) return;
@@ -5822,6 +5825,21 @@ function readyRender(){
   var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Your finished videos. Save each one, post it in TikTok and tag the product, then tap "Mark posted".</div>';
   if(!list.length){ root.innerHTML=head+'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>'; return; }
   root.innerHTML=head+list.map(readyCard).join('');
+}
+async function requeueRender(id){
+  try{
+    var r=await sb.from('ed_videos').select('id,storage_path,filename,folder_id,product_uid,edit_state').eq('id',id).single();
+    if(r.error||!r.data){ toast('Could not re-render','err'); return; }
+    var clip=r.data; var es=clip.edit_state;
+    if(!(es&&es.segments&&es.segments.length)){ toast('Nothing to re-render (no saved edit)','err'); return; }
+    var wOverlays=(es.overlays||[]).filter(function(o){return o.type!=='caption';}).map(function(o){ var sty=o.style||'plain'; return Object.assign({text:o.text,x:o.x,y:o.y,color:o.color,size:o.size,scale:(o.scale||1),font:(o.font==='classic'?'TikTok Sans':o.font),weight:600,style:sty,box:(sty==='box'),stroke:(sty==='outline'?2.5:0),outline:(sty==='outline')}, (o.start!=null&&o.end!=null?{start:o.start,end:o.end}:{})); });
+    try{ await sb.from('ed_edit_jobs').delete().eq('video_id',id).in('status',['queued','rendering','error']); }catch(e){}
+    var job={video_id:id,storage_path:clip.storage_path,filename:clip.filename,folder_id:clip.folder_id,product_uid:clip.product_uid,options:{segments:es.segments,source_duration:es.source_duration,overlays:wOverlays,media:(es.media||[]),captions:(es.captions||[]),edited_at:es.edited_at},status:'queued',requested_by:((state.user&&state.user.first_name)||'creator')};
+    var ins=await sb.from('ed_edit_jobs').insert(job);
+    if(ins.error){ toast('Re-render failed: '+ins.error.message,'err'); return; }
+    toast('Re-rendering -- it will appear here shortly','ok');
+    try{ loadReady(); }catch(e){}
+  }catch(e){ toast('Re-render failed','err'); }
 }
 function readyCard(v){
   var ready=!!(v._render&&v._render.storage_path);
@@ -5836,7 +5854,12 @@ function readyCard(v){
     btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
     if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
   } else {
-    btns+='<span class="h-sub" style="font-size:12.5px">Still rendering -- check back shortly.</span>';
+    var mins=v.delivered_at?((Date.now()-new Date(v.delivered_at).getTime())/60000):0;
+    if(mins<4){
+      btns+='<span class="h-sub" style="font-size:12.5px;display:flex;align-items:center;gap:7px"><span class="ph-spin"></span>Rendering your edited video... this updates by itself -- usually ready in a minute or two.</span>';
+    } else {
+      btns+='<div style="width:100%"><div class="h-sub" style="font-size:12.5px;margin-bottom:7px">Still rendering -- this one is taking a little longer than usual.</div><button class="btn ghost sm" onclick="requeueRender(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Re-render</button></div>';
+    }
   }
   btns+='</div>';
   var note=posted?'<div class="h-sub" style="font-size:11.5px;margin-top:6px;color:#0f6e56">Counted as posted. Tap "Save again" if you need the file again.</div>':'';
