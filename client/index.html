@@ -5671,6 +5671,9 @@ async function loadEditor(){
     try{ var mres=await sb.from('ed_videos').select('*').in('id',missing); if(!mres.data||!mres.data.length) break; mres.data.forEach(function(x){ byId[x.id]=x; }); }catch(e){ break; }
   }
   var rootOf=function(v){ var cur=v,g=0; while(cur&&cur.kind==='edited'&&cur.source_video_id&&byId[cur.source_video_id]&&g++<8){ cur=byId[cur.source_video_id]; } return cur; };
+  // collapse duplicate edited renders -> keep only the latest render per source clip. The render worker
+  // can emit several per source, and renders whose source was deleted were each becoming their own deck card.
+  (function(){ var _lr={}; all.forEach(function(v){ if(v.kind==='edited'&&v.source_video_id){ var c=_lr[v.source_video_id]; if(!c||new Date(v.created_at||0)>new Date(c.created_at||0)) _lr[v.source_video_id]=v; } }); all=all.filter(function(v){ return !(v.kind==='edited'&&v.source_video_id&&_lr[v.source_video_id]&&_lr[v.source_video_id]!==v); }); })();
   var editedByRoot={};
   all.forEach(function(v){ if(v.kind==='edited'){ var rid=rootOf(v).id; var cur=editedByRoot[rid]; if(!cur || new Date(v.created_at||0)>new Date(cur.created_at||0)) editedByRoot[rid]=v; } });
   var rootIds=Array.from(new Set(all.map(function(v){ return v.kind==='edited'?rootOf(v).id:v.id; })));
