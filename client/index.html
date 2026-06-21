@@ -586,7 +586,16 @@
   .mte-colors .wheel{background:conic-gradient(red,#ff0,#0f0,#0ff,#00f,#f0f,red);position:relative;overflow:hidden}
   .mte-colors .wheel input{position:absolute;inset:-6px;opacity:0;width:200%;height:200%;cursor:pointer}
 </style>
-<style>.svic{width:1em;height:1em;display:inline-block;vertical-align:-0.14em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}</style><style>
+<style>.svic{width:1em;height:1em;display:inline-block;vertical-align:-0.14em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}</style>
+<style>
+/* Native app polish: make it feel like an app, not a web page. Harmless in a browser too. */
+html,body{overscroll-behavior:none;}
+*{-webkit-tap-highlight-color:transparent;}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+/* still allow selecting/editing real text fields */
+input,textarea,[contenteditable="true"],[contenteditable=""]{ -webkit-user-select:text;user-select:text;-webkit-touch-callout:default; }
+img,a{ -webkit-touch-callout:none; }
+</style><style>
   .es-client{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;color:#fff;font-size:13px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.6);z-index:5}
   .es-client .es-av{width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
   .es-links{display:flex;justify-content:space-between;max-width:440px;margin:12px auto 0;width:100%;padding:0 10px;box-sizing:border-box}
@@ -3569,6 +3578,7 @@ function mteEnterReorder(idx){
   const scroll=document.getElementById('mteTlScroll'); if(scroll){ scroll.style.overflowX='hidden'; scroll.style.touchAction='none'; }
   const ph=document.getElementById('mtePhFix'); if(ph) ph.style.visibility='hidden';
   try{ if(navigator.vibrate) navigator.vibrate(15); }catch(e){}
+  haptic('medium');
   mteRenderRoStrip();
 }
 function mteRenderRoStrip(){
@@ -4812,6 +4822,16 @@ async function markTempDownloaded(id){
 // or PWA these are absent, so everything falls through to the normal web download below.
 function isNativeApp(){ try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }catch(e){ return false; } }
 function nativeSaveReady(){ try{ return isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && (window.Capacitor.Plugins.Media || window.Capacitor.Plugins.Share); }catch(e){ return false; } }
+// Light tactile feedback on key actions. No-ops in a browser or until the Haptics plugin is installed.
+function haptic(kind){ try{ if(!(window.Capacitor && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Haptics'))) return; var H=window.Capacitor.Plugins.Haptics; if(kind==='success'){ H.notification({type:'SUCCESS'}); } else if(kind==='warning'){ H.notification({type:'WARNING'}); } else if(kind==='medium'){ H.impact({style:'MEDIUM'}); } else if(kind==='heavy'){ H.impact({style:'HEAVY'}); } else { H.impact({style:'LIGHT'}); } }catch(e){} }
+// One-time native chrome setup: theme the status bar and dismiss the splash once the app is interactive.
+function initNativePolish(){
+  try{ if(!isNativeApp()) return; }catch(e){ return; }
+  var P=(window.Capacitor&&window.Capacitor.Plugins)||{};
+  try{ if(window.Capacitor.isPluginAvailable('StatusBar') && P.StatusBar){ P.StatusBar.setStyle({style:'DARK'}); if(P.StatusBar.setBackgroundColor) P.StatusBar.setBackgroundColor({color:'#0f1115'}); } }catch(e){}
+  try{ if(window.Capacitor.isPluginAvailable('SplashScreen') && P.SplashScreen){ setTimeout(function(){ try{ P.SplashScreen.hide(); }catch(e){} }, 250); } }catch(e){}
+}
+if(document.readyState==='complete'||document.readyState==='interactive'){ setTimeout(initNativePolish,0); } else { document.addEventListener('DOMContentLoaded', initNativePolish); }
 async function nativeSaveFromUrl(url, filename){
   const C=window.Capacitor.Plugins;
   const safe=(filename||'video.mp4').replace(/[^\w.\-]+/g,'_');
@@ -4836,6 +4856,7 @@ async function nativeSaveFromUrl(url, filename){
       }
       if(lis&&lis.remove){ try{ await lis.remove(); }catch(e){} lis=null; }
       if(ok){
+        haptic('success');
         showModal('<div style="text-align:center;padding:14px 6px 6px"><div style="font-size:34px;margin:2px 0 8px">&#10003;</div><h3 style="margin:0 0 7px">Saved to your camera roll</h3><p class="h-sub" style="margin:0;font-size:13px">In Photos it is in <b>Recents</b> and the album <b>'+esc(ALBUM)+'</b>.</p><div style="margin-top:14px"><button class="btn" onclick="closeModal()">Done</button></div></div>');
         return true;
       }
