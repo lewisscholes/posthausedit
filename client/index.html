@@ -2426,8 +2426,8 @@ async function loadBank(){
   state.activeEdits=new Set((ajobs||[]).map(j=>j.video_id));
   populateViewAs(); renderBank();
 }
-function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.viewAs||me.id; }
-function onViewAsChange(){ state.viewAs=val('viewAs'); renderBank(); }
+function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.creatorFilter||state.viewAs||me.id; }
+function onViewAsChange(){ var v=val('viewAs')||''; state.viewAs=v; state.creatorFilter=(state.user&&v===state.user.id)?null:(v||null); loadBank(); }
 function viewUser(){ return state.viewAs||(state.user&&state.user.id); }
 function isSelf(){ return viewUser()===(state.user&&state.user.id); }
 function isPosted(v){ return !!v.posted_at; }
