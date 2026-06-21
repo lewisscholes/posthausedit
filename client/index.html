@@ -2691,7 +2691,7 @@ async function downloadVideo(id){
     }
   }
   // Computer (and phones without file sharing): save to the files / Downloads folder
-  await fileDownload(v,id);
+  await fileDownload(v,id); await recordDownload(id);
 }
 function promptShare(file,id){
   showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
@@ -5637,7 +5637,9 @@ async function uploadOne(file,prodId,onProgress){
   var cid = state.isAdmin ? (state.creatorFilter||null) : (ME&&ME.id);
   var path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe;
   await tusUpload(file,path,onProgress); if(onProgress)onProgress(file.size||0,file.size||0);
-  var ins=await sb.from('ed_videos').insert({creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'}).select('id').single();
+  var row={creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'};
+  if(state.isAdmin && cid){ row.status='ready'; row.delivered_at=new Date().toISOString(); }   // admin bank upload = a finished edit -> deliver to the client (Ready to post / Sent to Post)
+  var ins=await sb.from('ed_videos').insert(row).select('id').single();
   if(ins.error) throw ins.error;
   // refresh the creator's "Your uploads" list as soon as each upload lands
   if(!state.isAdmin && state.currentView==='upload'){ try{ loadUpload(); }catch(e){} }
@@ -5708,7 +5710,7 @@ function bankBuckets(){
   var b={new:[],edited:[],downloaded:[],posted:[]};
   (state.videos||[]).filter(function(v){ return !v.pending_approval; }).forEach(function(v){
     if(v.kind==='edited') return;
-    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled';
+    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready';
     if(posted){ b.posted.push(v); }
     else if(typeof downloadedBy==='function' && downloadedBy(v.id,uid)){ b.downloaded.push(v); }
     else { b.new.push(v); }
@@ -5785,9 +5787,9 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
   for(var i=0;i<srcs.length;i++){
-    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){ srcs[i]._render=null; }
+    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||(srcs[i].storage_path?{id:srcs[i].id,storage_path:srcs[i].storage_path,filename:srcs[i].filename}:null); }catch(e){ srcs[i]._render=null; }
   }
   state.readyList=srcs; readyRender();
 }
