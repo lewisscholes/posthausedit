@@ -3325,7 +3325,7 @@ function mteAdvance(){
   // still hidden+muted. By the time we hit the cut it has been decoding/playing for LEAD
   // and has arrived exactly on the cut point -- so the swap is warm (no decode hitch) and
   // lands on the right frame (no content skip).
-  const LEAD=0.5;   // EXPERIMENT: more warm-up so the standby buffer is reliably painting before a cut (smoother joins on light 480p proxies)
+  const LEAD=Math.max(0.06, Math.min(0.32, (run.end-run.start)-0.05));   // pre-roll: capped at 0.32 and never longer than the run itself -> short segments can't get stuck in a broken-record loop
   if(!mteRolling && t>=run.end-LEAD){
     const sb=mteVB(); sb.muted=true; const warm=Math.max(0,runs[ni].start-LEAD);
     if(Math.abs(sb.currentTime-warm)>0.04){ try{sb.currentTime=warm;}catch(e){} }
@@ -4362,7 +4362,8 @@ function mteUpdTextVis(){
 
 async function mteSave(){
   const v=swVids.find(x=>x.id===mteId); if(!v){ mteClose(); return; }
-  const segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000}));
+  let segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000})).filter(s=>(s.end-s.start)>=0.2);   // drop sub-0.2s slivers: they cause the broken-record preview loop + a flash in the render
+  if(!segs.length) segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000}));
   const _otot=mteTotalKept()||0;
   // only store a text overlay's window when it's actually been trimmed below the full clip
   const _win=(o)=>(o.start!=null&&o.end!=null&&(o.start>0.05||o.end<_otot-0.05))?{start:Math.round(o.start*100)/100,end:Math.round(o.end*100)/100}:{};
