@@ -5810,10 +5810,11 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,edit_state').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
-  for(var i=0;i<srcs.length;i++){
-    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||((srcs[i].storage_path&&!(srcs[i].edit_state&&srcs[i].edit_state.segments&&srcs[i].edit_state.segments.length))?{id:srcs[i].id,storage_path:srcs[i].storage_path,filename:srcs[i].filename}:null); }catch(e){ srcs[i]._render=null; }
-  }
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,edit_state,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).order('delivered_at',{ascending:false}).limit(150); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  var _ids=srcs.map(function(x){return x.id;}); var _ren={};
+  if(_ids.length){ try{ var rr=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,created_at').eq('creator_id',ME.id).eq('kind','edited').in('source_video_id',_ids).order('created_at',{ascending:false}); (rr.data||[]).forEach(function(x){ if(!_ren[x.source_video_id]) _ren[x.source_video_id]=x; }); }catch(e){} }
+  srcs.forEach(function(c){ c._render=_ren[c.id]||((c.storage_path&&!(c.edit_state&&c.edit_state.segments&&c.edit_state.segments.length))?{id:c.id,storage_path:c.storage_path,filename:c.filename}:null); });
+  srcs.sort(function(a,b){ var ad=!!a.posted_at, bd=!!b.posted_at; if(ad!==bd) return ad?1:-1; var ka=new Date((ad?a.posted_at:a.delivered_at)||0).getTime(), kb=new Date((bd?b.posted_at:b.delivered_at)||0).getTime(); return kb-ka; });
   state.readyList=srcs; readyRender();
   clearTimeout(state.readyPollT);
   var anyRendering=srcs.some(function(x){ return !(x._render&&x._render.storage_path) && !x.posted_at; });
@@ -5822,9 +5823,15 @@ async function loadReady(){
 function readyRender(){
   var root=document.getElementById('readyBody'); if(!root) return;
   var list=state.readyList||[];
-  var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Your finished videos. Save each one, post it in TikTok and tag the product, then tap "Mark posted".</div>';
+  var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Save each video and post it in TikTok. Once you save it, it greys out and drops to Downloaded below -- so you can always see what is left.</div>';
   if(!list.length){ root.innerHTML=head+'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>'; return; }
-  root.innerHTML=head+list.map(readyCard).join('');
+  var todo=list.filter(function(v){ return !v.posted_at; });
+  var done=list.filter(function(v){ return !!v.posted_at; });
+  var html=head;
+  html+='<div class="h-sub" style="font-weight:800;color:#1A1512;margin:0 2px 8px">To download'+(todo.length?(' ('+todo.length+')'):'')+'</div>';
+  html+= todo.length ? todo.map(readyCard).join('') : '<div class="empty" style="margin-bottom:14px">All caught up -- everything here has been downloaded.</div>';
+  if(done.length){ html+='<div class="h-sub" style="font-weight:800;color:#0f6e56;margin:16px 2px 8px;display:flex;align-items:center;gap:6px"><svg class="svic" style="width:1em;height:1em" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded ('+done.length+')</div>'+done.map(readyCard).join(''); }
+  root.innerHTML=html;
 }
 async function requeueRender(id){
   try{
@@ -5843,16 +5850,16 @@ async function requeueRender(id){
 }
 function readyCard(v){
   var ready=!!(v._render&&v._render.storage_path);
-  var posted=!!v.posted_at;
+  var done=!!v.posted_at;
   var cap=v.caption_suggested||'';
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
-  var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
-  var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
+  var label=done?'Downloaded':(ready?'Ready to post':'Rendering');
+  var pill=done?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56"><svg class="svic" style="width:.95em;height:.95em;vertical-align:-2px" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
   var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
-    btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
-    if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
+    btns+='<button class="btn'+(done?' ghost sm':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(done?'Save again':'Save video')+'</button>';
+    if(cap) btns+='<button class="btn ghost'+(done?' sm':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
   } else {
     var mins=v.delivered_at?((Date.now()-new Date(v.delivered_at).getTime())/60000):0;
     if(mins<4){
@@ -5862,8 +5869,7 @@ function readyCard(v){
     }
   }
   btns+='</div>';
-  var note=posted?'<div class="h-sub" style="font-size:11.5px;margin-top:6px;color:#0f6e56">Counted as posted. Tap "Save again" if you need the file again.</div>':'';
-  return '<div class="card" style="margin-bottom:12px">'+top+capBlock+btns+note+'</div>';
+  return '<div class="card" style="margin-bottom:12px'+(done?';opacity:.62':'')+'">'+top+capBlock+btns+'</div>';
 }
 function readyCopy(id){ var v=(state.readyList||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
 async function readySave(id){
