@@ -3155,6 +3155,58 @@ function mteAttachSource(el, v, fallbackUrl){
   }
   el.src=fallbackUrl||'';
 }
+// ===== Phase 1 auto-trim silence -- DEMO ACCOUNT ONLY, client-side, non-destructive (v2) =====
+// Validated offline on real clips. Waits for the audio peaks to be ready, then pre-fills the
+// trim segments with the spoken parts (cutting silent gaps >= 1s). Nothing saved until Save;
+// every cut is a normal draggable segment and Undo restores the full clip.
+const AUTOTRIM_CREATOR='bac7f943-1234-4aa7-93cc-facd5787a1f7';
+let mteAutoTrimDone=false;
+function autoTrimSegments(peaks,dur){
+  if(!peaks||!peaks.length||!(dur>0)) return null;
+  const n=peaks.length; let mx=0; for(let i=0;i<n;i++){ if(peaks[i]>mx) mx=peaks[i]; }
+  if(mx<=0) return null;
+  const thr=mx*0.08;            // silence = below 8% of the loudest peak (relative -> scale-independent)
+  const spp=dur/n;             // seconds per peak
+  const minSil=1.0, pad=0.15;  // only cut gaps >= 1s (never mid-sentence); keep 0.15s of air around speech
+  const loud=new Array(n); for(let i=0;i<n;i++) loud[i]=peaks[i]>thr;
+  const keep=loud.slice();
+  let i=0; while(i<n){ if(loud[i]){ i++; continue; } let j=i; while(j<n&&!loud[j]) j++; if((j-i)*spp<minSil){ for(let k=i;k<j;k++) keep[k]=true; } i=j; }
+  const padn=Math.max(0,Math.round(pad/spp));
+  const padded=keep.slice();
+  for(let k=0;k<n;k++){ if(keep[k]){ for(let d=-padn;d<=padn;d++){ const q=k+d; if(q>=0&&q<n) padded[q]=true; } } }
+  const segs=[]; let k=0;
+  while(k<n){ if(padded[k]){ const a=k; while(k<n&&padded[k]) k++; const st=a*spp, en=Math.min(dur,k*spp); if(en-st>0.3) segs.push({start:+st.toFixed(2),end:+en.toFixed(2),zoom:1}); } else { k++; } }
+  return segs;
+}
+function mteMaybeAutoTrim(){
+  try{
+    if(mteAutoTrimDone) return;
+    const cv=(swVids&&swVids.find&&swVids.find(x=>x.id===mteId))||(state.videos&&state.videos.find&&state.videos.find(x=>x.id===mteId));
+    if(!cv || cv.creator_id!==AUTOTRIM_CREATOR) return;                                 // gate: demo account clips only
+    if(cv.edit_state&&cv.edit_state.segments&&cv.edit_state.segments.length) return;    // already edited -> keep saved trims
+    if(!(mteWavePeaks&&mteWavePeaks.length>20)||!(mteDuration>2)) return;               // peaks not ready yet
+    if(!(mteSegments.length===1&&mteSegments[0].start<=0.05&&Math.abs(mteSegments[0].end-mteDuration)<0.2)) return;   // only while pristine
+    const segs=autoTrimSegments(mteWavePeaks,mteDuration);
+    if(!segs||!segs.length) return;
+    const kept=segs.reduce((a,sg)=>a+(sg.end-sg.start),0);
+    if(kept<1||(mteDuration-kept)<0.4){ mteAutoTrimDone=true; return; }                 // nothing worth cutting
+    mtePushUndo();                                                                      // snapshot full clip -> Undo restores every gap
+    mteSegments=segs; mteAutoTrimDone=true;
+    try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}  // repaint INCLUDING the wave lane
+    try{ setTimeout(mteRenderWave,60); setTimeout(mteRenderWave,300); }catch(e){}        // ensure the wave redraws after relayout
+    try{ toast('Auto-trimmed ~'+Math.round(mteDuration-kept)+'s of silence -- drag a handle or tap Undo to restore','ok'); }catch(e){}
+  }catch(e){}
+}
+function mteAutoTrimSchedule(){
+  mteAutoTrimDone=false;
+  let tries=0;
+  (function attempt(){
+    if(mteAutoTrimDone) return;
+    if(mteWavePeaks&&mteWavePeaks.length>20&&mteDuration>2){ mteMaybeAutoTrim(); return; }
+    if(tries++>14) return;                 // wait up to ~6s for peaks/duration, then give up quietly
+    setTimeout(attempt,400);
+  })();
+}
 async function mteOpen(id){
   let v=swVids.find(x=>x.id===id); if(!v) return;
   // NEVER edit a burned render -- its text is baked into the pixels, so editing it again
@@ -3175,7 +3227,7 @@ async function mteOpen(id){
   // audio decoding); fall back to decoding in the browser only if none are stored yet.
   mteWavePeaks=null; mteWaveId=null; mteWaveFailed=false;
   (function(){ var wv=(swVids&&swVids.find&&swVids.find(function(x){return x.id===id;}))||(state.videos&&state.videos.find&&state.videos.find(function(x){return x.id===id;})); var st=wv?mteWaveParse(wv.waveform):null; if(st){ mteWaveId=id; mteWavePeaks=st; } else { mteDecodeWave(id); } })();
-  setTimeout(mteRenderWave,400); setTimeout(mteRenderWave,1200);   // ensure the lane draws once the timeline has laid out (mobile)
+  setTimeout(mteRenderWave,400); setTimeout(mteRenderWave,1200); mteAutoTrimSchedule();   // ensure the lane draws once the timeline has laid out (mobile)
   const es=v.edit_state;
   if(es&&es.overlays&&es.overlays.length){ mteTexts=es.overlays.map(o=> o.type==='caption'
       ? {id:++mteOvSeq,type:'caption',words:(o.words||[]).map(w=>({w:w.w,start:+w.start,end:+w.end})),x:o.x,y:o.y,color:o.color||'#ffffff',size:o.size||30,scale:o.scale||1,font:o.font||'classic',style:'outline'}
