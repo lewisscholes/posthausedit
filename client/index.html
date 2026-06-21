@@ -1050,6 +1050,7 @@ a{color:#B0211A}
 
     <!-- MOBILE TIKTOK-STYLE EDITOR -->
     <div class="mte" id="mte">
+      <div id="mteDbg" style="position:absolute;left:6px;bottom:96px;z-index:99;background:rgba(0,0,0,.78);color:#39ff6a;font:10px/1.35 ui-monospace,Menlo,monospace;padding:4px 7px;border-radius:7px;pointer-events:none;white-space:pre;display:none"></div>
       <div class="mte-top">
         <button class="mte-back" onclick="mteClose()" aria-label="Back">&#8249;</button>
         <button class="mte-next" onclick="mteSave()" aria-label="Save edits">&#8594;</button>
@@ -3708,6 +3709,27 @@ function mteRelayout(){ var m=document.getElementById('mte'); if(!m||!m.classLis
 window.addEventListener('resize', mteRelayout);
 window.addEventListener('orientationchange', function(){ setTimeout(mteRelayout,200); setTimeout(mteRelayout,600); });
 try{ if(window.visualViewport){ window.visualViewport.addEventListener('resize', mteRelayout); } }catch(e){}
+// ---- TEMP editor touch diagnostic (build tag b5). Alfie only; removed once the editor is fixed. ----
+(function(){
+  var ts=0,tm=0,te=0,pd=0;
+  document.addEventListener('touchstart',function(){ts++;},true);
+  document.addEventListener('touchmove',function(){tm++;},true);
+  document.addEventListener('touchend',function(){te++;},true);
+  document.addEventListener('pointerdown',function(){pd++;},true);
+  setInterval(function(){
+    var d=document.getElementById('mteDbg'); if(!d)return;
+    var alfie=(typeof BUCKET!=='undefined' && BUCKET==='videos');
+    var open=document.getElementById('mte') && document.getElementById('mte').classList.contains('open');
+    if(!alfie || !open){ d.style.display='none'; return; }
+    d.style.display='block';
+    var sc=document.getElementById('mteTlScroll');
+    var cw=sc?sc.clientWidth:-1, sw=sc?Math.round(sc.scrollWidth):-1;
+    var NL=String.fromCharCode(10);
+    d.textContent=['b5  native:'+(isNativeApp()?'YES':'no')+'  open:'+(open?1:0),
+      'w:'+cw+' sw:'+sw+' pps:'+(Math.round(mtePps*10)/10)+' fit:'+(Math.round(mtePpsFit*10)/10)+' seg:'+(mteSegments?mteSegments.length:-1),
+      'touch ts:'+ts+' tm:'+tm+' te:'+te+'  ptr pd:'+pd].join(NL);
+  },400);
+})();
 
 function mteOnTimeUpdate(){ if(!mtePlaying) mteUpdTime(); }   // during playback the 60fps loop (mteAdvance) handles boundaries
 
