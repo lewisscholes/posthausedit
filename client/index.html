@@ -5858,8 +5858,13 @@ function readyCard(v){
   var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
-    btns+='<button class="btn'+(done?' ghost sm':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(done?'Save again':'Save video')+'</button>';
-    if(cap) btns+='<button class="btn ghost'+(done?' sm':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
+    if(done){
+      btns+='<button class="btn ghost sm" style="font-size:12px;padding:5px 11px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Re-download</button>';
+      if(cap) btns+='<button class="btn ghost sm" style="font-size:12px;padding:5px 11px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
+    } else {
+      btns+='<button class="btn" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Save video</button>';
+      if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
+    }
   } else {
     var mins=v.delivered_at?((Date.now()-new Date(v.delivered_at).getTime())/60000):0;
     if(mins<4){
