@@ -475,8 +475,11 @@
   .mte{position:fixed;inset:0;height:100dvh;z-index:300;background:#000;color:#fff;display:none;flex-direction:column;-webkit-user-select:none;user-select:none;overscroll-behavior:contain}
   .mte.open{display:flex}
   .mte-top{position:absolute;top:0;left:0;right:0;z-index:320;display:flex;align-items:center;justify-content:space-between;padding:max(8px,env(safe-area-inset-top)) 12px 0;pointer-events:none}
-  .mte-back{background:rgba(120,120,128,.5);border:0;color:#fff;width:38px;height:38px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;pointer-events:auto}
-  .mte-next{background:#fe2c55;border:0;color:#fff;width:44px;height:44px;border-radius:50%;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+  .mte-back{background:rgba(40,40,44,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:0;color:#fff;width:40px;height:40px;border-radius:50%;font-size:23px;line-height:1;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+  .mte-back:active{transform:scale(.92)}
+  .mte-next{background:#fe2c55;border:0;color:#fff;height:40px;padding:0 17px;border-radius:21px;font-size:15px;font-weight:600;line-height:1;cursor:pointer;display:flex;align-items:center;gap:6px;pointer-events:auto;box-shadow:0 6px 18px rgba(254,44,85,.38);transition:transform .12s}
+  .mte-next:active{transform:scale(.95)}
+  .mte-next svg{width:16px;height:16px;stroke:#fff;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
   .mte-stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:max(8px,env(safe-area-inset-top)) 6px 0}
   .mte-pv{position:relative;height:100%;max-width:100%;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#000}
   .mte-pv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:2}
@@ -492,11 +495,13 @@
   .mte-transport{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:7px 16px 3px;font-size:13px;color:#cfcfd2}
   .mte-time{font-variant-numeric:tabular-nums;min-width:88px}
   .mte-time b{color:#fff;font-weight:600}
-  .mte-playc{background:transparent;border:0;color:#fff;font-size:17px;cursor:pointer;width:40px;text-align:center}
+  .mte-playc{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.9);border-radius:50%;color:#fff;font-size:15px;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center;transition:transform .12s,background .15s}
+  .mte-playc:active{transform:scale(.92);background:rgba(255,255,255,.15)}
+  .mte-div{width:1px;height:18px;background:rgba(255,255,255,.14);align-self:center;flex:none}
   .mte-tr-ic{display:flex;gap:17px;align-items:center;justify-content:flex-end;min-width:88px}
   .mte-tr-ic button{background:transparent;border:0;color:#cfcfd2;font-size:15px;cursor:pointer;padding:0}
   .mte-tlrow{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:2px 10px 0}
-  .mte-gap{flex:0 0 4vh;touch-action:none}   /* thin thumb-scroll strip; kept small so the video preview gets maximum height */
+  .mte-gap{flex:0 0 6.5vh;min-height:48px;touch-action:none}   /* black thumb-scrub strip between the timeline and the toolbar (TikTok-style); scroll/pinch/deselect bound to it */
   .mte-vol{flex:0 0 auto;width:24px;text-align:center;color:#fff;font-size:15px;background:transparent;border:0;cursor:pointer}
   .mte-tlwrap{position:relative;flex:1 1 auto;min-width:0;padding-bottom:48px}
   /* TikTok-style long-press reorder: timeline becomes a row of square tiles */
@@ -519,7 +524,7 @@
   .mte-thumbs div{position:absolute;top:0;bottom:0;background-size:cover;background-position:center}
   .mte-seg{position:relative;height:100%;border-right:2px solid #000;box-sizing:border-box;flex:0 0 auto;z-index:2}
   .mte-seg:last-child{border-right:0}
-  .mte-seg.sel{outline:3px solid #fff;outline-offset:-3px;border-radius:7px;z-index:5;box-shadow:0 0 0 3px #000}
+  .mte-seg.sel{outline:2px solid #fe2c55;outline-offset:-2px;border-radius:8px;z-index:5;box-shadow:0 0 0 3px rgba(0,0,0,.6),0 0 14px rgba(254,44,85,.5)}
   .ro-row{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 14px;-webkit-overflow-scrolling:touch}
   .ro-tile{position:relative;flex:0 0 auto;width:74px;height:104px;border-radius:10px;background-size:cover;background-position:center;background-color:#222;border:2px solid var(--line,#e8dcc8);box-shadow:0 2px 6px rgba(0,0,0,.18);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
   .ro-tile.drag{opacity:.9;transform:scale(1.06);cursor:grabbing;border-color:#fe2c55;box-shadow:0 8px 18px rgba(0,0,0,.35);z-index:3}
@@ -546,11 +551,13 @@
   .mte-obar.txt{background:#1d3350;border-color:#2f6df6}
   .mte-obar.txt.sel{background:#26456e;border-color:#fff}
   .mte-obarlbl{position:absolute;left:7px;right:7px;top:50%;transform:translateY(-50%);color:#cfe0ff;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-  .mte-bar{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+  .mte-bar{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;padding:4px 12px 8px}   /* flush to the bottom; the native safe-area is reserved by the app's contentInset, so no extra inset padding here (avoids a double gap) */
   .mte-barscroll{display:flex;gap:9px;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .mte-barscroll::-webkit-scrollbar{display:none}
   .mte-barscroll button{flex:0 0 auto;width:70px}
-  .mte-bar button{background:#1c1c1e;border:0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:500;cursor:pointer;flex:1 1 0;min-width:0;height:56px;border-radius:11px}
+  .mte-bar button{background:#1c1c1e;border:0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:500;cursor:pointer;flex:1 1 0;min-width:0;height:56px;border-radius:13px;transition:transform .12s,background .15s,color .15s}
+  .mte-bar button:active{transform:scale(.93);background:#242427}
+  .mte-bar button.flash{background:rgba(254,44,85,.16);color:#fe2c55}
   .mte-bar .mi{font-size:19px;line-height:1}
   .mte-movs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:4}
   .mte-mov{position:absolute;pointer-events:auto;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -1055,7 +1062,7 @@ a{color:#B0211A}
     <div class="mte" id="mte">
       <div class="mte-top">
         <button class="mte-back" onclick="mteClose()" aria-label="Back">&#8249;</button>
-        <button class="mte-next" onclick="mteSave()" aria-label="Save edits">&#8594;</button>
+        <button class="mte-next" onclick="mteSave()" aria-label="Save edits">Save <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
       </div>
       <div class="mte-stage" id="mteStage">
         <div class="mte-pv" id="mtePv">
@@ -1073,6 +1080,7 @@ a{color:#B0211A}
         <span class="mte-tr-ic">
           <button id="mteUndo" onclick="mteUndo()" aria-label="Undo"><svg class="svic" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 0 1 0 8h-1"/></svg></button>
           <button id="mteRedo" onclick="mteRedo()" aria-label="Redo"><svg class="svic" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a4 4 0 0 0 0 8h1"/></svg></button>
+          <span class="mte-div"></span>
           <button onclick="mteZoom(-1)" aria-label="Zoom out">&#8722;</button>
           <button onclick="mteZoom(1)" aria-label="Zoom in">&#43;</button>
         </span>
@@ -3199,6 +3207,7 @@ async function mteOpen(id){
   document.querySelectorAll('.sw-card video').forEach(x=>{ try{x.pause(); x.removeAttribute('src'); x.load();}catch(e){} });   // fully release the deck's video decoders -> the editor's player isn't starved (no multi-second play stalls)
   mteLockScroll(true);
   mteBindTl();
+  requestAnimationFrame(mteRelayout); setTimeout(mteRelayout,160); setTimeout(mteRelayout,520);   // re-fit once the native webview reports the true width (fixes scrub/zoom/select/waveform)
   // Engine choice: for normal clip lengths the in-memory 480p proxy is FASTER than streaming
   // (instant in-memory seeks, seamless double-buffer cuts, instant play). HLS/Cloudflare only wins
   // for long clips too big to hold in memory -> use it as a fallback (no proxy, or >120s).
@@ -3619,6 +3628,9 @@ function mteExitReorder(commit){
 
 function mteBindTl(){
   if(mteBound)return; mteBound=true;
+  // brief red press-flash on the bottom toolbar buttons (TikTok-style tactile feedback)
+  var _bar=document.getElementById('mteBar');
+  if(_bar){ _bar.addEventListener('pointerdown',function(e){ var b=e.target.closest&&e.target.closest('button'); if(!b)return; b.classList.add('flash'); setTimeout(function(){ b.classList.remove('flash'); },180); }); }
   const scroll=document.getElementById('mteTlScroll');
   let tapX=0,tapY=0,tapT=0,tapMoved=false,tapPinch=false;
   // any finger on the timeline pauses playback so the user can scrub the full length
@@ -3700,6 +3712,13 @@ function mteApplySeek(){
 }
 
 function mteZoom(dir){ if(!mtePpsFit)return; mtePps=Math.min(MTE_PPS_MAX,Math.max(mtePpsFit,mtePps*(dir>0?1.5:1/1.5))); mteRenderTL(); }
+// Re-measure the timeline. The native webview often reports the wrong scroll width at open
+// (splash/safe-area timing), which leaves mtePpsFit stale and breaks scrub/zoom/select/waveform.
+// Recomputing once the real width is available fixes all of them together. Safe to call anytime.
+function mteRelayout(){ var m=document.getElementById('mte'); if(!m||!m.classList.contains('open'))return; try{ mteRenderTL(true); }catch(e){} try{ mteRenderThumbs(); }catch(e){} try{ mteRenderWave(); }catch(e){} }
+window.addEventListener('resize', mteRelayout);
+window.addEventListener('orientationchange', function(){ setTimeout(mteRelayout,200); setTimeout(mteRelayout,600); });
+try{ if(window.visualViewport){ window.visualViewport.addEventListener('resize', mteRelayout); } }catch(e){}
 
 function mteOnTimeUpdate(){ if(!mtePlaying) mteUpdTime(); }   // during playback the 60fps loop (mteAdvance) handles boundaries
 
