@@ -3325,7 +3325,7 @@ function mteAdvance(){
   // still hidden+muted. By the time we hit the cut it has been decoding/playing for LEAD
   // and has arrived exactly on the cut point -- so the swap is warm (no decode hitch) and
   // lands on the right frame (no content skip).
-  const LEAD=0.32;
+  const LEAD=0.5;   // EXPERIMENT: more warm-up so the standby buffer is reliably painting before a cut (smoother joins on light 480p proxies)
   if(!mteRolling && t>=run.end-LEAD){
     const sb=mteVB(); sb.muted=true; const warm=Math.max(0,runs[ni].start-LEAD);
     if(Math.abs(sb.currentTime-warm)>0.04){ try{sb.currentTime=warm;}catch(e){} }
