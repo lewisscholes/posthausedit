@@ -777,7 +777,9 @@ img,a{ -webkit-touch-callout:none; }
     body:not(.ph-client) .ed-admintop{display:flex;position:fixed;top:0;left:0;right:0;z-index:66;align-items:center;gap:12px;background:var(--grad);color:#fff;padding:calc(11px + env(safe-area-inset-top)) 16px 11px}
     body:not(.ph-client) .drawer-btn{display:none}
   }
-</style><link rel="icon" type="image/png" href="favicon-32.png">
+</style><link rel="apple-touch-icon" sizes="180x180" href="posthaus-icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="posthaus-icon-512.png">
+<link rel="icon" type="image/png" href="favicon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style id="ph-brand">
 :root{
@@ -962,10 +964,10 @@ a{color:#B0211A}
         </div>
       </div>
       <div class="tabs">
-        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> New <span class="cnt" id="cnt-new">0</span></button>
+        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> To do <span class="cnt" id="cnt-new">0</span></button>
         <button class="tab" id="tab-edited" onclick="setBankTab('edited')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg> Edited <span class="cnt" id="cnt-edited">0</span></button>
         <button class="tab" id="tab-downloaded" onclick="setBankTab('downloaded')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Downloaded <span class="cnt" id="cnt-downloaded">0</span></button>
-        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Posted <span class="cnt" id="cnt-posted">0</span></button>
+        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Sent to Post <span class="cnt" id="cnt-posted">0</span></button>
       </div>
       <div id="bankEmpty" class="empty hide"><div class="big"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></div><div id="bankEmptyMsg">Nothing here yet.</div></div>
       <div id="bankCards" class="cards"></div>
@@ -1367,7 +1369,7 @@ let state={ user:null, currentView:'dashboard', isAdmin:false,
 
 function esc(s){ return (s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function toast(m,k){ const t=document.createElement('div'); t.className='toast '+(k||''); t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(), k==='err'?6000:3200); }
-function parseNum(s){ if(s==null) return null; s=(''+s).replace(/[£,]/g,'').trim(); if(/M$/.test(s)) return parseFloat(s)*1e6; if(/K$/.test(s)) return parseFloat(s)*1e3; const n=parseFloat(s); return isNaN(n)?null:n; }
+function parseNum(s){ if(s==null) return null; s=(''+s).replace(/[\xa3,]/g,'').trim(); if(/M$/.test(s)) return parseFloat(s)*1e6; if(/K$/.test(s)) return parseFloat(s)*1e3; const n=parseFloat(s); return isNaN(n)?null:n; }
 function showModal(h){ document.getElementById('modalBox').innerHTML=h; document.getElementById('modal').classList.remove('hide'); }
 function closeModal(){ document.getElementById('modal').classList.add('hide'); window.__umFiles=null; }
 document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
@@ -1570,8 +1572,8 @@ async function loadTraining(){
       const badge=r.source==='manual'
         ? '<span style="background:#ecebff;color:#4a3fb8;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700">Taught</span>'
         : '<span style="background:#eef2f6;color:#5f6b76;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700">Edited</span>';
-      const prod=r.product_uid?(' · '+esc(pname(r.product_uid))):'';
-      const ctxShort=ctx?(' · '+(ctx.length>140?ctx.slice(0,140)+'…':ctx)):'';
+      const prod=r.product_uid?(' \xb7 '+esc(pname(r.product_uid))):'';
+      const ctxShort=ctx?(' \xb7 '+(ctx.length>140?ctx.slice(0,140)+'\u2026':ctx)):'';
       return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-weight:700;white-space:pre-wrap">'+esc(r.overlay_text||'')+'</div><button class="btn ghost" style="flex:0 0 auto;padding:3px 8px" onclick="deleteTrMem(\''+r.id+'\')">Remove</button></div><div class="h-sub" style="margin-top:5px">'+badge+prod+ctxShort+'</div></div>';
     }).join('');
   }catch(e){ toast('Could not load memory: '+(e.message||e),'err'); }
@@ -1652,7 +1654,7 @@ async function loadDashboard(refresh){
   state.results=data||[];
   // top-line stats now reflect OUR OWN activity (not scraped data)
   await renderOwnMetrics();
-  document.getElementById('dashSub').textContent=state.results.length+' competitor videos · deduped, updated on each re-scrape';
+  document.getElementById('dashSub').textContent=state.results.length+' competitor videos \xb7 deduped, updated on each re-scrape';
   loadJobs();
   renderDash();
   await loadTicks();
@@ -1991,14 +1993,14 @@ async function tfMarkOwned(pid){
   const {error}=await sb.from('products').update({owned:true}).eq('id',pid);
   if(error){ toast('Failed: '+error.message,'err'); return; }
   const p=tfProduct(pid); if(p)p.owned=true;
-  toast('Marked owned — added to Products','ok'); renderToFilm();
+  toast('Marked owned \u2014 added to Products','ok'); renderToFilm();
 }
 async function tfTogglePriority(pid){
   const p=tfProduct(pid); const np=!(p&&p.priority);
   const {error}=await sb.from('products').update({priority:np}).eq('id',pid);
   if(error){ toast('Failed','err'); return; }
   if(p)p.priority=np;
-  toast(np?'Priority on — its uploads skip the edit queue':'Priority off','ok'); renderToFilm();
+  toast(np?'Priority on \u2014 its uploads skip the edit queue':'Priority off','ok'); renderToFilm();
 }
 
 // ---------- PRODUCTS view (owned vs not owned) ----------
@@ -2015,12 +2017,12 @@ function renderProductsView(){
 }
 function prodRow(p){
   const link=p.source_link||p.listing_url||'';
-  const linkHtml=link?'<a href="'+esc(link)+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#1850c4">link ↗</a>':'<span class="h-sub" style="font-size:12px">no link</span>';
+  const linkHtml=link?'<a href="'+esc(link)+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#1850c4">link \u2197</a>':'<span class="h-sub" style="font-size:12px">no link</span>';
   return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap">'
-    +'<div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+(p.priority?' <span style="color:#d8961e">★</span>':'')+'</div>'
+    +'<div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+(p.priority?' <span style="color:#d8961e">\u2605</span>':'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-top:5px">'+linkHtml+'<button class="btn ghost sm" style="padding:3px 8px" onclick="setProductLinkModal(\''+p.id+'\')">'+(link?'Edit link':'Add link')+'</button></div></div>'
-    +'<button class="btn ghost sm" onclick="togglePriority(\''+p.id+'\')">'+(p.priority?'★ Priority':'☆ Priority')+'</button>'
-    +'<button class="btn sm" onclick="toggleOwned(\''+p.id+'\')">'+(p.owned?'Owned ✓':'Mark owned')+'</button>'
+    +'<button class="btn ghost sm" onclick="togglePriority(\''+p.id+'\')">'+(p.priority?'\u2605 Priority':'\u2606 Priority')+'</button>'
+    +'<button class="btn sm" onclick="toggleOwned(\''+p.id+'\')">'+(p.owned?'Owned \u2713':'Mark owned')+'</button>'
     +'</div>';
 }
 async function toggleOwned(id){ const p=tfProduct(id); const v=!(p&&p.owned); const {error}=await sb.from('products').update({owned:v}).eq('id',id); if(error){toast('Failed','err');return;} if(p)p.owned=v; toast(v?'Marked owned':'Marked not owned','ok'); renderProductsView(); }
@@ -2155,7 +2157,7 @@ function scVidRow(v){
     +(hasTr?'<span class="tf-badge" style="background:#e7f7ee;border-color:#bfe6cf;color:#0f6e56">transcript</span>':'')
     +(hasOv?'<span class="tf-badge" style="background:#f0ecff;border-color:#d9cffb;color:#4a3fb8">overlay</span>':'');
   var prod=scProdName(v.product_uid);
-  var watch=v.tiktok_url?'<a class="tf-watch" href="'+esc(v.tiktok_url)+'" target="_blank" rel="noopener">Open ↗</a>':'';
+  var watch=v.tiktok_url?'<a class="tf-watch" href="'+esc(v.tiktok_url)+'" target="_blank" rel="noopener">Open \u2197</a>':'';
   return '<div class="card" style="padding:12px 14px;margin-bottom:9px">'
     +'<div style="display:flex;justify-content:space-between;gap:10px"><div style="font-weight:700;font-size:14px">'+esc(v.handle||'(video)')+'</div>'+watch+'</div>'
     +(prod?'<div class="h-sub" style="font-size:12px;margin-top:2px">'+esc(prod)+'</div>':'')
@@ -2267,7 +2269,7 @@ function renderDashTable(rows){
   rows.forEach(r=>{ const tr=document.createElement('tr'); cols.forEach(c=>{ const td=document.createElement('td'); if(c.cls)td.className=c.cls;
     if(c.k==='tiktokUrl') td.innerHTML=r.tiktokUrl?`<a href="${esc(r.tiktokUrl)}" target="_blank"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg> Watch</a>`:'';
     else if(c.k==='videoType'){ const cl=r.videoType==='speech'?'speech':r.videoType==='music+captions'?'music':'unknown'; td.innerHTML=r.videoType?`<span class="pill ${cl}">${esc(r.videoType)}</span>`:''; }
-    else if(c.k==='product') td.innerHTML=r.product?`<span class="pill blue">${esc(r.product)}</span>`:'<span class="pill gray">—</span>';
+    else if(c.k==='product') td.innerHTML=r.product?`<span class="pill blue">${esc(r.product)}</span>`:'<span class="pill gray">\u2014</span>';
     else if(c.overlay) td.innerHTML=`<div class="ov">${esc(r[c.k])}</div>`;
     else { td.textContent=r[c.k]; if(c.cls==='col-trunc'||c.cls==='col-med') td.title=r[c.k]; }
     tr.appendChild(td); }); body.appendChild(tr); });
@@ -2282,9 +2284,9 @@ function renderDashCards(rows){
     return `<div class="vcard">
       ${vid?`<div class="vthumb" id="emb_${vid}" data-url="${esc(r.tiktokUrl)}" onclick="playEmbed('${vid}',this)"><img class="vthumb-img" id="th_${vid}" referrerpolicy="no-referrer" alt=""><span class="play"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg></span></div>`:''}
       <div class="vbody">
-        <div class="vtop"><div class="vh">${esc(r.handle)||'—'}</div>${r.videoType?`<span class="pill ${tc}">${esc(r.videoType)}</span>`:''}</div>
+        <div class="vtop"><div class="vh">${esc(r.handle)||'\u2014'}</div>${r.videoType?`<span class="pill ${tc}">${esc(r.videoType)}</span>`:''}</div>
         ${r.product?`<div><span class="vtag">${esc(r.product)}</span></div>`:''}
-        <div class="vstats"><span><b>${esc(r.views||'—')}</b> views</span><span><b>${esc(r.likes||'—')}</b> likes</span><span><b>${esc(r.comments||'—')}</b> comments</span>${r.creatorGMV?`<span>GMV <b>${esc(r.creatorGMV)}</b></span>`:''}</div>
+        <div class="vstats"><span><b>${esc(r.views||'\u2014')}</b> views</span><span><b>${esc(r.likes||'\u2014')}</b> likes</span><span><b>${esc(r.comments||'\u2014')}</b> comments</span>${r.creatorGMV?`<span>GMV <b>${esc(r.creatorGMV)}</b></span>`:''}</div>
         ${overlay}
         ${r.caption?`<div class="copybox copytext" data-copy="${esc(r.caption)}" data-label="description" onclick="copyFromEl(event,this)">${esc(r.caption)}<span class="copyhint"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Tap to copy description</span></div>`:''}
         ${r.tiktokUrl?`<a href="${esc(r.tiktokUrl)}" target="_blank" style="font-size:13px;margin-top:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg> Watch on TikTok</a>`:''}
@@ -2341,7 +2343,7 @@ function openScrapeModal(){
     <input id="sc_product" list="sc_prodlist" placeholder="e.g. Glycolic Acid Body Stick" autocomplete="off">
     <datalist id="sc_prodlist">${opts}</datalist>
     <div class="row3">
-      <div><label>Social1 product URL (or ID)</label><input id="sc_url" placeholder="https://www.social1.ai/products/…"></div>
+      <div><label>Social1 product URL (or ID)</label><input id="sc_url" placeholder="https://www.social1.ai/products/\u2026"></div>
       <div style="flex:0 0 110px"><label>Videos</label><input id="sc_records" type="number" min="12" max="72" value="24"></div>
     </div>
     <div class="row3">
@@ -2391,11 +2393,11 @@ async function queueScrape(){
     const ends=days>0 ? new Date(Date.now()+days*86400000).toISOString() : null;
     const {error}=await sb.from('scrape_schedules').insert({ product_uid:prodId, product_url:url, product_id:productIdFromUrl(url), max_records:n, every_minutes:every, ends_at:ends, created_by:displayName(state.user) });
     if(error){ toast('Schedule failed: '+error.message,'err'); document.getElementById('sc_go').disabled=false; return; }
-    toast('Scheduled — first scrape runs shortly, then on repeat','ok');
+    toast('Scheduled \u2014 first scrape runs shortly, then on repeat','ok');
   } else {
     const {error}=await sb.from('scrape_jobs').insert({ product_url:url, product_id:productIdFromUrl(url), max_records:n, status:'queued', product_uid:prodId, requested_by:displayName(state.user) });
     if(error){ toast('Queue failed: '+error.message,'err'); document.getElementById('sc_go').disabled=false; return; }
-    toast('Queued — the local runner will pick it up','ok');
+    toast('Queued \u2014 the local runner will pick it up','ok');
   }
   await loadProducts();
   document.getElementById('sc_url').value=''; document.getElementById('sc_go').disabled=false;
@@ -2407,14 +2409,14 @@ function fmtEvery(m){ if(m===60)return 'hour'; if(m===1440)return 'day'; if(m%14
 function renderSchedulesInto(id){
   const body=document.getElementById(id); if(!body) return;
   if(!state.schedules||!state.schedules.length){ body.innerHTML='<tr><td colspan="4" style="color:var(--muted)">No repeat schedules.</td></tr>'; return; }
-  body.innerHTML=state.schedules.map(s=>`<tr><td>${esc(prodName(s.product_uid)||s.product_id||'—')}</td><td>every ${fmtEvery(s.every_minutes)}</td><td>${s.ends_at?s.ends_at.slice(0,10):'until stopped'}</td><td><button class="btn ghost sm" onclick="stopSchedule('${s.id}')">Stop</button></td></tr>`).join('');
+  body.innerHTML=state.schedules.map(s=>`<tr><td>${esc(prodName(s.product_uid)||s.product_id||'\u2014')}</td><td>every ${fmtEvery(s.every_minutes)}</td><td>${s.ends_at?s.ends_at.slice(0,10):'until stopped'}</td><td><button class="btn ghost sm" onclick="stopSchedule('${s.id}')">Stop</button></td></tr>`).join('');
 }
 async function stopSchedule(id){ const {error}=await sb.from('scrape_schedules').update({active:false}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Schedule stopped','ok'); await loadSchedules(); renderSchedulesInto('sc_scheds'); }
 async function loadJobs(){ const {data}=await sb.from('scrape_jobs').select('*').order('created_at',{ascending:false}).limit(40); state.jobs=data||[]; }
 function renderJobsInto(id){
   const body=document.getElementById(id); if(!body) return;
   if(!state.jobs.length){ body.innerHTML='<tr><td colspan="5" style="color:var(--muted)">No jobs yet.</td></tr>'; return; }
-  body.innerHTML=state.jobs.slice(0,12).map(j=>{ const cl=j.status==='done'?'green':j.status==='running'?'amber':j.status==='error'?'':'gray'; const st=j.status==='error'?`<span class="pill" style="background:#fee2e2;color:#991b1b">error</span>`:`<span class="pill ${cl}">${esc(j.status)}</span>`; return `<tr><td>${st}</td><td>${esc(prodName(j.product_uid)||j.product_id||'—')}</td><td>${j.video_count!=null?j.video_count:(j.max_records+' max')}</td><td>${(j.created_at||'').slice(0,16).replace('T',' ')}</td><td style="text-align:right"><button class="btn ghost sm danger" title="Delete this scrape and its results" onclick="deleteScrape('${j.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"></use></svg></button></td></tr>`; }).join('');
+  body.innerHTML=state.jobs.slice(0,12).map(j=>{ const cl=j.status==='done'?'green':j.status==='running'?'amber':j.status==='error'?'':'gray'; const st=j.status==='error'?`<span class="pill" style="background:#fee2e2;color:#991b1b">error</span>`:`<span class="pill ${cl}">${esc(j.status)}</span>`; return `<tr><td>${st}</td><td>${esc(prodName(j.product_uid)||j.product_id||'\u2014')}</td><td>${j.video_count!=null?j.video_count:(j.max_records+' max')}</td><td>${(j.created_at||'').slice(0,16).replace('T',' ')}</td><td style="text-align:right"><button class="btn ghost sm danger" title="Delete this scrape and its results" onclick="deleteScrape('${j.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"></use></svg></button></td></tr>`; }).join('');
 }
 async function deleteScrape(jobId){
   const j=(state.jobs||[]).find(x=>x.id===jobId); if(!j)return;
@@ -2442,8 +2444,8 @@ async function loadBank(){
   state.activeEdits=new Set((ajobs||[]).map(j=>j.video_id));
   populateViewAs(); renderBank();
 }
-function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.viewAs||me.id; }
-function onViewAsChange(){ state.viewAs=val('viewAs'); renderBank(); }
+function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.creatorFilter||state.viewAs||me.id; }
+function onViewAsChange(){ var v=val('viewAs')||''; state.viewAs=v; state.creatorFilter=(state.user&&v===state.user.id)?null:(v||null); loadBank(); }
 function viewUser(){ return state.viewAs||(state.user&&state.user.id); }
 function isSelf(){ return viewUser()===(state.user&&state.user.id); }
 function isPosted(v){ return !!v.posted_at; }
@@ -2625,8 +2627,8 @@ function bankCard(v){
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
         ${self?`<div class="menu-wrap"><button class="dots" onclick="toggleMenu(event,'${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-more"></use></svg></button><div class="menu hide" id="menu_${v.id}"></div></div>`:''}</div>
       <div class="vstats">${v.product_uid?`<span class="vtag">${esc(prodName(v.product_uid))}</span>`:''}<span>${size}</span><span>${(v.created_at||'').slice(0,10)}</span></div>
-      ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'…':''}</div>`:''}
-      ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' · '+esc(v.posted_by)):''}</div>`:''}
+      ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'\u2026':''}</div>`:''}
+      ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' \xb7 '+esc(v.posted_by)):''}</div>`:''}
       <div class="vrow"><button class="btn sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
     </div>`;
   return card;
@@ -2674,7 +2676,7 @@ async function hydrateBankUrls(){ for(const v of state.videos){ if(signed[v.id])
 function renderBankVideos(){ const b=bankBuckets(); const list=b[state.bankTab]; if(list.length) paintBank(list); }
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints>1); }
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
-async function fileDownload(v,id){ toast('Preparing download…'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:v.filename}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=v.filename; a.click(); await recordDownload(id); }
+async function fileDownload(v,id){ toast('Preparing download\u2026'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:v.filename}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=v.filename; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
   const v=state.videos.find(x=>x.id===id); if(!v)return;
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
@@ -2683,7 +2685,7 @@ async function downloadVideo(id){
   if(isMobileDevice() && navigator.canShare){
     let file=null;
     try{
-      toast('Preparing video…');
+      toast('Preparing video\u2026');
       const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300); if(error) throw error;
       const blob=await (await fetch(data.signedUrl)).blob();
       file=new File([blob], v.filename||'video.mp4', {type: blob.type||'video/mp4'});
@@ -2708,7 +2710,7 @@ function promptShare(file,id){
 }
 async function markPosted(id){ const {error}=await sb.from('ed_videos').update({posted_at:new Date().toISOString(),posted_by:displayName(state.user)}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Marked posted (shared)','ok'); loadBank(); }
 async function unpost(id){ const {error}=await sb.from('ed_videos').update({posted_at:null,posted_by:null}).eq('id',id); if(error){toast('Failed','err');return;} toast('Unposted','ok'); loadBank(); }
-async function editVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; const row={video_id:id,storage_path:v.storage_path,filename:v.filename,folder_id:v.folder_id,product_uid:v.product_uid,requested_by:displayName(state.user)}; const {error}=await sb.from('ed_edit_jobs').insert(row); if(error){toast('Could not queue edit: '+error.message,'err');return;} toast('Queued for editing — it will appear in the Editor for approval','ok'); }
+async function editVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; const row={video_id:id,storage_path:v.storage_path,filename:v.filename,folder_id:v.folder_id,product_uid:v.product_uid,requested_by:displayName(state.user)}; const {error}=await sb.from('ed_edit_jobs').insert(row); if(error){toast('Could not queue edit: '+error.message,'err');return;} toast('Queued for editing \u2014 it will appear in the Editor for approval','ok'); }
 function openMoveModal(id){ const opts=state.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(''); showModal(`<h3>Change product</h3><label>Product</label><select id="mv_prod">${opts}</select><div class="actions"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="moveVideo('${id}')">Save</button></div>`); }
 async function moveVideo(id){ const p=val('mv_prod')||null; const {error}=await sb.from('ed_videos').update({product_uid:p}).eq('id',id); if(error){toast('Failed','err');return;} closeModal(); toast('Updated','ok'); loadBank(); }
 function openVideoTypeModal(id){
@@ -2732,9 +2734,9 @@ async function applyVideoType(id,v){
 async function deleteVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; if(!confirm('Delete this video permanently?'))return; await sb.storage.from(BUCKET).remove([v.storage_path]); const {error}=await sb.from('ed_videos').delete().eq('id',id); if(error){toast('Failed','err');return;} delete signed[id]; toast('Deleted','ok'); loadBank(); }
 
 // ---------- EDITOR (pending approval) ----------
-// ──────────────────────────────────────────────────────
+// ------------------------------------------------------
 //  SWIPE EDITOR
-// ──────────────────────────────────────────────────────
+// ------------------------------------------------------
 let swVids=[], swIdx=0, swDragging=false, swStartX=0, swStartY=0, swCurX=0, swCurY=0;
 let epCurrentId=null, epMuted=false, epTextPos={x:50,y:72}, epBg='none', epDragActive=false, epDragOX=0, epDragOY=0;
 
@@ -2794,7 +2796,7 @@ function swRender(){
           const sc=1-depth*0.035; const ty=depth*9;
           return `<div class="sw-card ${isTop?'is-top':''}" data-id="${v.id}" data-idx="${swIdx+i}"
             style="transform:scale(${sc}) translateY(${ty}px);z-index:${10-depth};${!isTop?'pointer-events:none':''}">
-            ${signed[v.id]?`<video src="${signed[v.id]}" autoplay muted loop playsinline></video>`:`<div class="sw-card-ph">Loading…</div>`}
+            ${signed[v.id]?`<video src="${signed[v.id]}" autoplay muted loop playsinline></video>`:`<div class="sw-card-ph">Loading\u2026</div>`}
             ${swOverlayHtml(v)}
           </div>`;
         }).join('')}
@@ -3065,7 +3067,7 @@ function epToggleMute(){
 function epSwapVideo(){ document.getElementById('epSwapInput')?.click(); }
 async function epSwapVideoFile(e){
   const file=e.target.files?.[0]; if(!file||!epCurrentId)return;
-  toast('Uploading swap…');
+  toast('Uploading swap\u2026');
   try{
     await tusUpload(file,'swap/'+Date.now()+'_'+file.name.replace(/[^\w.\-]+/g,'_'),null);
     toast('Swapped','ok');
@@ -4081,7 +4083,7 @@ async function mteAddCaptions(){
   if(mteTexts.some(o=>o.type==='caption')){ toast('Captions already added -- tap a word to edit','ok'); return; }
   let tr=v.transcript; if(typeof tr==='string'){ try{ tr=JSON.parse(tr); }catch(e){ tr=null; } }
   if(!(tr&&tr.length)){
-    toast('Fetching transcript…');
+    toast('Fetching transcript\u2026');
     try{ const {data}=await sb.from('ed_videos').select('transcript').eq('id',mteId).single(); if(data&&data.transcript){ tr=(typeof data.transcript==='string')?JSON.parse(data.transcript):data.transcript; v.transcript=tr; } }catch(e){}
   }
   if(!(tr&&tr.length)){ toast('Captions are still being generated for this clip -- try again in a moment','err'); return; }
@@ -4332,7 +4334,7 @@ async function openScheduler(id){
   var autoCap=await tfAutoCaption(v);
   window.schedSelAcct = accs.length ? ((accs.find(function(a){return a.account_tag===preferred;})||accs[0]).account_tag) : '';
   var pills = accs.length
-    ? '<div id="schedAcctPills" style="display:flex;flex-wrap:wrap;gap:8px">'+accs.map(function(a){return '<button type="button" class="schp'+(a.account_tag===window.schedSelAcct?' active':'')+'" data-tag="'+esc(a.account_tag)+'" onclick="schedPick(this)">'+esc(a.account_tag)+'</button>';}).join('')+'</div>'
+    ? '<div id="schedAcctPills" style="display:flex;flex-wrap:wrap;gap:8px">'+accs.map(function(a){return '<button type="button" class="schp'+(a.account_tag===window.schedSelAcct?' active':'')+'" data-tag="'+esc(a.account_tag)+'" onclick="schedPickAcct(this)">'+esc(a.account_tag)+'</button>';}).join('')+'</div>'
     : '<div class="h-sub" style="font-size:13px">No TikTok account connected. Add one in Content Schedule first.</div>';
   var inp='width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#fff;box-sizing:border-box';
   var lbl='font-size:13px;font-weight:600;display:block;margin:14px 0 7px';
@@ -4361,7 +4363,7 @@ async function tfAutoCaption(v){
   if(!hook && v&&v.caption_suggested) hook=String(v.caption_suggested).replace(/\s+/g,' ').trim();
   return (hook?hook+'\n\n':'')+'#tiktokshop #fyp #foryou';
 }
-function schedPick(btn){
+function schedPickAcct(btn){
   window.schedSelAcct = btn.dataset.tag;
   var wrap=document.getElementById('schedAcctPills');
   if(wrap) [].forEach.call(wrap.children,function(b){ b.classList.toggle('active', b===btn); });
@@ -4615,7 +4617,7 @@ function renderOverlays(){
   const sugg=state.suggestions||[], jobs=state.aijobs||[];
   empty.classList.toggle('hide', sugg.length>0 || jobs.length>0);
   let html='';
-  if(jobs.length){ html+='<div class="card"><div style="font-weight:700;margin-bottom:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hourglass"></use></svg> Generating…</div>'+jobs.map(j=>`<div class="h-sub">${esc(ovName(j.video_id))} — ${esc(j.message||j.status)}</div>`).join('')+'</div>'; }
+  if(jobs.length){ html+='<div class="card"><div style="font-weight:700;margin-bottom:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hourglass"></use></svg> Generating\u2026</div>'+jobs.map(j=>`<div class="h-sub">${esc(ovName(j.video_id))} \u2014 ${esc(j.message||j.status)}</div>`).join('')+'</div>'; }
   html+=sugg.map(ovCard).join('');
   wrap.innerHTML=html;
 }
@@ -4626,9 +4628,9 @@ function ovCard(s){
     const insp=(o.inspired_by||[]).join(', ');
     const isRej=rej.has(i);
     return `<div class="opt${isRej?' rej':''}">
-      <div class="opt-h">Option ${i+1}${isRej?' · rejected':''}</div>
+      <div class="opt-h">Option ${i+1}${isRej?' \xb7 rejected':''}</div>
       <div class="ovls">${ov||'<span class="h-sub">(no overlay text)</span>'}</div>
-      <div class="desc"><b>Description:</b> ${esc(o.description||'—')}</div>
+      <div class="desc"><b>Description:</b> ${esc(o.description||'\u2014')}</div>
       ${o.rationale?`<div class="h-sub"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"></use></svg> ${esc(o.rationale)}</div>`:''}
       ${insp?`<div class="h-sub"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-corner"></use></svg> from: ${esc(insp)}</div>`:''}
       <div class="vrow">
@@ -4640,27 +4642,27 @@ function ovCard(s){
   const allRej = opts.length>0 && rej.size>=opts.length;
   return `<div class="card">
     <div style="font-weight:700">${esc(ovName(s.video_id))}</div>
-    <div class="h-sub" style="margin-bottom:11px">${esc(prodName(s.product_uid)||'')} · ${opts.length} ideas · ${esc(s.model||'')}</div>
+    <div class="h-sub" style="margin-bottom:11px">${esc(prodName(s.product_uid)||'')} \xb7 ${opts.length} ideas \xb7 ${esc(s.model||'')}</div>
     <div class="opts">${body}</div>
     ${allRej?`<div style="margin-top:11px"><button class="btn" onclick="regenSuggestions('${s.id}','${s.video_id}','${s.product_uid||''}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Regenerate</button></div>`:''}
   </div>`;
 }
 async function approveSuggestion(id,i){
   const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{};
-  const why=prompt('Nice — what worked about this one? (trains future suggestions)'); if(why===null)return;
+  const why=prompt('Nice \u2014 what worked about this one? (trains future suggestions)'); if(why===null)return;
   await sb.from('caption_feedback').insert({suggestion_id:id,video_id:s.video_id,product_uid:s.product_uid,option_index:i,decision:'approved',chosen_overlay:o.overlay||null,chosen_description:o.description||null,reason:why,created_by:displayName(state.user)});
   await sb.from('caption_suggestions').update({status:'decided'}).eq('id',id);
   if(s.video_id) await sb.from('ed_videos').update({caption_final:o.description||null,caption_suggested:JSON.stringify(o.overlay||[])}).eq('id',s.video_id);
-  toast('Approved — saved to the knowledge base','ok'); loadOverlays();
+  toast('Approved \u2014 saved to the knowledge base','ok'); loadOverlays();
 }
 async function rejectSuggestion(id,i){
   const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{};
-  const why=prompt("Got it — why didn't this one land? (trains future suggestions)"); if(why===null)return;
+  const why=prompt("Got it \u2014 why didn't this one land? (trains future suggestions)"); if(why===null)return;
   await sb.from('caption_feedback').insert({suggestion_id:id,video_id:s.video_id,product_uid:s.product_uid,option_index:i,decision:'rejected',chosen_overlay:o.overlay||null,chosen_description:o.description||null,reason:why,created_by:displayName(state.user)});
-  toast('Noted — thanks','ok'); loadOverlays();
+  toast('Noted \u2014 thanks','ok'); loadOverlays();
 }
 function copyOpt(id,i){ const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{}; const t=((o.overlay||[]).join('\n'))+(o.description?('\n\n'+o.description):''); copyText(t,'suggestion'); }
-async function regenSuggestions(sid,vid,prod){ await sb.from('caption_suggestions').update({status:'decided'}).eq('id',sid); await sb.from('ai_jobs').insert({video_id:vid,product_uid:prod||null,status:'queued',requested_by:displayName(state.user)}); toast('Regenerating…','ok'); loadOverlays(); }
+async function regenSuggestions(sid,vid,prod){ await sb.from('caption_suggestions').update({status:'decided'}).eq('id',sid); await sb.from('ai_jobs').insert({video_id:vid,product_uid:prod||null,status:'queued',requested_by:displayName(state.user)}); toast('Regenerating\u2026','ok'); loadOverlays(); }
 
 // ---------- UPLOAD (per-video manager, background) ----------
 function tusUpload(file,objectPath,onProgress){ return new Promise(async(res,rej)=>{ if(!window.tus)return rej(new Error('tus')); let token; try{const{data}=await sb.auth.getSession();token=data.session&&data.session.access_token;}catch(e){} if(!token)return rej(new Error('no-session')); const up=new tus.Upload(file,{endpoint:SUPABASE_URL+'/storage/v1/upload/resumable',retryDelays:[0,1000,3000,5000,10000],headers:{authorization:'Bearer '+token,apikey:SUPABASE_KEY,'x-upsert':'true'},uploadDataDuringCreation:false,removeFingerprintOnSuccess:true,chunkSize:1*1024*1024,metadata:{bucketName:BUCKET,objectName:objectPath,contentType:'video/mp4',cacheControl:'3600'},onError:rej,onProgress:(s,t)=>{if(onProgress)onProgress(s,t);},onSuccess:res}); up.findPreviousUploads().then(p=>{if(p&&p.length)up.resumeFromPreviousUpload(p[0]);up.start();}).catch(()=>up.start()); }); }
@@ -4703,7 +4705,7 @@ async function bgUpload(jobs){
   drawBg();
 }
 function openUploadManager(preFiles){
-  if(!state.products.length){ toast('Create a product first (run a scrape, or it’s created on the fly)','err'); }
+  if(!state.products.length){ toast('Create a product first (run a scrape, or it\u2019s created on the fly)','err'); }
   window.__umFiles=(preFiles&&preFiles.length)?[...preFiles]:[];
   const opts=state.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   showModal(`<h3>Upload videos</h3>
@@ -5031,7 +5033,7 @@ async function enterApp(){ state.viewAs=state.user.id; ['authName','authEmail','
 function showLogin(){ state.user=null; if(authMode==='signup')toggleAuthMode(); setView('login'); }
 async function refreshAuth(){ const{data}=await sb.auth.getSession(); if(data.session) await gateBySession(data.session); else showLogin(); }
 async function doLogin(){ authMsg(''); const email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!email||!pw){authMsg('Enter email and password');return;} const{data,error}=await sb.auth.signInWithPassword({email,password:pw}); if(error){authMsg(error.message);return;} gateBySession(data.session); }
-async function doSignup(){ authMsg(''); const name=val('authName').trim(),email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!name){authMsg('Enter your first name');return;} if(!email||!pw){authMsg('Enter email and password');return;} if(pw.length<6){authMsg('Password ≥ 6 chars');return;} const{data,error}=await sb.auth.signUp({email,password:pw}); if(error){authMsg(error.message);return;} let session=data.session; if(!session){const r=await sb.auth.signInWithPassword({email,password:pw});session=r.data&&r.data.session;} if(session){ await sb.from('profiles').upsert({id:session.user.id,email:session.user.email,first_name:name,status:'pending',last_seen:new Date().toISOString()}); state.user={id:session.user.id,email:session.user.email,first_name:name,status:'pending',role:'user'}; setView('pending'); } else authMsg('Request submitted — log in once approved.'); }
+async function doSignup(){ authMsg(''); const name=val('authName').trim(),email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!name){authMsg('Enter your first name');return;} if(!email||!pw){authMsg('Enter email and password');return;} if(pw.length<6){authMsg('Password \u2265 6 chars');return;} const{data,error}=await sb.auth.signUp({email,password:pw}); if(error){authMsg(error.message);return;} let session=data.session; if(!session){const r=await sb.auth.signInWithPassword({email,password:pw});session=r.data&&r.data.session;} if(session){ await sb.from('profiles').upsert({id:session.user.id,email:session.user.email,first_name:name,status:'pending',last_seen:new Date().toISOString()}); state.user={id:session.user.id,email:session.user.email,first_name:name,status:'pending',role:'user'}; setView('pending'); } else authMsg('Request submitted \u2014 log in once approved.'); }
 async function doLogout(){ await sb.auth.signOut(); showLogin(); }
 function promptName(){ showModal(`<h3>Welcome! What's your first name?</h3><input id="nm" placeholder="First name"><div class="actions"><button class="btn" onclick="saveMyName()">Save</button></div>`); setTimeout(()=>{const e=document.getElementById('nm');if(e)e.focus();},60); }
 async function saveMyName(){ const n=val('nm').trim(); if(!n)return; await sb.from('profiles').update({first_name:n}).eq('id',state.user.id); state.user.first_name=n; document.getElementById('sideName').textContent=displayName(state.user)+(state.isAdmin?' (admin)':''); closeModal(); toast('Thanks, '+n+'!','ok'); }
@@ -5606,7 +5608,7 @@ async function loadEditor(){
   list=list.filter(function(v){ return !(v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready'); });   // delivered-to-creator clips leave the editor deck
   list.forEach(function(v){ var er=editedByRoot[v.id]; if(er){ v._editedId=er.id; v._editedAt=er.created_at; } v._srcProxy=null; v._srcES=null; v._rootId=null; });
   try{ var dres=await sb.from('ed_video_downloads').select('video_id').eq('user_id',state.user.id); var dset=new Set((dres.data||[]).map(function(d){ return d.video_id; })); list=list.filter(function(v){ return (v._editedId||(v.edit_state&&v.edit_state.segments))?true:!dset.has(v.id); }); }catch(e){}
-  list.sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });   // oldest first -> front of the queue (FIFO), so nothing goes out late
+  list.sort(function(a,b){ return new Date(b.created_at||0)-new Date(a.created_at||0); });   // newest first -> latest uploads surface at the front of the stack so they're never buried behind older clips
   swVids=list; swIdx=0;
   for(var i=0;i<Math.min(3,swVids.length);i++){ var v=swVids[i]; if(!signed[v.id]){ var s=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); if(s&&s.data&&s.data.signedUrl) signed[v.id]=s.data.signedUrl; } }
   swRender();
