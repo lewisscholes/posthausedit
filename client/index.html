@@ -1100,6 +1100,7 @@ a{color:#B0211A}
           <button onclick="mteDeleteSeg()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>Delete</button>
           <button onclick="mtePickOverlay()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span>Overlay</button>
           <button onclick="mteAddCaptions()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><line x1="6" y1="11" x2="11" y2="11"/><line x1="13.5" y1="11" x2="18" y2="11"/><line x1="6" y1="14.5" x2="9.5" y2="14.5"/><line x1="12" y1="14.5" x2="18" y2="14.5"/></svg></span>Captions</button>
+          <button onclick="ASD.run()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><line x1="20" y1="4" x2="8.5" y2="15.5"/><line x1="20" y1="20" x2="8.5" y2="8.5"/></svg></span>Auto-cut</button>
         </div>
         <input id="mteOvFile" type="file" accept="image/*" style="display:none" onchange="mteOnOverlayFile(this.files&&this.files[0]); this.value='';">
       </div>
@@ -3207,6 +3208,116 @@ function mteAutoTrimSchedule(){
     setTimeout(attempt,400);
   })();
 }
+// ===== Auto Silence & Dead Space Detection Layer (non-destructive, session-based, undoable) =====
+// Builds a structured edit_plan from the already-computed audio peaks (mteWavePeaks). Nothing is
+// written to Supabase: the plan lives in memory only. "Apply" maps the cuts onto the existing
+// mteSegments model (the proven path the render worker already understands -- no lockstep change),
+// snapshotting via mtePushUndo so the normal Undo button restores the exact prior state. Preview
+// draws ghost bands over the timeline WITHOUT touching mteSegments.
+window.ASD={
+  config:{ enabled:true, silenceRatio:0.09, minSilence:0.4, deadSpace:1.2, padTail:0, padLead:0 },  // TikTok-tight: cut lands exactly at the speech edge so the next word starts as the last one ends (the boundary speech peaks are kept either way, so onsets are not clipped)
+  previewOn:false, _sid:null, _plan:null, _sessions:{},
+  // ---- silence_detector + dead_space_detector ----
+  silence_detector:{
+    detect:function(peaks,dur){
+      if(!peaks||!peaks.length||!(dur>0)) return [];
+      const n=peaks.length; let mx=0; for(let i=0;i<n;i++){ if(peaks[i]>mx) mx=peaks[i]; }
+      if(mx<=0) return [];
+      const c=window.ASD.config, thr=mx*c.silenceRatio, spp=dur/n, out=[];
+      let i=0;
+      while(i<n){
+        if(peaks[i]>thr){ i++; continue; }
+        let j=i, sum=0, cnt=0; while(j<n&&peaks[j]<=thr){ sum+=peaks[j]; cnt++; j++; }
+        const L=(j-i)*spp;
+        if(L>=c.minSilence){
+          let st=i*spp+c.padTail, en=Math.min(dur,j*spp)-c.padLead;   // hug the speech: minimal tail after they stop, slightly more lead-in to protect the next word's onset
+          if(en-st>0.05){
+            const reason=(L>=c.deadSpace)?'dead_space':'silence';
+            const depth=1-(cnt?sum/cnt:0)/(thr||1);            // how quiet, 0..1
+            const conf=Math.max(0,Math.min(1, 0.55+Math.min(0.30,(L-c.minSilence)/3)+0.15*depth));
+            out.push({ start:+st.toFixed(2), end:+en.toFixed(2), reason:reason, confidence:+conf.toFixed(2) });
+          }
+        }
+        i=j;
+      }
+      return out;
+    }
+  },
+  // ---- edit_plan_service ----
+  edit_plan_service:{
+    build:function(videoId,sessionId,regions){
+      return { videoId:videoId, sessionId:sessionId, createdAt:Date.now(),
+        autoEdits:regions.map(function(r){ return { type:'cut', startTime:r.start, endTime:r.end, reason:r.reason, confidence:r.confidence }; }) };
+    }
+  },
+  // ---- session_manager (snapshot-based undo; no diff reconstruction) ----
+  session_manager:{
+    createAutoEditSession:function(){
+      const sid='asd_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+      window.ASD._sessions[sid]={ snapshot:mteSegments.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; }), applied:false };
+      return sid;
+    },
+    applyEditPlan:function(sid){
+      const A=window.ASD, ses=A._sessions[sid]; if(!ses||!A._plan) return;
+      mtePushUndo();                                   // global Undo also restores this
+      mteSegments=A._subtract(mteSegments,A._plan.autoEdits);
+      if(!mteSegments.length) mteSegments=[{start:0,end:mteDuration,zoom:1}];
+      ses.applied=true; A.previewOn=false; A.clearGhosts(); mteSelSeg=-1;
+      try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}
+    },
+    undoEditPlan:function(sid){
+      const A=window.ASD, ses=A._sessions[sid]; if(!ses) return;
+      mteSegments=ses.snapshot.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; });   // exact snapshot, full rollback
+      ses.applied=false; A.previewOn=false; A.clearGhosts(); mteSelSeg=-1;
+      try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}
+    }
+  },
+  // subtract cut ranges from the current kept segments, preserving each clip's zoom
+  _subtract:function(segs,cuts){
+    let out=segs.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; });
+    cuts.forEach(function(c){
+      const next=[];
+      out.forEach(function(s){
+        if(c.endTime<=s.start||c.startTime>=s.end){ next.push(s); return; }
+        if(c.startTime>s.start) next.push({start:s.start,end:Math.max(s.start,c.startTime),zoom:s.zoom});
+        if(c.endTime<s.end) next.push({start:Math.min(s.end,c.endTime),end:s.end,zoom:s.zoom});
+      });
+      out=next.filter(function(s){ return s.end-s.start>0.05; });
+    });
+    return out;
+  },
+  // ---- preview_renderer integration (ghost bands; does NOT mutate segments) ----
+  renderGhosts:function(){
+    const A=window.ASD; A.clearGhosts();
+    if(!A.previewOn||!A._plan||!mtePps) return;
+    const tl=document.getElementById('mteTl'); if(!tl) return;
+    A._plan.autoEdits.forEach(function(c){
+      const ks=mteSrcToKept(c.startTime), ke=mteSrcToKept(c.endTime);
+      const left=ks*mtePps, w=Math.max(2,(ke-ks)*mtePps);
+      const b=document.createElement('div'); b.className='asd-ghost';
+      b.style.cssText='position:absolute;top:0;bottom:0;left:'+left+'px;width:'+w+'px;background:rgba(215,52,44,.28);border-left:2px dashed #D7342C;border-right:2px dashed #D7342C;border-radius:4px;pointer-events:none;z-index:6;';
+      tl.appendChild(b);
+    });
+  },
+  clearGhosts:function(){ const tl=document.getElementById('mteTl'); if(tl) tl.querySelectorAll('.asd-ghost').forEach(function(e){ e.remove(); }); },
+  reset:function(){ const A=window.ASD; A.previewOn=false; A._sid=null; A._plan=null; A.clearGhosts(); },
+  // ---- toolbar entry point: ONE tap detects + cuts; the normal Undo button restores ----
+  run:function(_retry){
+    const A=window.ASD;
+    if(!A.config.enabled){ toast('Auto-cut is off','err'); return; }
+    if(!(mteWavePeaks&&mteWavePeaks.length>20&&mteDuration>2)){   // peaks may still be decoding -- wait briefly instead of failing
+      if((_retry||0)<8){ toast('Reading audio...','ok'); setTimeout(function(){ A.run((_retry||0)+1); },400); return; }
+      toast('Could not read this clip audio','err'); return;
+    }
+    const regions=A.silence_detector.detect(mteWavePeaks,mteDuration);
+    if(!regions.length){ toast('No silence or dead space found','ok'); return; }
+    A._sid=A.session_manager.createAutoEditSession();
+    A._plan=A.edit_plan_service.build(mteId,A._sid,regions);
+    const tot=regions.reduce(function(a,r){ return a+(r.endTime-r.startTime); },0);
+    A.session_manager.applyEditPlan(A._sid);   // cut immediately; mtePushUndo inside -> the Undo button fully restores
+    toast('Cut '+regions.length+' gaps (~'+Math.round(tot)+'s) -- tap Undo to restore','ok');
+  }
+};
 async function mteOpen(id){
   let v=swVids.find(x=>x.id===id); if(!v) return;
   // NEVER edit a burned render -- its text is baked into the pixels, so editing it again
@@ -3220,6 +3331,7 @@ async function mteOpen(id){
     v=src; id=src.id;
   }
   mteId=id; mteSelSeg=-1; mteThumbs=[]; mtePlaying=false; mteTexts=[]; mteSegments=[]; mteMedia=[]; mteMovSeq=0; mteSelMedia=null; mteSelText=null; mtePps=0; mteMuted=false; mteResetUndo();
+  try{ if(window.ASD) ASD.reset(); }catch(e){}   // clear any auto-cut preview/plan from the previous clip
   mteRenderOverlays(); mteRenderMedia();   // clear any overlays left on screen from the previous video right away
   let url=signed[id];
   if(!url){ const {data:s}=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); url=s&&s.signedUrl; if(url)signed[id]=url; }
@@ -3424,6 +3536,7 @@ function mteRenderTL(keepScroll){
   if(prevSL!=null){ mteProgScroll=true; scroll.scrollLeft=prevSL; clearTimeout(mteProgT); mteProgT=setTimeout(()=>{mteProgScroll=false;},90); }   // keep the marker exactly where it was
   else mteUpdScroll();
   mteApplyVideoZoom(); mteRenderOTrack(); mteRenderWave();
+  try{ if(window.ASD&&ASD.previewOn) ASD.renderGhosts(); }catch(e){}   // keep auto-cut preview bands after a rebuild
 }
 // The on-screen playhead = the centred marker = the scroll position. This (not the video's
 // currentTime, which can lag a scrub) is the source of truth for "where we're up to".
