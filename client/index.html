@@ -5900,8 +5900,10 @@ function readyCard(v){
     var mins=v.delivered_at?((Date.now()-new Date(v.delivered_at).getTime())/60000):0;
     if(mins<4){
       btns+='<span class="h-sub" style="font-size:12.5px;display:flex;align-items:center;gap:7px"><span class="ph-spin"></span>Rendering your edited video... this updates by itself -- usually ready in a minute or two.</span>';
-    } else {
+    } else if(mins<10){
       btns+='<div style="width:100%"><div class="h-sub" style="font-size:12.5px;margin-bottom:7px">Still rendering -- this one is taking a little longer than usual.</div><button class="btn ghost sm" onclick="requeueRender(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Re-render</button></div>';
+    } else {
+      btns+='<div style="width:100%"><div class="h-sub" style="font-size:12.5px;margin-bottom:7px;color:#9a6b00">This is taking longer than expected -- it may have stalled. Tap Re-render to restart it.</div><button class="btn sm" onclick="requeueRender(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Re-render</button></div>';
     }
   }
   btns+='</div>';
