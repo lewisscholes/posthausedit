@@ -2607,7 +2607,7 @@ function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) retur
 async function bankSendToPost(id){
   var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v){ toast('Clip not found','err'); return; }
   if(!v.creator_id){ toast('Assign a client to this clip first','err'); return; }
-  if(!bankIsEdited(v)){ toast('This clip has not been edited yet','err'); return; }
+  if(!bankIsEdited(v)){ if(!confirm('This clip has no in-app edit. Send it to the client as-is? (Use this when you have edited it externally.)')) return; }
   var who=''; try{ var c=(state.clientList||[]).find(function(x){ return String(x.id)===String(v.creator_id); }); if(c&&c.name) who=c.name; }catch(e){}
   var up={delivered_at:new Date().toISOString(), status:'ready'};
   try{ if(!v.caption_suggested){ var cap=await tfAutoCaption(v); if(cap) up.caption_suggested=cap; } }catch(e){}
@@ -2663,7 +2663,7 @@ function bankCard(v){
       <div class="vstats">${v.product_uid?`<span class="vtag">${esc(prodName(v.product_uid))}</span>`:''}<span>${size}</span><span>${(v.created_at||'').slice(0,10)}</span></div>
       ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'\u2026':''}</div>`:''}
       ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' \xb7 '+esc(v.posted_by)):''}</div>`:''}
-      <div class="vrow">${edited&&!posted&&state.bankTab==='new'?`<button class="btn sm" onclick="bankSendToPost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}<button class="btn ghost sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
+      <div class="vrow">${!posted&&state.bankTab==='new'?`<button class="btn sm" onclick="bankSendToPost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}<button class="btn ghost sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
     </div>`;
   return card;
 }
