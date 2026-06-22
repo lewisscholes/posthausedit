@@ -5816,6 +5816,11 @@ async function loadEditor(){
   list=list.filter(function(v){ return !(v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready'); });   // delivered-to-creator clips leave the editor deck
   list.forEach(function(v){ var er=editedByRoot[v.id]; if(er){ v._editedId=er.id; v._editedAt=er.created_at; } v._srcProxy=null; v._srcES=null; v._rootId=null; });
   try{ var dres=await sb.from('ed_video_downloads').select('video_id').eq('user_id',state.user.id); var dset=new Set((dres.data||[]).map(function(d){ return d.video_id; })); list=list.filter(function(v){ return (v._editedId||(v.edit_state&&v.edit_state.segments))?true:!dset.has(v.id); }); }catch(e){}
+  // A clip is DONE once any of its edited renders was posted/scheduled/delivered. The deck card is the
+  // raw ROOT and the query above excludes posted/scheduled rows, so a posted render is invisible here --
+  // without this lookup an edited-and-sent clip keeps reappearing in the deck. Fetch the done renders by
+  // source and drop their roots.
+  try{ var _rids=list.map(function(v){ return v.id; }); if(_rids.length){ var _dr=await sb.from('ed_videos').select('source_video_id').eq('workspace_id',WS).eq('kind','edited').in('source_video_id',_rids).or('status.in.(posted,scheduled,ready),posted_at.not.is.null,delivered_at.not.is.null'); if(_dr&&!_dr.error){ var _doneSrc=new Set((_dr.data||[]).map(function(r){ return r.source_video_id; })); list=list.filter(function(v){ return !_doneSrc.has(v.id); }); } } }catch(e){}
   list.sort(function(a,b){ return new Date(b.created_at||0)-new Date(a.created_at||0); });   // newest first -> latest uploads surface at the front of the stack so they're never buried behind older clips
   swVids=list; swIdx=0;
   for(var i=0;i<Math.min(3,swVids.length);i++){ var v=swVids[i]; if(!signed[v.id]){ var s=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); if(s&&s.data&&s.data.signedUrl) signed[v.id]=s.data.signedUrl; } }
