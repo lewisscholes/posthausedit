@@ -2908,17 +2908,16 @@ function swAdvance(){
   if(next&&!signed[next.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(next),3600).then(({data:s})=>{if(s?.signedUrl)signed[next.id]=s.signedUrl;});
   swRender();
 }
-// Skip: move the front clip ~4 places back in the pile (not to the very end), so something else can jump the queue.
+// Skip: send the front clip to the BACK of the pile, so you don't see it again until everything else is done.
 function swSkip(){
   if(swVids.length - swIdx < 2){ try{ toast('Nothing to skip past','ok'); }catch(e){} return; }
   const card=document.querySelector('.sw-card.is-top');
   const doMove=()=>{
     const cur=swVids.splice(swIdx,1)[0];
-    const insertAt=Math.min(swVids.length, swIdx+4);   // 4 spots back from the front
-    swVids.splice(insertAt,0,cur);
+    swVids.push(cur);   // to the very end -- it only returns once you've worked through the rest
     for(let i=0;i<3;i++){ const v=swVids[swIdx+i]; if(v&&!signed[v.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600).then(({data:s})=>{ if(s&&s.signedUrl){ signed[v.id]=s.signedUrl; swRender(); } }).catch(()=>{}); }
     swRender();
-    try{ toast('Skipped -- it will come back round shortly','ok'); }catch(e){}
+    try{ toast('Skipped -- sent to the back of the stack','ok'); }catch(e){}
   };
   if(card){ card.classList.add('fly-left'); setTimeout(doMove,360); } else { doMove(); }
 }
