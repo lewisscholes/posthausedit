@@ -3334,7 +3334,7 @@ window.ASD={
     if(!A.config.enabled){ toast('Auto-cut is off','err'); return; }
     if(!(mteWavePeaks&&mteWavePeaks.length>20&&mteDuration>2)){   // peaks may still be decoding -- wait briefly instead of failing
       if((_retry||0)<8){ toast('Reading audio...','ok'); setTimeout(function(){ A.run((_retry||0)+1); },400); return; }
-      toast('Could not read this clip audio','err'); return;
+      toast('Audio for this clip is still being prepared -- Auto-cut will work once the wave bar appears','err'); return;
     }
     const regions=A.silence_detector.detect(mteWavePeaks,mteDuration);
     if(!regions.length){ toast('No silence or dead space found','ok'); return; }
@@ -3610,7 +3610,7 @@ function mteRenderWave(){
   ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(0,mid-0.5,cw,1);
   ctx.font='9px -apple-system,Helvetica,Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.40)'; ctx.fillText('AUDIO',6,11);
   if(!mtePps||!mteDuration)return;
-  if(mteWaveId!==mteId || !mteWavePeaks){ if(mteWaveFailed){ ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillText('no audio',cw-52,11); } return; }
+  if(mteWaveId!==mteId || !mteWavePeaks){ ctx.font='10px -apple-system,Helvetica,Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.55)'; ctx.textAlign='center'; ctx.fillText(mteWaveFailed?'Audio still being prepared -- Auto-cut available once the wave loads':'Loading audio...', cw/2, mid+3); ctx.textAlign='left'; return; }
   const pad=(scroll.clientWidth||320)/2, sl=scroll.scrollLeft, total=mteTotalKept();
   const bd=mteDuration/mteWavePeaks.length;
   ctx.fillStyle='#46a0ff';
