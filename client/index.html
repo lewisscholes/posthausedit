@@ -2594,11 +2594,35 @@ function promptShareAll(files,list){
   if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 const signed={};
+// Find the latest burned EDITED render for a root clip (state.videos holds every row incl. edited ones).
+function bankResolveEdited(id){
+  let best=null;
+  (state.videos||[]).forEach(function(x){ if(x&&x.kind==='edited'&&x.source_video_id===id&&x.storage_path){ if(!best||(x.created_at||'')>(best.created_at||'')) best=x; } });
+  return best;
+}
+// "Edited" = a burned render exists OR the clip has saved edit segments. Otherwise it's still raw.
+function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) return true; if(v.edit_state&&v.edit_state.segments&&v.edit_state.segments.length) return true; return false; }
+// Tap a bank thumbnail -> play it full-size. Prefer the edited (text burned-in) render; fall back to raw.
+async function bankPlay(id){
+  const v=(state.videos||[]).find(x=>x.id===id); if(!v) return;
+  const ed=bankResolveEdited(id); const target=ed||v; const isEd=!!ed||bankIsEdited(v);
+  showModal('<div style="text-align:center">'
+    +'<div class="h-sub" style="margin:0 0 10px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;color:'+(isEd?'#0f6e56':'#8a7f72')+'">'+(isEd?'Edited version':'Raw -- not edited yet')+'</div>'
+    +'<div id="bankPlayBox" style="min-height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Loading video...</div>'
+    +'<div class="actions" style="margin-top:12px"><button class="btn ghost" style="width:100%;justify-content:center" onclick="closeModal()">Close</button></div></div>');
+  try{
+    const playPath=(target.proxy_path)||target.storage_path;   // proxy starts fast; full file if no proxy
+    const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(playPath,1800);
+    const box=document.getElementById('bankPlayBox'); if(!box) return;
+    if(error||!(data&&data.signedUrl)){ box.textContent='Could not load this video.'; return; }
+    box.innerHTML='<video src="'+esc(data.signedUrl)+'" controls autoplay playsinline style="width:100%;max-height:68vh;border-radius:12px;background:#000"></video>';
+  }catch(e){ const box=document.getElementById('bankPlayBox'); if(box) box.textContent='Could not load this video.'; }
+}
 function bankCard(v){
   const card=document.createElement('div'); card.className='vcard';
   const url=signed[v.id]||'';
   const size=v.size_bytes?((v.size_bytes/1048576).toFixed(1)+' MB'):'';
-  const posted=isPosted(v); const self=isSelf();
+  const posted=isPosted(v); const self=isSelf(); const edited=bankIsEdited(v);
   if(v._finalizing){
     // Landed in Edited instantly -- the workhorse is still rendering the final file.
     card.innerHTML=`
@@ -2613,7 +2637,11 @@ function bankCard(v){
     return card;
   }
   card.innerHTML=`
-    <div class="vthumb"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video></div>
+    <div class="vthumb" onclick="bankPlay('${v.id}')" style="cursor:pointer;position:relative">
+      <video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:46px;height:46px;border-radius:50%;background:rgba(8,8,24,.5);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div></div>
+      <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:${edited?'#0f6e56':'#8a7f72'}">${edited?'Edited':'Not edited'}</div>
+    </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
         ${self?`<div class="menu-wrap"><button class="dots" onclick="toggleMenu(event,'${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-more"></use></svg></button><div class="menu hide" id="menu_${v.id}"></div></div>`:''}</div>
