@@ -1362,7 +1362,7 @@ function esc(s){ return (s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<'
 function toast(m,k){ const t=document.createElement('div'); t.className='toast '+(k||''); t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(), k==='err'?6000:3200); }
 function parseNum(s){ if(s==null) return null; s=(''+s).replace(/[\xa3,]/g,'').trim(); if(/M$/.test(s)) return parseFloat(s)*1e6; if(/K$/.test(s)) return parseFloat(s)*1e3; const n=parseFloat(s); return isNaN(n)?null:n; }
 function showModal(h){ document.getElementById('modalBox').innerHTML=h; document.getElementById('modal').classList.remove('hide'); }
-function closeModal(){ document.getElementById('modal').classList.add('hide'); window.__umFiles=null; }
+function closeModal(){ try{ document.querySelectorAll('#modalBox video, #modalBox audio').forEach(function(m){ try{ m.pause(); m.removeAttribute('src'); m.load(); }catch(e){} }); }catch(e){} document.getElementById('modal').classList.add('hide'); window.__umFiles=null; }
 document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
 function prodName(id){ const p=state.products.find(x=>x.id===id); return p?p.name:''; }
 
@@ -5882,9 +5882,13 @@ async function loadBank(){
 function bankBuckets(){
   var uid=(state.user&&state.user.id);
   var b={new:[],edited:[],downloaded:[],posted:[]};
+  // A raw clip is done once any of ITS edited renders was sent/posted -- otherwise the root sits in
+  // "To do" forever even though its edit is live (the edited render is hidden from the bank).
+  var doneSrc=new Set();
+  (state.videos||[]).forEach(function(v){ if(v.kind==='edited'&&v.source_video_id&&(v.posted_at||v.delivered_at||v.status==='posted'||v.status==='scheduled'||v.status==='ready')) doneSrc.add(v.source_video_id); });
   (state.videos||[]).filter(function(v){ return !v.pending_approval; }).forEach(function(v){
     if(v.kind==='edited') return;
-    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready';
+    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready' || doneSrc.has(v.id);
     if(posted){ b.posted.push(v); }
     else if(typeof downloadedBy==='function' && downloadedBy(v.id,uid)){ b.downloaded.push(v); }
     else { b.new.push(v); }
