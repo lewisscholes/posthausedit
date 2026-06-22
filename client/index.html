@@ -767,9 +767,7 @@ html,body{overscroll-behavior:none;}
     body:not(.ph-client) .ed-admintop{display:flex;position:fixed;top:0;left:0;right:0;z-index:66;align-items:center;gap:12px;background:var(--grad);color:#fff;padding:calc(11px + env(safe-area-inset-top)) 16px 11px}
     body:not(.ph-client) .drawer-btn{display:none}
   }
-</style><link rel="apple-touch-icon" sizes="180x180" href="posthaus-icon-180.png">
-<link rel="icon" type="image/png" sizes="512x512" href="posthaus-icon-512.png">
-<link rel="icon" type="image/png" href="favicon-32.png">
+</style><link rel="icon" type="image/png" href="favicon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style id="ph-brand">
 :root{
@@ -869,20 +867,16 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-board" onclick="showView('board')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span> Job board</button>
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
-      <button class="nav-btn" id="nav-bank" onclick="showView('bank')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span> Video bank</button>
-      <button class="nav-btn" id="nav-editor" onclick="showView('editor')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span> Editor</button>
-      <button class="nav-btn" id="nav-schedule" onclick="showView('schedule')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg></span> Content Schedule</button>
+
     </div>
     <div class="nav-grow"></div>
     <div class="nav-sep"></div>
     <div class="nav-scroll" id="toolsPanel">
       <div class="grp-l">Tools</div>
-      <button class="nav-btn" id="nav-priority" onclick="showView('priority')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"></use></svg></span> Priority</button>
+      <button class="nav-btn" id="nav-watch" onclick="showView('watch')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"></use></svg></span> Watch list</button>
       <button class="nav-btn" id="nav-products" onclick="showView('products')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tag"></use></svg></span> Products</button>
       <button class="nav-btn" id="nav-files" onclick="showView('files')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Files</button>
       <button class="nav-btn" id="nav-scraper" onclick="showView('scraper')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg></span> Scraper Results</button>
-      <button class="nav-btn" id="nav-overlays" onclick="showView('overlays')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wand"></use></svg></span> Overlay generator</button>
-      <button class="nav-btn" id="nav-training" onclick="showView('training')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cap"></use></svg></span> Overlay Training</button>
       <div id="adminGroup" style="display:none">
         <div class="grp-l">Admin</div>
         <button class="nav-btn" id="nav-team" onclick="showView('team')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> Team</button>
@@ -954,10 +948,10 @@ a{color:#B0211A}
         </div>
       </div>
       <div class="tabs">
-        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> To do <span class="cnt" id="cnt-new">0</span></button>
+        <button class="tab active" id="tab-new" onclick="setBankTab('new')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg> New <span class="cnt" id="cnt-new">0</span></button>
         <button class="tab" id="tab-edited" onclick="setBankTab('edited')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg> Edited <span class="cnt" id="cnt-edited">0</span></button>
         <button class="tab" id="tab-downloaded" onclick="setBankTab('downloaded')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Downloaded <span class="cnt" id="cnt-downloaded">0</span></button>
-        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Sent to Post <span class="cnt" id="cnt-posted">0</span></button>
+        <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Posted <span class="cnt" id="cnt-posted">0</span></button>
       </div>
       <div id="bankEmpty" class="empty hide"><div class="big"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></div><div id="bankEmptyMsg">Nothing here yet.</div></div>
       <div id="bankCards" class="cards"></div>
@@ -1052,7 +1046,6 @@ a{color:#B0211A}
 
     <!-- MOBILE TIKTOK-STYLE EDITOR -->
     <div class="mte" id="mte">
-      <div id="mteDbg" style="position:absolute;left:6px;bottom:96px;z-index:99;background:rgba(0,0,0,.78);color:#39ff6a;font:10px/1.35 ui-monospace,Menlo,monospace;padding:4px 7px;border-radius:7px;pointer-events:none;white-space:pre;display:none"></div>
       <div class="mte-top">
         <button class="mte-back" onclick="mteClose()" aria-label="Back">&#8249;</button>
         <button class="mte-next" onclick="mteSave()" aria-label="Save edits">&#8594;</button>
@@ -1100,7 +1093,6 @@ a{color:#B0211A}
           <button onclick="mteDeleteSeg()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>Delete</button>
           <button onclick="mtePickOverlay()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span>Overlay</button>
           <button onclick="mteAddCaptions()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><line x1="6" y1="11" x2="11" y2="11"/><line x1="13.5" y1="11" x2="18" y2="11"/><line x1="6" y1="14.5" x2="9.5" y2="14.5"/><line x1="12" y1="14.5" x2="18" y2="14.5"/></svg></span>Captions</button>
-          <button onclick="ASD.run()"><span class="mi"><svg class="svic" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><line x1="20" y1="4" x2="8.5" y2="15.5"/><line x1="20" y1="20" x2="8.5" y2="8.5"/></svg></span>Auto-cut</button>
         </div>
         <input id="mteOvFile" type="file" accept="image/*" style="display:none" onchange="mteOnOverlayFile(this.files&&this.files[0]); this.value='';">
       </div>
@@ -1267,6 +1259,28 @@ a{color:#B0211A}
       <div id="productsEmpty" class="h-sub hide" style="padding:18px 0">Nothing here yet.</div>
     </section>
 
+    <section id="view-watch" class="hide">
+      <div class="head">
+        <div>
+          <h2 class="h-title">Creator watch list</h2>
+          <div class="h-sub">Track creators in your niche. We snapshot their recent videos and flag any that are gaining views fast, so you can order the product and film your own.</div>
+        </div>
+        <button class="btn ghost" onclick="loadWatch()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Refresh</button>
+      </div>
+      <div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div style="font-size:13.5px">Flag videos gaining over <input id="wThresh" type="text" inputmode="numeric" style="width:110px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font:inherit" onchange="saveWatchThreshold(this.value)"> views / 24h</div>
+        <span class="h-sub" id="wThreshNote" style="font-size:12px"></span>
+        <span style="flex:1"></span>
+        <button class="btn" onclick="watchAddPrompt()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-2px"><use href="#i-plus"></use></svg> Add creator</button>
+      </div>
+      <div class="seg" id="wTabs" style="margin:14px 0 4px">
+        <button class="active" id="wtab-creators" onclick="setWatchTab('creators')">Watched creators</button>
+        <button id="wtab-flagged" onclick="setWatchTab('flagged')">Winning videos</button>
+      </div>
+      <div id="wPaneCreators"><div id="wCreators" class="cards"></div></div>
+      <div id="wPaneFlagged" class="hide"><div id="wFlagged" class="cards"></div></div>
+    </section>
+
     <section id="view-priority" class="hide">
       <div class="head">
         <div>
@@ -1325,10 +1339,11 @@ a{color:#B0211A}
     <button id="bnav-ready" onclick="showView('ready')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span>To post</button>
     <button id="bnav-board" onclick="showView('board')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span>Board</button>
     <button id="bnav-analytics" onclick="showView('analytics')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span>Analytics</button>
-    <button id="bnav-bank" onclick="showView('bank')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></span>Bank</button>
+
+    <button id="bnav-products" onclick="showView('products')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tag"></use></svg></span>Products</button>
     <button class="bnav-plus" onclick="openToolsSheet()" aria-label="Tools menu"><span class="plusic" style="display:flex;align-items:center;justify-content:center"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:24px;height:24px"><use href="#i-more"></use></svg></span></button>
-    <button id="bnav-editor" onclick="showView('editor')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span>Editor</button>
-    <button id="bnav-schedule" onclick="showView('schedule')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg></span>Schedule</button>
+    <button id="bnav-watch" onclick="showView('watch')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"></use></svg></span>Watch</button>
+    <button id="bnav-files" onclick="showView('files')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span>Files</button>
   </nav>
 
   <div class="tsheet-scrim" id="tsheetScrim" onclick="closeToolsSheet()"></div>
@@ -1336,11 +1351,8 @@ a{color:#B0211A}
     <div class="tsheet-grab"></div>
     <div class="tsheet-title">Tools</div>
     <div class="tsheet-sub">Everything outside the daily workflow</div>
-    <button class="tsheet-item" onclick="toolsGo('priority')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"></use></svg></span> Priority</button>
-    <button class="tsheet-item" onclick="toolsGo('products')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tag"></use></svg></span> Products</button>
+    <button class="tsheet-item" onclick="toolsGo('scraper')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg></span> Scraper Results</button>
     <button class="tsheet-item" onclick="toolsGo('files')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Files</button>
-    <button class="tsheet-item" onclick="toolsGo('overlays')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wand"></use></svg></span> Overlay generator</button>
-    <button class="tsheet-item" onclick="toolsGo('training')"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cap"></use></svg></span> Overlay Training</button>
     <button class="tsheet-item" id="tsheet-team" onclick="toolsGo('team')" style="display:none"><span class="ti"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> Team &amp; Access</button>
   </div>
 </div>
@@ -1360,22 +1372,23 @@ let state={ user:null, currentView:'dashboard', isAdmin:false,
 
 function esc(s){ return (s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function toast(m,k){ const t=document.createElement('div'); t.className='toast '+(k||''); t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(), k==='err'?6000:3200); }
-function parseNum(s){ if(s==null) return null; s=(''+s).replace(/[\xa3,]/g,'').trim(); if(/M$/.test(s)) return parseFloat(s)*1e6; if(/K$/.test(s)) return parseFloat(s)*1e3; const n=parseFloat(s); return isNaN(n)?null:n; }
+function parseNum(s){ if(s==null) return null; s=(''+s).replace(/[£,]/g,'').trim(); if(/M$/.test(s)) return parseFloat(s)*1e6; if(/K$/.test(s)) return parseFloat(s)*1e3; const n=parseFloat(s); return isNaN(n)?null:n; }
 function showModal(h){ document.getElementById('modalBox').innerHTML=h; document.getElementById('modal').classList.remove('hide'); }
-function closeModal(){ try{ document.querySelectorAll('#modalBox video, #modalBox audio').forEach(function(m){ try{ m.pause(); m.removeAttribute('src'); m.load(); }catch(e){} }); }catch(e){} document.getElementById('modal').classList.add('hide'); window.__umFiles=null; }
+function closeModal(){ document.getElementById('modal').classList.add('hide'); window.__umFiles=null; }
 document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
 function prodName(id){ const p=state.products.find(x=>x.id===id); return p?p.name:''; }
 
 // ---------- nav ----------
 function showView(v){
   state.currentView=v;
-  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team'].forEach(n=>{ const s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); const b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); const bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
+  ['dashboard','bank','files','products','priority','watch','scraper','editor','schedule','overlays','training','team'].forEach(n=>{ const s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); const b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); const bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   var na=document.getElementById('nav-access'); if(na) na.classList.toggle('active', v==='team');
   closeDrawer(); closeToolsSheet();
   if(v==='dashboard') loadDashboard();
   if(v==='files') loadFiles();
   if(v==='products') loadProductsView();
   if(v==='priority') loadPriorityView();
+  if(v==='watch') loadWatch();
   if(v==='scraper') loadScraperView();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
@@ -1563,8 +1576,8 @@ async function loadTraining(){
       const badge=r.source==='manual'
         ? '<span style="background:#ecebff;color:#4a3fb8;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700">Taught</span>'
         : '<span style="background:#eef2f6;color:#5f6b76;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700">Edited</span>';
-      const prod=r.product_uid?(' \xb7 '+esc(pname(r.product_uid))):'';
-      const ctxShort=ctx?(' \xb7 '+(ctx.length>140?ctx.slice(0,140)+'\u2026':ctx)):'';
+      const prod=r.product_uid?(' · '+esc(pname(r.product_uid))):'';
+      const ctxShort=ctx?(' · '+(ctx.length>140?ctx.slice(0,140)+'…':ctx)):'';
       return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="font-weight:700;white-space:pre-wrap">'+esc(r.overlay_text||'')+'</div><button class="btn ghost" style="flex:0 0 auto;padding:3px 8px" onclick="deleteTrMem(\''+r.id+'\')">Remove</button></div><div class="h-sub" style="margin-top:5px">'+badge+prod+ctxShort+'</div></div>';
     }).join('');
   }catch(e){ toast('Could not load memory: '+(e.message||e),'err'); }
@@ -1645,7 +1658,7 @@ async function loadDashboard(refresh){
   state.results=data||[];
   // top-line stats now reflect OUR OWN activity (not scraped data)
   await renderOwnMetrics();
-  document.getElementById('dashSub').textContent=state.results.length+' competitor videos \xb7 deduped, updated on each re-scrape';
+  document.getElementById('dashSub').textContent=state.results.length+' competitor videos · deduped, updated on each re-scrape';
   loadJobs();
   renderDash();
   await loadTicks();
@@ -1655,9 +1668,19 @@ async function loadDashboard(refresh){
 
 // ---------- TO FILM (dashboard) ----------
 const TF_ACCT_LINACRE='@LinkedByLinacre', TF_ACCT_YAS='@LinkedByYas';
+// Managed accounts (tf_accounts table). Falls back to the original two if the table hasn't loaded.
+function tfAccts(){ var a=(state.tfAccounts&&state.tfAccounts.length)?state.tfAccounts:[
+    {handle:TF_ACCT_LINACRE,label:'LBL',role:'BOF . text on screen',initial:'L',video_type:'music+captions',quota:25,color:'#e6f1fb',ink:'#0c447c',sort:0},
+    {handle:TF_ACCT_YAS,label:'SWY',role:'TOF . talking',initial:'Y',video_type:'',quota:10,color:'#e1f5ee',ink:'#0f6e56',sort:1}];
+  return a.slice().sort(function(x,y){return (x.sort||0)-(y.sort||0);}); }
+function tfAcctHandles(){ return tfAccts().map(function(a){return a.handle;}); }
+function tfAcct(h){ return tfAccts().find(function(a){return a.handle===h;})||null; }
 function tfProduct(pid){ return (state.products||[]).find(p=>p.id===pid); }
-function tfAcctOf(vtype){ return (vtype==='music+captions')?TF_ACCT_LINACRE:TF_ACCT_YAS; }
+function tfAcctOf(vtype){ var as=tfAccts(); var m=as.find(function(a){return a.video_type&&a.video_type===vtype;}); if(m)return m.handle; var c=as.find(function(a){return !a.video_type;}); return (c||as[as.length-1]||{handle:TF_ACCT_YAS}).handle; }
 function tfStyleOf(vtype){ return (vtype==='music+captions')?'Text on screen':'Talking'; }
+function tfQuota(h){ var a=tfAcct(h); return a?(a.quota||0):0; }
+function tfAcctCol(h){ var a=tfAcct(h); return a?[a.color||'#eef2f7',a.ink||'#234']:['#eef2f7','#234']; }
+function tfInitial(h){ var a=tfAcct(h); return (a&&a.initial)||((h||'@').replace('@','')[0]||'?').toUpperCase(); }
 function tfFmt(n){ if(!n)return '0'; if(n>=1e6)return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M'; if(n>=1e3)return Math.round(n/1e3)+'k'; return ''+Math.round(n); }
 function tfToday(){ return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); }
 var TF_MONS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
@@ -1690,6 +1713,7 @@ function tfIsToday(){ return tfActiveDay()===tfToday(); }
 function tfDayLabel(){ var t=tfToday(); var y=new Date(Date.now()-86400000-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); if(tfActiveDay()===t)return 'Today'; if(tfActiveDay()===y)return 'Yesterday'; return new Date(tfActiveDay()+'T00:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}); }
 function tfShiftDay(d){ var p=tfActiveDay().split('-'); var dt=new Date(+p[0], (+p[1])-1, +p[2]); dt.setDate(dt.getDate()+d); var nd=dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2); if(nd>tfToday())return; state.tfDay=nd; loadTicks().then(renderToFilm); }
 async function loadTicks(){
+  try{ var ta=await sb.from('tf_accounts').select('*').eq('active',true).order('sort'); if(ta.data&&ta.data.length) state.tfAccounts=ta.data; }catch(e){}
   try{ var r=await sb.from('film_ticks').select('idea_key,count,product_uid,account,angle').eq('day',tfActiveDay()); tfTickRows=r.data||[]; tfTicks={}; tfTickRows.forEach(function(t){tfTicks[t.idea_key]=t.count||0;}); }catch(e){ tfTicks={}; tfTickRows=[]; }
   try{ var sp=await sb.from('sample_picks').select('product_uid,decision').eq('day',tfToday()); tfSamplePicks={}; (sp.data||[]).forEach(function(p){tfSamplePicks[p.product_uid]=p.decision;}); }catch(e){ tfSamplePicks={}; }
   // last 7 days of ticks per idea -> enforce the weekly per-video cap + spread
@@ -1757,7 +1781,7 @@ function tfRecencyCmp(a,b){
 // Build TODAY's plan for an account: assign each video a small daily target so the
 // account quota is met, while no video exceeds 5 films/week (spread across days).
 function tfPlan(acct){
-  var quota=TF_QUOTA[acct]||0;
+  var quota=tfQuota(acct);
   var ideas=tfOwnedIdeas(acct);
   ideas.forEach(function(x){ x.today=tfTicks[x.key]||0; x.weekOther=Math.max(0,(tfWeek[x.key]||0)-x.today); x.maxToday=Math.max(0,TF_WEEK_CAP-x.weekOther); });
   var elig=ideas.filter(function(x){return x.maxToday>0;});
@@ -1777,6 +1801,47 @@ function tfFilmedTotal(){ var s=0; Object.keys(tfTicks).forEach(function(k){ s+=
 function setFilmedMetric(){ var el=document.getElementById('statFilmed'); if(el) el.textContent=tfFilmedTotal(); }
 function setTfAcct(a){ state.tfAcct=a; renderToFilm(); }
 function setTfProd(v){ state.tfProd=v; renderToFilm(); }
+// ---- Manage accounts (drives the daily filming plan) ----
+function tfInk(hex){ try{ var c=(hex||'').replace('#',''); if(c.length===3)c=c.split('').map(function(x){return x+x;}).join(''); function dk(i){ return ('0'+Math.round(parseInt(c.substr(i,2),16)*0.32).toString(16)).slice(-2); } return '#'+dk(0)+dk(2)+dk(4); }catch(e){ return '#0c447c'; } }
+function tfAcctRow(a){ a=a||{};
+  var inp='padding:7px;border:1px solid var(--line);border-radius:7px;font:inherit;min-width:0;width:100%;box-sizing:border-box';
+  return '<div class="tf-arow" data-id="'+esc(a.id||'')+'" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px">'
+    +'<input class="tfa-handle" placeholder="@handle" value="'+esc(a.handle||'')+'" style="'+inp+'">'
+    +'<input class="tfa-label" placeholder="Short label (LBL)" value="'+esc(a.label||'')+'" style="'+inp+'">'
+    +'<input class="tfa-role" placeholder="Role (e.g. BOF . text on screen)" value="'+esc(a.role||'')+'" style="'+inp+'">'
+    +'<input class="tfa-vtype" placeholder="Style key (blank = catch-all)" value="'+esc(a.video_type||'')+'" style="'+inp+'">'
+    +'<input class="tfa-quota" type="number" min="0" placeholder="Videos/day" value="'+esc(a.quota!=null?a.quota:'')+'" style="'+inp+'">'
+    +'<div style="display:flex;gap:6px;align-items:center"><input class="tfa-color" type="color" value="'+esc(a.color||'#e6f1fb')+'" style="width:40px;height:34px;border:1px solid var(--line);border-radius:7px;padding:2px;flex:0 0 auto"><button class="btn ghost sm" onclick="this.closest(&quot;.tf-arow&quot;).remove()" style="margin-left:auto">Remove</button></div>'
+    +'</div>';
+}
+function tfManageAccts(){
+  var rows=tfAccts().map(function(a){return tfAcctRow(a);}).join('');
+  var h='<div style="text-align:left;max-width:560px">'
+    +'<h3 style="margin:0 0 4px">Accounts</h3>'
+    +'<div class="h-sub" style="margin:0 0 12px;font-size:12.5px">Each account drives the daily filming plan. <b>Style key</b> matches a video type from your scrapes (leave one account blank as the catch-all). <b>Videos/day</b> is the daily quota.</div>'
+    +'<div id="tfAcctRows">'+rows+'</div>'
+    +'<button class="btn ghost sm" onclick="tfAddAcctRow()" style="margin-top:4px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-2px"><use href="#i-plus"></use></svg> Add account</button>'
+    +'<div style="display:flex;gap:8px;margin-top:16px"><button class="btn" onclick="tfSaveAccts()">Save</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div></div>';
+  showModal(h);
+}
+function tfAddAcctRow(){ var c=document.getElementById('tfAcctRows'); if(c) c.insertAdjacentHTML('beforeend', tfAcctRow({color:'#e6f1fb'})); }
+async function tfSaveAccts(){
+  var rows=[].slice.call(document.querySelectorAll('#tfAcctRows .tf-arow'));
+  var ins=[], ups=[], keepIds=[];
+  rows.forEach(function(r,i){ var hv=(r.querySelector('.tfa-handle').value||'').trim(); if(!hv)return; if(hv[0]!=='@')hv='@'+hv;
+    var color=r.querySelector('.tfa-color').value||'#e6f1fb';
+    var rec={ handle:hv, label:(r.querySelector('.tfa-label').value||'').trim(), role:(r.querySelector('.tfa-role').value||'').trim(), video_type:(r.querySelector('.tfa-vtype').value||'').trim(), quota:parseInt(r.querySelector('.tfa-quota').value||'0',10)||0, color:color, ink:tfInk(color), sort:i, active:true };
+    var id=r.getAttribute('data-id'); if(id){ rec.id=id; keepIds.push(id); ups.push(rec); } else { ins.push(rec); } });
+  if(!ins.length && !ups.length){ toast('Add at least one account','err'); return; }
+  try{
+    var cur=await sb.from('tf_accounts').select('id'); var curIds=(cur.data||[]).map(function(x){return x.id;});
+    var del=curIds.filter(function(id){return keepIds.indexOf(id)<0;});
+    if(del.length){ var d=await sb.from('tf_accounts').delete().in('id',del); if(d.error)throw d.error; }
+    if(ups.length){ var u=await sb.from('tf_accounts').upsert(ups); if(u.error)throw u.error; }
+    if(ins.length){ var n=await sb.from('tf_accounts').insert(ins); if(n.error)throw n.error; }
+    closeModal(); toast('Accounts saved'); state.tfAccounts=null; await loadTicks(); renderToFilm();
+  }catch(e){ toast('Save failed: '+((e&&e.message)||e),'err'); }
+}
 function renderToFilm(){
   var card=document.getElementById('toFilmCard'); if(!card) return;
   card.style.display='';
@@ -1785,14 +1850,14 @@ function renderToFilm(){
   var linFilmed=tfFilmed(TF_ACCT_LINACRE), yasFilmed=tfFilmed(TF_ACCT_YAS);
   var DOT=String.fromCharCode(183), DASH=String.fromCharCode(8211);
   // ---- plan data (needed before the hero ring) ----
-  var accts=(state.tfAcct==='all')?[TF_ACCT_LINACRE,TF_ACCT_YAS]:[state.tfAcct];
+  var accts=(state.tfAcct==='all')?tfAcctHandles():[state.tfAcct];
   var planned=[]; if(isToday){ accts.forEach(function(a){ planned=planned.concat(tfPlan(a)); }); }
   var pf=(state.tfProd||'').toLowerCase().trim();
   if(pf) planned=planned.filter(function(x){return (x.pname||'').toLowerCase().indexOf(pf)>=0;});
   planned.sort(tfRecencyCmp);   // newest videos at the top of the to-film list
   var todo=planned.filter(function(x){return (tfTicks[x.key]||0)<x.target;});
   var done=planned.filter(function(x){return (tfTicks[x.key]||0)>=x.target;});
-  var plannedTotal=0, filmedPlanned=0, planBy={}; planBy[TF_ACCT_LINACRE]=0; planBy[TF_ACCT_YAS]=0;
+  var plannedTotal=0, filmedPlanned=0, planBy={}; tfAcctHandles().forEach(function(h){planBy[h]=0;});
   planned.forEach(function(x){ plannedTotal+=x.target; filmedPlanned+=Math.min(x.target,tfTicks[x.key]||0); planBy[x.acct]=(planBy[x.acct]||0)+x.target; });
   // ---- hero ----
   var pct=plannedTotal?Math.round(filmedPlanned/plannedTotal*100):0;
@@ -1808,14 +1873,14 @@ function renderToFilm(){
     return '<div class="tf-acct"><div class="tf-acct-top"><div class="tf-av">'+initial+'</div>'
       +'<div style="min-width:0"><div class="nm">'+handle+'</div><div class="role">'+role+'</div></div>'
       +'<div class="cnt">'+have+' / '+target+' filmed</div></div><div class="tf-bar"><i style="width:'+p+'%"></i></div></div>';};
-  h+='<div class="tf-accts">'+acctCard('@LinkedByLinacre','L','BOF '+DOT+' text on screen',linFilmed,25)
-    +acctCard('@LinkedByYas','Y','TOF '+DOT+' talking',yasFilmed,10)+'</div>';
+  h+='<div class="tf-accts">'+tfAccts().map(function(a){ return acctCard(a.handle,(a.initial||tfInitial(a.handle)),String(a.role||'').replace(/\./g,DOT),tfFilmed(a.handle),(a.quota||0)); }).join('')+'</div>';
   if(isToday) h+='<div class="tf-ring-row">'+tfRingSvg(pct)+'<span class="rr-num">'+filmedPlanned+' / '+plannedTotal+'</span><span class="rr-lbl">videos planned</span></div>';
   if(!isToday){ h+=tfHistory(); card.innerHTML=h; return; }
   // ---- filters ----
   var seg=function(opts){return '<span class="seg">'+opts.map(function(o){return '<button class="'+(o[0]===state.tfAcct?'active':'')+'" onclick="setTfAcct(\''+o[0]+'\')">'+o[1]+'</button>';}).join('')+'</span>';};
   var popts='<option value="">All products</option>'+(state.products||[]).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'');}).map(function(p){return '<option value="'+esc(p.name)+'"'+(((state.tfProd||'')===p.name)?' selected':'')+'>'+esc(p.name)+'</option>';}).join('');
-  h+='<div class="tf-filters" style="margin-top:14px">'+seg([['all','All'],[TF_ACCT_LINACRE,'LBL'],[TF_ACCT_YAS,'SWY']])
+  h+='<div class="tf-filters" style="margin-top:14px">'+seg([['all','All']].concat(tfAccts().map(function(a){return [a.handle,(a.label||a.handle)];})))
+    +'<button class="btn ghost sm" onclick="tfManageAccts()" style="margin-left:auto;flex:0 0 auto">Accounts</button>'
     +'<div class="tf-prodwrap"><svg class="tf-prodicon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
     +'<select class="tf-prodfilter" onchange="setTfProd(this.value)">'+popts+'</select></div></div>';
   // ---- section callout (desktop: tinted panel + subtext + clapperboard; mobile: plain header) ----
@@ -1854,7 +1919,7 @@ function tfHistory(){
   h+='<div class="tf-secth-sub">A record of what was filmed -- read only.</div>';
   h+=rows.map(function(t){
     var p=tfProduct(t.product_uid); var nm=(p&&p.name)||'(product)';
-    var ac=t.account||''; var acctCol=ac===TF_ACCT_LINACRE?['#e6f1fb','#0c447c']:['#e1f5ee','#0f6e56'];
+    var ac=t.account||''; var acctCol=tfAcctCol(ac);
     return '<div class="card tf-card"><div class="tf-prodname">'+esc(nm)+'</div>'+(t.angle?'<div class="h-sub" style="font-size:12px;margin-top:2px">'+esc(t.angle)+'</div>':'')
       +'<div class="tf-meta">'+(ac?'<span class="tf-pill" style="background:'+acctCol[0]+';color:'+acctCol[1]+'">'+esc(ac)+'</span>':'')+'<span class="tf-badge">filmed '+(t.count||0)+'</span></div></div>';
   }).join('');
@@ -1895,7 +1960,7 @@ function tfSamplesSection(){
   return h;
 }
 function tfSampleCard(x){
-  var acctCol=x.acct===TF_ACCT_LINACRE?['#e6f1fb','#0c447c']:['#e1f5ee','#0f6e56'];
+  var acctCol=tfAcctCol(x.acct);
   var rec=tfRecency(x.days), vel=tfPerDay(x.views,x.days);
   var why='<span class="tf-badge">'+tfFmt(x.views)+' views</span>'+(x.gmv?'<span class="tf-badge">'+String.fromCharCode(163)+tfFmt(x.gmv)+' GMV</span>':'')+(rec?'<span class="tf-badge">'+rec+'</span>':'')+(vel?'<span class="tf-badge" style="background:#fff6e9;border-color:#f4d8a8;color:#8a5b00">'+vel+'</span>':'');
   var tags='<span class="tf-pill" style="background:'+acctCol[0]+';color:'+acctCol[1]+'">'+x.acct+'</span><span class="tf-pill" style="background:#f0ecff;color:#4a3fb8">'+tfStyleOf(x.vtype)+'</span>';
@@ -1947,7 +2012,7 @@ function tfToggleSave(pid){ tfSaved[pid]=!tfSaved[pid]; renderToFilm(); }
 function hydrateTfThumbs(){ try{ [].slice.call(document.querySelectorAll('#toFilmCard .vthumb')).forEach(loadThumbFor); }catch(e){} }
 function tfCard(x,mode){
   var DOT=String.fromCharCode(183);
-  var acctCol = x.acct===TF_ACCT_LINACRE?['#e6f1fb','#0c447c']:['#e1f5ee','#0f6e56'];
+  var acctCol = tfAcctCol(x.acct);
   var rec=tfRecency(x.days), vel=tfPerDay(x.views,x.days);
   var vid=(String(x.link||'').match(/\/video\/(\d+)/)||[])[1];
   var cap=esc(String(x.angle||'').trim());
@@ -1984,14 +2049,14 @@ async function tfMarkOwned(pid){
   const {error}=await sb.from('products').update({owned:true}).eq('id',pid);
   if(error){ toast('Failed: '+error.message,'err'); return; }
   const p=tfProduct(pid); if(p)p.owned=true;
-  toast('Marked owned \u2014 added to Products','ok'); renderToFilm();
+  toast('Marked owned — added to Products','ok'); renderToFilm();
 }
 async function tfTogglePriority(pid){
   const p=tfProduct(pid); const np=!(p&&p.priority);
   const {error}=await sb.from('products').update({priority:np}).eq('id',pid);
   if(error){ toast('Failed','err'); return; }
   if(p)p.priority=np;
-  toast(np?'Priority on \u2014 its uploads skip the edit queue':'Priority off','ok'); renderToFilm();
+  toast(np?'Priority on — its uploads skip the edit queue':'Priority off','ok'); renderToFilm();
 }
 
 // ---------- PRODUCTS view (owned vs not owned) ----------
@@ -2008,12 +2073,12 @@ function renderProductsView(){
 }
 function prodRow(p){
   const link=p.source_link||p.listing_url||'';
-  const linkHtml=link?'<a href="'+esc(link)+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#1850c4">link \u2197</a>':'<span class="h-sub" style="font-size:12px">no link</span>';
+  const linkHtml=link?'<a href="'+esc(link)+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#1850c4">link ↗</a>':'<span class="h-sub" style="font-size:12px">no link</span>';
   return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap">'
-    +'<div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+(p.priority?' <span style="color:#d8961e">\u2605</span>':'')+'</div>'
+    +'<div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+(p.priority?' <span style="color:#d8961e">★</span>':'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-top:5px">'+linkHtml+'<button class="btn ghost sm" style="padding:3px 8px" onclick="setProductLinkModal(\''+p.id+'\')">'+(link?'Edit link':'Add link')+'</button></div></div>'
-    +'<button class="btn ghost sm" onclick="togglePriority(\''+p.id+'\')">'+(p.priority?'\u2605 Priority':'\u2606 Priority')+'</button>'
-    +'<button class="btn sm" onclick="toggleOwned(\''+p.id+'\')">'+(p.owned?'Owned \u2713':'Mark owned')+'</button>'
+    +'<button class="btn ghost sm" onclick="togglePriority(\''+p.id+'\')">'+(p.priority?'★ Priority':'☆ Priority')+'</button>'
+    +'<button class="btn sm" onclick="toggleOwned(\''+p.id+'\')">'+(p.owned?'Owned ✓':'Mark owned')+'</button>'
     +'</div>';
 }
 async function toggleOwned(id){ const p=tfProduct(id); const v=!(p&&p.owned); const {error}=await sb.from('products').update({owned:v}).eq('id',id); if(error){toast('Failed','err');return;} if(p)p.owned=v; toast(v?'Marked owned':'Marked not owned','ok'); renderProductsView(); }
@@ -2046,6 +2111,111 @@ async function addProductSave(){
 
 // ---------- PRIORITY (kanban) ----------
 async function loadPriorityView(){ await loadProducts(); renderPriority(); }
+// ---------- Creator watch list ----------
+var watchState={creators:[],videos:[],tab:'creators',threshold:100000};
+function wNum(n){ n=+n||0; if(n>=1e6)return (n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,'')+'M'; if(n>=1e3)return Math.round(n/1e3)+'k'; return ''+n; }
+function wHandleFromUrl(u){ try{ var m=(''+u).match(/@([A-Za-z0-9_.]+)/); return m?('@'+m[1]):''; }catch(e){ return ''; } }
+function wTimeAgo(iso){ try{ var s=(Date.now()-new Date(iso).getTime())/1000; if(s<3600)return Math.max(1,Math.round(s/60))+'m ago'; if(s<86400)return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }catch(e){ return ''; } }
+async function loadWatch(){
+  try{ var s=await sb.from('watch_settings').select('default_threshold').eq('id',1).single(); if(s.data&&s.data.default_threshold)watchState.threshold=s.data.default_threshold; }catch(e){}
+  var th=document.getElementById('wThresh'); if(th)th.value=watchState.threshold.toLocaleString();
+  try{ var c=await sb.from('watch_creators').select('*').order('created_at',{ascending:false}); watchState.creators=c.data||[]; }catch(e){ watchState.creators=[]; }
+  try{ var v=await sb.from('watch_videos').select('*').eq('flagged',true).neq('status','dismissed').order('vel_24h',{ascending:false}).limit(60); watchState.videos=v.data||[]; }catch(e){ watchState.videos=[]; }
+  renderWatch();
+}
+function setWatchTab(t){ watchState.tab=t; var a=document.getElementById('wtab-creators'),b=document.getElementById('wtab-flagged'); if(a)a.classList.toggle('active',t==='creators'); if(b)b.classList.toggle('active',t==='flagged'); var pc=document.getElementById('wPaneCreators'),pf=document.getElementById('wPaneFlagged'); if(pc)pc.classList.toggle('hide',t!=='creators'); if(pf)pf.classList.toggle('hide',t!=='flagged'); }
+function renderWatch(){
+  var flagByC={}; watchState.videos.forEach(function(v){ flagByC[v.creator_id]=(flagByC[v.creator_id]||0)+1; });
+  var cEl=document.getElementById('wCreators');
+  if(cEl) cEl.innerHTML=watchState.creators.length? watchState.creators.map(function(c){ return wCreatorCard(c, flagByC[c.id]||0); }).join('')
+    : '<div class="empty"><div>No creators yet. Tap <b>Add creator</b> and paste a TikTok profile URL to start watching.</div></div>';
+  var fEl=document.getElementById('wFlagged');
+  if(fEl) fEl.innerHTML=watchState.videos.length? watchState.videos.map(wVideoCard).join('')
+    : '<div class="empty"><div>No breakout videos yet. Once a watched creator posts something gaining '+wNum(watchState.threshold)+'+ views in 24h, it appears here.</div></div>';
+  var ft=document.getElementById('wtab-flagged'); if(ft) ft.textContent='Winning videos'+(watchState.videos.length?(' ('+watchState.videos.length+')'):'');
+  var note=document.getElementById('wThreshNote'); if(note) note.textContent=watchState.creators.length+' creator'+(watchState.creators.length===1?'':'s')+' watched';
+}
+function wStatusPill(c){ var s=c.status||'queued';
+  if(s==='running')return '<span class="tf-badge" style="background:#eef1ff;color:#3340b6">checking...</span>';
+  if(s==='error')return '<span class="tf-badge" style="background:#fdecec;color:#a3261f">error</span>';
+  if(!c.backfilled)return '<span class="tf-badge" style="background:#fff4e6;color:#b45309">first scan queued</span>';
+  return ''; }
+function wCreatorCard(c,flag){
+  var init=((c.handle||c.display_name||'@?').replace('@','')[0]||'?').toUpperCase();
+  var tags=(c.style_tags||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var last=c.last_run_at?('checked '+wTimeAgo(c.last_run_at)):'not checked yet';
+  return '<div class="card"><div style="display:flex;align-items:center;gap:11px">'
+    +'<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6a8bff,#9a6aff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none">'+esc(init)+'</div>'
+    +'<div style="min-width:0;flex:1"><div style="font-weight:700">'+esc(c.handle||wHandleFromUrl(c.profile_url)||'(creator)')+'</div>'
+    +'<div class="h-sub" style="font-size:12px">'+(c.followers?(esc(c.followers)+' followers . '):'')+esc(last)+'</div></div>'+wStatusPill(c)+'</div>'
+    +(tags.length?'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">'+tags.map(function(t){return '<span class="tf-pill" style="background:#eef1ff;color:#3340b6">'+esc(t)+'</span>';}).join('')+'</div>':'')
+    +'<div style="display:flex;align-items:center;gap:10px;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)">'
+    +(flag?'<span class="tf-badge" style="background:#fff4e6;color:#b45309">'+flag+' flagged</span>':'<span class="h-sub" style="font-size:12px">no breakouts yet</span>')
+    +'<span class="h-sub" style="font-size:12px">every '+Math.round((c.every_minutes||360)/60)+'h</span><span style="flex:1"></span>'
+    +'<button class="btn ghost sm" onclick="watchCheckNow(\''+c.id+'\')">Check now</button>'
+    +'<button class="btn ghost sm" onclick="watchRemove(\''+c.id+'\')" title="Remove">&times;</button></div></div>';
+}
+function wVideoCard(v){
+  var prod=v.product_name?('<div class="h-sub" style="font-size:12px;margin:6px 0 8px">Product: <b style="color:var(--ink)">'+esc(v.product_name)+'</b></div>')
+    :'<div class="h-sub" style="font-size:12px;margin:6px 0 8px">Product not detected</div>';
+  var thumb=v.thumb?('background-image:url(\''+esc(v.thumb)+'\');background-size:cover;background-position:center'):'background:linear-gradient(160deg,#5b2440,#2a1f3a 60%,#0e1019)';
+  return '<div class="card" style="padding:0;overflow:hidden">'
+    +'<div style="position:relative;aspect-ratio:9/16;max-height:220px;'+thumb+'">'
+    +'<span style="position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.62);color:#fff;font-weight:800;font-size:14px;padding:4px 8px;border-radius:7px">&#9650; +'+wNum(v.vel_24h)+' / 24h</span>'
+    +'<span style="position:absolute;right:8px;top:8px;background:#fe2c55;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px">NEW</span></div>'
+    +'<div style="padding:11px 12px"><div style="font-size:13px;line-height:1.35;max-height:36px;overflow:hidden">'+esc(v.caption||'(no caption)')+'</div>'
+    +'<div class="h-sub" style="font-size:12px;margin:5px 0 0">'+esc(v.handle||'')+' . '+wNum(v.views)+' total'+(v.posted_date?(' . '+esc(v.posted_date)):'')+'</div>'+prod
+    +'<div style="display:flex;gap:7px;flex-wrap:wrap">'
+    +(v.product_name?'<button class="btn sm" onclick="watchOrderSample(\''+v.id+'\')">Order sample</button>':'<button class="btn ghost sm" onclick="watchOpen(\''+v.id+'\')">Find product</button>')
+    +'<button class="btn ghost sm" onclick="watchAddFilm(\''+v.id+'\')">Add to film</button>'
+    +'<button class="btn ghost sm" onclick="watchOpen(\''+v.id+'\')">Open</button>'
+    +'<button class="btn ghost sm" onclick="watchDismiss(\''+v.id+'\')">Dismiss</button></div></div></div>';
+}
+function watchAddPrompt(){
+  showModal('<div style="text-align:left"><h3 style="margin:0 0 4px">Add a creator to watch</h3>'
+    +'<p class="h-sub" style="margin:0 0 12px;font-size:13px">Paste their TikTok profile URL. We snapshot their recent videos and re-check on a schedule.</p>'
+    +'<div style="margin-bottom:10px"><label class="h-sub" style="display:block;font-size:12px;margin-bottom:4px">Profile URL</label><input id="wcUrl" placeholder="https://www.tiktok.com/@creator" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit"></div>'
+    +'<div style="margin-bottom:10px"><label class="h-sub" style="display:block;font-size:12px;margin-bottom:4px">Style tags (optional, comma separated)</label><input id="wcTags" placeholder="skincare, text-on-screen" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit"></div>'
+    +'<div style="margin-bottom:6px"><label class="h-sub" style="display:block;font-size:12px;margin-bottom:4px">Flag threshold / 24h (blank = default)</label><input id="wcThr" inputmode="numeric" placeholder="'+watchState.threshold.toLocaleString()+'" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:16px"><button class="btn" onclick="watchAddSave()">Add &amp; start watching</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div></div>');
+}
+async function watchAddSave(){
+  var url=(document.getElementById('wcUrl').value||'').trim(); if(!url){ toast('Paste a profile URL','err'); return; }
+  var handle=wHandleFromUrl(url), tags=(document.getElementById('wcTags').value||'').trim();
+  var thr=parseInt((document.getElementById('wcThr').value||'').replace(/[^0-9]/g,''),10); if(isNaN(thr))thr=null;
+  try{ var {error}=await sb.from('watch_creators').insert({profile_url:url,handle:handle,style_tags:tags,threshold:thr,active:true,status:'queued',next_run_at:new Date().toISOString()}); if(error)throw error;
+    closeModal(); toast('Creator added - first scan queued'); loadWatch();
+  }catch(e){ toast('Could not add: '+((e&&e.message)||e),'err'); }
+}
+async function saveWatchThreshold(v){
+  var n=parseInt((''+v).replace(/[^0-9]/g,''),10); if(isNaN(n)||n<1000){ toast('Enter a number (min 1000)','err'); return; }
+  watchState.threshold=n; var th=document.getElementById('wThresh'); if(th)th.value=n.toLocaleString();
+  try{ await sb.from('watch_settings').upsert({id:1,default_threshold:n}); toast('Threshold saved'); renderWatch(); }catch(e){ toast('Save failed','err'); }
+}
+async function watchCheckNow(id){ try{ await sb.from('watch_creators').update({status:'queued',next_run_at:new Date().toISOString()}).eq('id',id); toast('Check queued'); loadWatch(); }catch(e){ toast('Failed','err'); } }
+async function watchRemove(id){ if(!confirm('Remove this creator from your watch list?'))return; try{ await sb.from('watch_creators').delete().eq('id',id); toast('Removed'); loadWatch(); }catch(e){ toast('Failed','err'); } }
+async function watchDismiss(id){ try{ await sb.from('watch_videos').update({status:'dismissed'}).eq('id',id); watchState.videos=watchState.videos.filter(function(v){return v.id!==id;}); renderWatch(); }catch(e){ toast('Failed','err'); } }
+function watchVid(id){ return watchState.videos.find(function(v){return v.id===id;}); }
+function watchOpen(id){ var v=watchVid(id); if(v&&v.url) window.open(v.url,'_blank'); }
+async function watchOrderSample(id){
+  var v=watchVid(id); if(!v)return;
+  try{ var pid=v.product_uid;
+    if(!pid){ var pr=await sb.from('products').insert({name:v.product_name||('From '+(v.handle||'creator')),source_link:v.url,owned:false}).select('id').single(); pid=pr.data&&pr.data.id; }
+    if(pid){ var today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); await sb.from('sample_picks').upsert({product_uid:pid,day:today,decision:'yes',created_at:new Date().toISOString()},{onConflict:'product_uid,day'}); }
+    await sb.from('watch_videos').update({status:'sampled'}).eq('id',id);
+    watchState.videos=watchState.videos.filter(function(x){return x.id!==id;}); renderWatch(); toast('Sample requested + added to Products');
+  }catch(e){ toast('Failed: '+((e&&e.message)||e),'err'); }
+}
+async function watchAddFilm(id){
+  var v=watchVid(id); if(!v)return;
+  try{ var pid=v.product_uid;
+    if(!pid && v.product_name){ var pr=await sb.from('products').insert({name:v.product_name,source_link:v.url,owned:false}).select('id').single(); pid=pr.data&&pr.data.id; }
+    var today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+    await sb.from('ed_film_queue').insert({day:today,product_uid:pid||null,hook:(v.caption||'').slice(0,160),reason:'Watch list: '+(v.handle||'')+' +'+wNum(v.vel_24h)+'/24h',status:'todo'});
+    await sb.from('watch_videos').update({status:'filmed'}).eq('id',id);
+    watchState.videos=watchState.videos.filter(function(x){return x.id!==id;}); renderWatch(); toast('Added to To-Film');
+  }catch(e){ toast('Failed: '+((e&&e.message)||e),'err'); }
+}
 function renderPriority(){
   var all=(state.products||[]).filter(function(p){return p.owned;});  // owned products only
   var notP=all.filter(function(p){return !p.priority;}), yesP=all.filter(function(p){return p.priority;});
@@ -2148,7 +2318,7 @@ function scVidRow(v){
     +(hasTr?'<span class="tf-badge" style="background:#e7f7ee;border-color:#bfe6cf;color:#0f6e56">transcript</span>':'')
     +(hasOv?'<span class="tf-badge" style="background:#f0ecff;border-color:#d9cffb;color:#4a3fb8">overlay</span>':'');
   var prod=scProdName(v.product_uid);
-  var watch=v.tiktok_url?'<a class="tf-watch" href="'+esc(v.tiktok_url)+'" target="_blank" rel="noopener">Open \u2197</a>':'';
+  var watch=v.tiktok_url?'<a class="tf-watch" href="'+esc(v.tiktok_url)+'" target="_blank" rel="noopener">Open ↗</a>':'';
   return '<div class="card" style="padding:12px 14px;margin-bottom:9px">'
     +'<div style="display:flex;justify-content:space-between;gap:10px"><div style="font-weight:700;font-size:14px">'+esc(v.handle||'(video)')+'</div>'+watch+'</div>'
     +(prod?'<div class="h-sub" style="font-size:12px;margin-top:2px">'+esc(prod)+'</div>':'')
@@ -2260,7 +2430,7 @@ function renderDashTable(rows){
   rows.forEach(r=>{ const tr=document.createElement('tr'); cols.forEach(c=>{ const td=document.createElement('td'); if(c.cls)td.className=c.cls;
     if(c.k==='tiktokUrl') td.innerHTML=r.tiktokUrl?`<a href="${esc(r.tiktokUrl)}" target="_blank"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg> Watch</a>`:'';
     else if(c.k==='videoType'){ const cl=r.videoType==='speech'?'speech':r.videoType==='music+captions'?'music':'unknown'; td.innerHTML=r.videoType?`<span class="pill ${cl}">${esc(r.videoType)}</span>`:''; }
-    else if(c.k==='product') td.innerHTML=r.product?`<span class="pill blue">${esc(r.product)}</span>`:'<span class="pill gray">\u2014</span>';
+    else if(c.k==='product') td.innerHTML=r.product?`<span class="pill blue">${esc(r.product)}</span>`:'<span class="pill gray">—</span>';
     else if(c.overlay) td.innerHTML=`<div class="ov">${esc(r[c.k])}</div>`;
     else { td.textContent=r[c.k]; if(c.cls==='col-trunc'||c.cls==='col-med') td.title=r[c.k]; }
     tr.appendChild(td); }); body.appendChild(tr); });
@@ -2275,9 +2445,9 @@ function renderDashCards(rows){
     return `<div class="vcard">
       ${vid?`<div class="vthumb" id="emb_${vid}" data-url="${esc(r.tiktokUrl)}" onclick="playEmbed('${vid}',this)"><img class="vthumb-img" id="th_${vid}" referrerpolicy="no-referrer" alt=""><span class="play"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg></span></div>`:''}
       <div class="vbody">
-        <div class="vtop"><div class="vh">${esc(r.handle)||'\u2014'}</div>${r.videoType?`<span class="pill ${tc}">${esc(r.videoType)}</span>`:''}</div>
+        <div class="vtop"><div class="vh">${esc(r.handle)||'—'}</div>${r.videoType?`<span class="pill ${tc}">${esc(r.videoType)}</span>`:''}</div>
         ${r.product?`<div><span class="vtag">${esc(r.product)}</span></div>`:''}
-        <div class="vstats"><span><b>${esc(r.views||'\u2014')}</b> views</span><span><b>${esc(r.likes||'\u2014')}</b> likes</span><span><b>${esc(r.comments||'\u2014')}</b> comments</span>${r.creatorGMV?`<span>GMV <b>${esc(r.creatorGMV)}</b></span>`:''}</div>
+        <div class="vstats"><span><b>${esc(r.views||'—')}</b> views</span><span><b>${esc(r.likes||'—')}</b> likes</span><span><b>${esc(r.comments||'—')}</b> comments</span>${r.creatorGMV?`<span>GMV <b>${esc(r.creatorGMV)}</b></span>`:''}</div>
         ${overlay}
         ${r.caption?`<div class="copybox copytext" data-copy="${esc(r.caption)}" data-label="description" onclick="copyFromEl(event,this)">${esc(r.caption)}<span class="copyhint"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Tap to copy description</span></div>`:''}
         ${r.tiktokUrl?`<a href="${esc(r.tiktokUrl)}" target="_blank" style="font-size:13px;margin-top:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"></use></svg> Watch on TikTok</a>`:''}
@@ -2334,7 +2504,7 @@ function openScrapeModal(){
     <input id="sc_product" list="sc_prodlist" placeholder="e.g. Glycolic Acid Body Stick" autocomplete="off">
     <datalist id="sc_prodlist">${opts}</datalist>
     <div class="row3">
-      <div><label>Social1 product URL (or ID)</label><input id="sc_url" placeholder="https://www.social1.ai/products/\u2026"></div>
+      <div><label>Social1 product URL (or ID)</label><input id="sc_url" placeholder="https://www.social1.ai/products/…"></div>
       <div style="flex:0 0 110px"><label>Videos</label><input id="sc_records" type="number" min="12" max="72" value="24"></div>
     </div>
     <div class="row3">
@@ -2384,11 +2554,11 @@ async function queueScrape(){
     const ends=days>0 ? new Date(Date.now()+days*86400000).toISOString() : null;
     const {error}=await sb.from('scrape_schedules').insert({ product_uid:prodId, product_url:url, product_id:productIdFromUrl(url), max_records:n, every_minutes:every, ends_at:ends, created_by:displayName(state.user) });
     if(error){ toast('Schedule failed: '+error.message,'err'); document.getElementById('sc_go').disabled=false; return; }
-    toast('Scheduled \u2014 first scrape runs shortly, then on repeat','ok');
+    toast('Scheduled — first scrape runs shortly, then on repeat','ok');
   } else {
     const {error}=await sb.from('scrape_jobs').insert({ product_url:url, product_id:productIdFromUrl(url), max_records:n, status:'queued', product_uid:prodId, requested_by:displayName(state.user) });
     if(error){ toast('Queue failed: '+error.message,'err'); document.getElementById('sc_go').disabled=false; return; }
-    toast('Queued \u2014 the local runner will pick it up','ok');
+    toast('Queued — the local runner will pick it up','ok');
   }
   await loadProducts();
   document.getElementById('sc_url').value=''; document.getElementById('sc_go').disabled=false;
@@ -2400,14 +2570,14 @@ function fmtEvery(m){ if(m===60)return 'hour'; if(m===1440)return 'day'; if(m%14
 function renderSchedulesInto(id){
   const body=document.getElementById(id); if(!body) return;
   if(!state.schedules||!state.schedules.length){ body.innerHTML='<tr><td colspan="4" style="color:var(--muted)">No repeat schedules.</td></tr>'; return; }
-  body.innerHTML=state.schedules.map(s=>`<tr><td>${esc(prodName(s.product_uid)||s.product_id||'\u2014')}</td><td>every ${fmtEvery(s.every_minutes)}</td><td>${s.ends_at?s.ends_at.slice(0,10):'until stopped'}</td><td><button class="btn ghost sm" onclick="stopSchedule('${s.id}')">Stop</button></td></tr>`).join('');
+  body.innerHTML=state.schedules.map(s=>`<tr><td>${esc(prodName(s.product_uid)||s.product_id||'—')}</td><td>every ${fmtEvery(s.every_minutes)}</td><td>${s.ends_at?s.ends_at.slice(0,10):'until stopped'}</td><td><button class="btn ghost sm" onclick="stopSchedule('${s.id}')">Stop</button></td></tr>`).join('');
 }
 async function stopSchedule(id){ const {error}=await sb.from('scrape_schedules').update({active:false}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Schedule stopped','ok'); await loadSchedules(); renderSchedulesInto('sc_scheds'); }
 async function loadJobs(){ const {data}=await sb.from('scrape_jobs').select('*').order('created_at',{ascending:false}).limit(40); state.jobs=data||[]; }
 function renderJobsInto(id){
   const body=document.getElementById(id); if(!body) return;
   if(!state.jobs.length){ body.innerHTML='<tr><td colspan="5" style="color:var(--muted)">No jobs yet.</td></tr>'; return; }
-  body.innerHTML=state.jobs.slice(0,12).map(j=>{ const cl=j.status==='done'?'green':j.status==='running'?'amber':j.status==='error'?'':'gray'; const st=j.status==='error'?`<span class="pill" style="background:#fee2e2;color:#991b1b">error</span>`:`<span class="pill ${cl}">${esc(j.status)}</span>`; return `<tr><td>${st}</td><td>${esc(prodName(j.product_uid)||j.product_id||'\u2014')}</td><td>${j.video_count!=null?j.video_count:(j.max_records+' max')}</td><td>${(j.created_at||'').slice(0,16).replace('T',' ')}</td><td style="text-align:right"><button class="btn ghost sm danger" title="Delete this scrape and its results" onclick="deleteScrape('${j.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"></use></svg></button></td></tr>`; }).join('');
+  body.innerHTML=state.jobs.slice(0,12).map(j=>{ const cl=j.status==='done'?'green':j.status==='running'?'amber':j.status==='error'?'':'gray'; const st=j.status==='error'?`<span class="pill" style="background:#fee2e2;color:#991b1b">error</span>`:`<span class="pill ${cl}">${esc(j.status)}</span>`; return `<tr><td>${st}</td><td>${esc(prodName(j.product_uid)||j.product_id||'—')}</td><td>${j.video_count!=null?j.video_count:(j.max_records+' max')}</td><td>${(j.created_at||'').slice(0,16).replace('T',' ')}</td><td style="text-align:right"><button class="btn ghost sm danger" title="Delete this scrape and its results" onclick="deleteScrape('${j.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"></use></svg></button></td></tr>`; }).join('');
 }
 async function deleteScrape(jobId){
   const j=(state.jobs||[]).find(x=>x.id===jobId); if(!j)return;
@@ -2435,8 +2605,8 @@ async function loadBank(){
   state.activeEdits=new Set((ajobs||[]).map(j=>j.video_id));
   populateViewAs(); renderBank();
 }
-function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.creatorFilter||state.viewAs||me.id; }
-function onViewAsChange(){ var v=val('viewAs')||''; state.viewAs=v; state.creatorFilter=(state.user&&v===state.user.id)?null:(v||null); loadBank(); }
+function populateViewAs(){ const sel=document.getElementById('viewAs'); if(!sel)return; const me=state.user; const others=(state.profiles||[]).filter(p=>p.id!==me.id&&p.status==='approved'); sel.innerHTML=`<option value="${me.id}">Me (${esc(displayName(me))})</option>`+others.map(p=>`<option value="${p.id}">${esc(nameOf(p))}</option>`).join(''); sel.value=state.viewAs||me.id; }
+function onViewAsChange(){ state.viewAs=val('viewAs'); renderBank(); }
 function viewUser(){ return state.viewAs||(state.user&&state.user.id); }
 function isSelf(){ return viewUser()===(state.user&&state.user.id); }
 function isPosted(v){ return !!v.posted_at; }
@@ -2594,50 +2764,11 @@ function promptShareAll(files,list){
   if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 const signed={};
-// Find the latest burned EDITED render for a root clip (state.videos holds every row incl. edited ones).
-function bankResolveEdited(id){
-  let best=null;
-  (state.videos||[]).forEach(function(x){ if(x&&x.kind==='edited'&&x.source_video_id===id&&x.storage_path){ if(!best||(x.created_at||'')>(best.created_at||'')) best=x; } });
-  return best;
-}
-// "Edited" = a burned render exists OR the clip has saved edit segments. Otherwise it's still raw.
-function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) return true; if(v.edit_state&&v.edit_state.segments&&v.edit_state.segments.length) return true; return false; }
-// Deliver an edited clip straight from the bank to the creator's Ready-to-post (and into "Sent to Post").
-// For clips that were edited but never sent, so they don't sit stuck in "To do" with no action.
-async function bankSendToPost(id){
-  var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v){ toast('Clip not found','err'); return; }
-  if(!v.creator_id){ toast('Assign a client to this clip first','err'); return; }
-  if(!bankIsEdited(v)){ if(!confirm('This clip has no in-app edit. Send it to the client as-is? (Use this when you have edited it externally.)')) return; }
-  var who=''; try{ var c=(state.clientList||[]).find(function(x){ return String(x.id)===String(v.creator_id); }); if(c&&c.name) who=c.name; }catch(e){}
-  var up={delivered_at:new Date().toISOString(), status:'ready'};
-  try{ if(!v.caption_suggested){ var cap=await tfAutoCaption(v); if(cap) up.caption_suggested=cap; } }catch(e){}
-  var r=await sb.from('ed_videos').update(up).eq('id',id);
-  if(r&&r.error){ toast('Could not send: '+r.error.message,'err'); return; }
-  v.delivered_at=up.delivered_at; v.status='ready';
-  toast(who?('Sent to '+who+'\x27s Ready to post'):'Sent to post','ok');
-  try{ loadBank(); }catch(e){}
-}
-// Tap a bank thumbnail -> play it full-size. Prefer the edited (text burned-in) render; fall back to raw.
-async function bankPlay(id){
-  const v=(state.videos||[]).find(x=>x.id===id); if(!v) return;
-  const ed=bankResolveEdited(id); const target=ed||v; const isEd=!!ed||bankIsEdited(v);
-  showModal('<div style="text-align:center">'
-    +'<div class="h-sub" style="margin:0 0 10px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;color:'+(isEd?'#0f6e56':'#8a7f72')+'">'+(isEd?'Edited version':'Raw -- not edited yet')+'</div>'
-    +'<div id="bankPlayBox" style="min-height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Loading video...</div>'
-    +'<div class="actions" style="margin-top:12px"><button class="btn ghost" style="width:100%;justify-content:center" onclick="closeModal()">Close</button></div></div>');
-  try{
-    const playPath=(target.proxy_path)||target.storage_path;   // proxy starts fast; full file if no proxy
-    const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(playPath,1800);
-    const box=document.getElementById('bankPlayBox'); if(!box) return;
-    if(error||!(data&&data.signedUrl)){ box.textContent='Could not load this video.'; return; }
-    box.innerHTML='<video src="'+esc(data.signedUrl)+'" controls autoplay playsinline style="width:100%;max-height:68vh;border-radius:12px;background:#000"></video>';
-  }catch(e){ const box=document.getElementById('bankPlayBox'); if(box) box.textContent='Could not load this video.'; }
-}
 function bankCard(v){
   const card=document.createElement('div'); card.className='vcard';
   const url=signed[v.id]||'';
   const size=v.size_bytes?((v.size_bytes/1048576).toFixed(1)+' MB'):'';
-  const posted=isPosted(v); const self=isSelf(); const edited=bankIsEdited(v);
+  const posted=isPosted(v); const self=isSelf();
   if(v._finalizing){
     // Landed in Edited instantly -- the workhorse is still rendering the final file.
     card.innerHTML=`
@@ -2652,18 +2783,14 @@ function bankCard(v){
     return card;
   }
   card.innerHTML=`
-    <div class="vthumb" onclick="bankPlay('${v.id}')" style="cursor:pointer;position:relative">
-      <video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:46px;height:46px;border-radius:50%;background:rgba(8,8,24,.5);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div></div>
-      <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:${edited?'#0f6e56':'#8a7f72'}">${edited?'Edited':'Not edited'}</div>
-    </div>
+    <div class="vthumb"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video></div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
         ${self?`<div class="menu-wrap"><button class="dots" onclick="toggleMenu(event,'${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-more"></use></svg></button><div class="menu hide" id="menu_${v.id}"></div></div>`:''}</div>
       <div class="vstats">${v.product_uid?`<span class="vtag">${esc(prodName(v.product_uid))}</span>`:''}<span>${size}</span><span>${(v.created_at||'').slice(0,10)}</span></div>
-      ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'\u2026':''}</div>`:''}
-      ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' \xb7 '+esc(v.posted_by)):''}</div>`:''}
-      <div class="vrow">${!posted&&state.bankTab==='new'?`<button class="btn sm" onclick="bankSendToPost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}<button class="btn ghost sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
+      ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'…':''}</div>`:''}
+      ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' · '+esc(v.posted_by)):''}</div>`:''}
+      <div class="vrow"><button class="btn sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
     </div>`;
   return card;
 }
@@ -2710,7 +2837,7 @@ async function hydrateBankUrls(){ for(const v of state.videos){ if(signed[v.id])
 function renderBankVideos(){ const b=bankBuckets(); const list=b[state.bankTab]; if(list.length) paintBank(list); }
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints>1); }
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
-async function fileDownload(v,id){ toast('Preparing download\u2026'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:v.filename}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=v.filename; a.click(); await recordDownload(id); }
+async function fileDownload(v,id){ toast('Preparing download…'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:v.filename}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=v.filename; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
   const v=state.videos.find(x=>x.id===id); if(!v)return;
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
@@ -2719,7 +2846,7 @@ async function downloadVideo(id){
   if(isMobileDevice() && navigator.canShare){
     let file=null;
     try{
-      toast('Preparing video\u2026');
+      toast('Preparing video…');
       const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300); if(error) throw error;
       const blob=await (await fetch(data.signedUrl)).blob();
       file=new File([blob], v.filename||'video.mp4', {type: blob.type||'video/mp4'});
@@ -2735,7 +2862,7 @@ async function downloadVideo(id){
     }
   }
   // Computer (and phones without file sharing): save to the files / Downloads folder
-  await fileDownload(v,id); await recordDownload(id);
+  await fileDownload(v,id);
 }
 function promptShare(file,id){
   showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
@@ -2744,7 +2871,7 @@ function promptShare(file,id){
 }
 async function markPosted(id){ const {error}=await sb.from('ed_videos').update({posted_at:new Date().toISOString(),posted_by:displayName(state.user)}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Marked posted (shared)','ok'); loadBank(); }
 async function unpost(id){ const {error}=await sb.from('ed_videos').update({posted_at:null,posted_by:null}).eq('id',id); if(error){toast('Failed','err');return;} toast('Unposted','ok'); loadBank(); }
-async function editVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; const row={video_id:id,storage_path:v.storage_path,filename:v.filename,folder_id:v.folder_id,product_uid:v.product_uid,requested_by:displayName(state.user)}; const {error}=await sb.from('ed_edit_jobs').insert(row); if(error){toast('Could not queue edit: '+error.message,'err');return;} toast('Queued for editing \u2014 it will appear in the Editor for approval','ok'); }
+async function editVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; const row={video_id:id,storage_path:v.storage_path,filename:v.filename,folder_id:v.folder_id,product_uid:v.product_uid,requested_by:displayName(state.user)}; const {error}=await sb.from('ed_edit_jobs').insert(row); if(error){toast('Could not queue edit: '+error.message,'err');return;} toast('Queued for editing — it will appear in the Editor for approval','ok'); }
 function openMoveModal(id){ const opts=state.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(''); showModal(`<h3>Change product</h3><label>Product</label><select id="mv_prod">${opts}</select><div class="actions"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="moveVideo('${id}')">Save</button></div>`); }
 async function moveVideo(id){ const p=val('mv_prod')||null; const {error}=await sb.from('ed_videos').update({product_uid:p}).eq('id',id); if(error){toast('Failed','err');return;} closeModal(); toast('Updated','ok'); loadBank(); }
 function openVideoTypeModal(id){
@@ -2768,9 +2895,9 @@ async function applyVideoType(id,v){
 async function deleteVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; if(!confirm('Delete this video permanently?'))return; await sb.storage.from(BUCKET).remove([v.storage_path]); const {error}=await sb.from('ed_videos').delete().eq('id',id); if(error){toast('Failed','err');return;} delete signed[id]; toast('Deleted','ok'); loadBank(); }
 
 // ---------- EDITOR (pending approval) ----------
-// ------------------------------------------------------
+// ──────────────────────────────────────────────────────
 //  SWIPE EDITOR
-// ------------------------------------------------------
+// ──────────────────────────────────────────────────────
 let swVids=[], swIdx=0, swDragging=false, swStartX=0, swStartY=0, swCurX=0, swCurY=0;
 let epCurrentId=null, epMuted=false, epTextPos={x:50,y:72}, epBg='none', epDragActive=false, epDragOX=0, epDragOY=0;
 
@@ -2830,7 +2957,7 @@ function swRender(){
           const sc=1-depth*0.035; const ty=depth*9;
           return `<div class="sw-card ${isTop?'is-top':''}" data-id="${v.id}" data-idx="${swIdx+i}"
             style="transform:scale(${sc}) translateY(${ty}px);z-index:${10-depth};${!isTop?'pointer-events:none':''}">
-            ${signed[v.id]?`<video src="${signed[v.id]}" autoplay muted loop playsinline></video>`:`<div class="sw-card-ph">Loading\u2026</div>`}
+            ${signed[v.id]?`<video src="${signed[v.id]}" autoplay muted loop playsinline></video>`:`<div class="sw-card-ph">Loading…</div>`}
             ${swOverlayHtml(v)}
           </div>`;
         }).join('')}
@@ -2869,7 +2996,6 @@ function swApplySegments(){
 // swApplyOverlaySizes() once the cards are in the DOM (so o.size scales by the card's real height/640,
 // matching the editor and the export exactly).
 function swOverlayHtml(v){
- try{
   // Text is burned into edited renders -- don't draw it again... EXCEPT when the card is
   // previewing via the raw source's proxy (no text in those pixels), where we draw the
   // saved overlays so the card still shows what was written.
@@ -2880,7 +3006,6 @@ function swOverlayHtml(v){
   else if(v.caption_suggested) ovs=[{text:mteClampLines(v.caption_suggested),x:50,y:MTE_OV_TOP,color:'#ffffff',size:24,style:'outline',font:'classic'}];
   if(!ovs) return '';
   return ovs.filter(o=>o.type!=='caption').map(o=>{ const p=mteOvParts(o,640); return '<div class="sw-text'+(p.box?' sw-box':'')+'" data-osize="'+(o.size||24)+'"'+(p.box?(' data-bg="'+esc(p.bg)+'"'):'')+' style="position:absolute;'+p.style+'">'+p.inner+'</div>'; }).join('');
- }catch(_e){ return ''; }   // a single clip with bad overlay data must never throw out of swRender and freeze the deck (skip/advance would silently fail)
 }
 // Lock each preview overlay's size to the card height (same 640 reference as the editor + worker).
 function swApplyOverlaySizes(){
@@ -2951,16 +3076,17 @@ function swAdvance(){
   if(next&&!signed[next.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(next),3600).then(({data:s})=>{if(s?.signedUrl)signed[next.id]=s.signedUrl;});
   swRender();
 }
-// Skip: send the front clip to the BACK of the pile, so you don't see it again until everything else is done.
+// Skip: move the front clip ~4 places back in the pile (not to the very end), so something else can jump the queue.
 function swSkip(){
   if(swVids.length - swIdx < 2){ try{ toast('Nothing to skip past','ok'); }catch(e){} return; }
   const card=document.querySelector('.sw-card.is-top');
   const doMove=()=>{
     const cur=swVids.splice(swIdx,1)[0];
-    swVids.push(cur);   // to the very end -- it only returns once you've worked through the rest
+    const insertAt=Math.min(swVids.length, swIdx+4);   // 4 spots back from the front
+    swVids.splice(insertAt,0,cur);
     for(let i=0;i<3;i++){ const v=swVids[swIdx+i]; if(v&&!signed[v.id]) sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600).then(({data:s})=>{ if(s&&s.signedUrl){ signed[v.id]=s.signedUrl; swRender(); } }).catch(()=>{}); }
     swRender();
-    try{ toast('Skipped -- sent to the back of the stack','ok'); }catch(e){}
+    try{ toast('Skipped -- it will come back round shortly','ok'); }catch(e){}
   };
   if(card){ card.classList.add('fly-left'); setTimeout(doMove,360); } else { doMove(); }
 }
@@ -3102,7 +3228,7 @@ function epToggleMute(){
 function epSwapVideo(){ document.getElementById('epSwapInput')?.click(); }
 async function epSwapVideoFile(e){
   const file=e.target.files?.[0]; if(!file||!epCurrentId)return;
-  toast('Uploading swap\u2026');
+  toast('Uploading swap…');
   try{
     await tusUpload(file,'swap/'+Date.now()+'_'+file.name.replace(/[^\w.\-]+/g,'_'),null);
     toast('Swapped','ok');
@@ -3198,168 +3324,6 @@ function mteAttachSource(el, v, fallbackUrl){
   }
   el.src=fallbackUrl||'';
 }
-// ===== Phase 1 auto-trim silence -- DEMO ACCOUNT ONLY, client-side, non-destructive (v2) =====
-// Validated offline on real clips. Waits for the audio peaks to be ready, then pre-fills the
-// trim segments with the spoken parts (cutting silent gaps >= 1s). Nothing saved until Save;
-// every cut is a normal draggable segment and Undo restores the full clip.
-const AUTOTRIM_CREATOR='bac7f943-1234-4aa7-93cc-facd5787a1f7';
-let mteAutoTrimDone=false;
-function autoTrimSegments(peaks,dur){
-  if(!peaks||!peaks.length||!(dur>0)) return null;
-  const n=peaks.length; let mx=0; for(let i=0;i<n;i++){ if(peaks[i]>mx) mx=peaks[i]; }
-  if(mx<=0) return null;
-  const thr=mx*0.08;            // silence = below 8% of the loudest peak (relative -> scale-independent)
-  const spp=dur/n;             // seconds per peak
-  const minSil=1.0, pad=0.15;  // only cut gaps >= 1s (never mid-sentence); keep 0.15s of air around speech
-  const loud=new Array(n); for(let i=0;i<n;i++) loud[i]=peaks[i]>thr;
-  const keep=loud.slice();
-  let i=0; while(i<n){ if(loud[i]){ i++; continue; } let j=i; while(j<n&&!loud[j]) j++; if((j-i)*spp<minSil){ for(let k=i;k<j;k++) keep[k]=true; } i=j; }
-  const padn=Math.max(0,Math.round(pad/spp));
-  const padded=keep.slice();
-  for(let k=0;k<n;k++){ if(keep[k]){ for(let d=-padn;d<=padn;d++){ const q=k+d; if(q>=0&&q<n) padded[q]=true; } } }
-  const segs=[]; let k=0;
-  while(k<n){ if(padded[k]){ const a=k; while(k<n&&padded[k]) k++; const st=a*spp, en=Math.min(dur,k*spp); if(en-st>0.3) segs.push({start:+st.toFixed(2),end:+en.toFixed(2),zoom:1}); } else { k++; } }
-  return segs;
-}
-function mteMaybeAutoTrim(){
-  try{
-    if(mteAutoTrimDone) return;
-    const cv=(swVids&&swVids.find&&swVids.find(x=>x.id===mteId))||(state.videos&&state.videos.find&&state.videos.find(x=>x.id===mteId));
-    if(!cv || cv.creator_id!==AUTOTRIM_CREATOR) return;                                 // gate: demo account clips only
-    if(cv.edit_state&&cv.edit_state.segments&&cv.edit_state.segments.length) return;    // already edited -> keep saved trims
-    if(!(mteWavePeaks&&mteWavePeaks.length>20)||!(mteDuration>2)) return;               // peaks not ready yet
-    if(!(mteSegments.length===1&&mteSegments[0].start<=0.05&&Math.abs(mteSegments[0].end-mteDuration)<0.2)) return;   // only while pristine
-    const segs=autoTrimSegments(mteWavePeaks,mteDuration);
-    if(!segs||!segs.length) return;
-    const kept=segs.reduce((a,sg)=>a+(sg.end-sg.start),0);
-    if(kept<1||(mteDuration-kept)<0.4){ mteAutoTrimDone=true; return; }                 // nothing worth cutting
-    mtePushUndo();                                                                      // snapshot full clip -> Undo restores every gap
-    mteSegments=segs; mteAutoTrimDone=true;
-    try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}  // repaint INCLUDING the wave lane
-    try{ setTimeout(mteRenderWave,60); setTimeout(mteRenderWave,300); }catch(e){}        // ensure the wave redraws after relayout
-    try{ toast('Auto-trimmed ~'+Math.round(mteDuration-kept)+'s of silence -- drag a handle or tap Undo to restore','ok'); }catch(e){}
-  }catch(e){}
-}
-function mteAutoTrimSchedule(){
-  mteAutoTrimDone=false;
-  let tries=0;
-  (function attempt(){
-    if(mteAutoTrimDone) return;
-    if(mteWavePeaks&&mteWavePeaks.length>20&&mteDuration>2){ mteMaybeAutoTrim(); return; }
-    if(tries++>14) return;                 // wait up to ~6s for peaks/duration, then give up quietly
-    setTimeout(attempt,400);
-  })();
-}
-// ===== Auto Silence & Dead Space Detection Layer (non-destructive, session-based, undoable) =====
-// Builds a structured edit_plan from the already-computed audio peaks (mteWavePeaks). Nothing is
-// written to Supabase: the plan lives in memory only. "Apply" maps the cuts onto the existing
-// mteSegments model (the proven path the render worker already understands -- no lockstep change),
-// snapshotting via mtePushUndo so the normal Undo button restores the exact prior state. Preview
-// draws ghost bands over the timeline WITHOUT touching mteSegments.
-window.ASD={
-  config:{ enabled:true, silenceRatio:0.09, minSilence:0.4, deadSpace:1.2, padTail:0, padLead:0 },  // TikTok-tight: cut lands exactly at the speech edge so the next word starts as the last one ends (the boundary speech peaks are kept either way, so onsets are not clipped)
-  previewOn:false, _sid:null, _plan:null, _sessions:{},
-  // ---- silence_detector + dead_space_detector ----
-  silence_detector:{
-    detect:function(peaks,dur){
-      if(!peaks||!peaks.length||!(dur>0)) return [];
-      const n=peaks.length; let mx=0; for(let i=0;i<n;i++){ if(peaks[i]>mx) mx=peaks[i]; }
-      if(mx<=0) return [];
-      const c=window.ASD.config, thr=mx*c.silenceRatio, spp=dur/n, out=[];
-      let i=0;
-      while(i<n){
-        if(peaks[i]>thr){ i++; continue; }
-        let j=i, sum=0, cnt=0; while(j<n&&peaks[j]<=thr){ sum+=peaks[j]; cnt++; j++; }
-        const L=(j-i)*spp;
-        if(L>=c.minSilence){
-          let st=i*spp+c.padTail, en=Math.min(dur,j*spp)-c.padLead;   // hug the speech: minimal tail after they stop, slightly more lead-in to protect the next word's onset
-          if(en-st>0.05){
-            const reason=(L>=c.deadSpace)?'dead_space':'silence';
-            const depth=1-(cnt?sum/cnt:0)/(thr||1);            // how quiet, 0..1
-            const conf=Math.max(0,Math.min(1, 0.55+Math.min(0.30,(L-c.minSilence)/3)+0.15*depth));
-            out.push({ start:+st.toFixed(2), end:+en.toFixed(2), reason:reason, confidence:+conf.toFixed(2) });
-          }
-        }
-        i=j;
-      }
-      return out;
-    }
-  },
-  // ---- edit_plan_service ----
-  edit_plan_service:{
-    build:function(videoId,sessionId,regions){
-      return { videoId:videoId, sessionId:sessionId, createdAt:Date.now(),
-        autoEdits:regions.map(function(r){ return { type:'cut', startTime:r.start, endTime:r.end, reason:r.reason, confidence:r.confidence }; }) };
-    }
-  },
-  // ---- session_manager (snapshot-based undo; no diff reconstruction) ----
-  session_manager:{
-    createAutoEditSession:function(){
-      const sid='asd_'+Date.now()+'_'+Math.floor(Math.random()*1000);
-      window.ASD._sessions[sid]={ snapshot:mteSegments.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; }), applied:false };
-      return sid;
-    },
-    applyEditPlan:function(sid){
-      const A=window.ASD, ses=A._sessions[sid]; if(!ses||!A._plan) return;
-      mtePushUndo();                                   // global Undo also restores this
-      mteSegments=A._subtract(mteSegments,A._plan.autoEdits);
-      if(!mteSegments.length) mteSegments=[{start:0,end:mteDuration,zoom:1}];
-      ses.applied=true; A.previewOn=false; A.clearGhosts(); mteSelSeg=-1;
-      try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}
-    },
-    undoEditPlan:function(sid){
-      const A=window.ASD, ses=A._sessions[sid]; if(!ses) return;
-      mteSegments=ses.snapshot.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; });   // exact snapshot, full rollback
-      ses.applied=false; A.previewOn=false; A.clearGhosts(); mteSelSeg=-1;
-      try{ mteRenderTL(); mteRenderWave(); mteRenderOverlays(); mteUpdTime(); }catch(e){}
-    }
-  },
-  // subtract cut ranges from the current kept segments, preserving each clip's zoom
-  _subtract:function(segs,cuts){
-    let out=segs.map(function(s){ return {start:s.start,end:s.end,zoom:s.zoom||1}; });
-    cuts.forEach(function(c){
-      const next=[];
-      out.forEach(function(s){
-        if(c.endTime<=s.start||c.startTime>=s.end){ next.push(s); return; }
-        if(c.startTime>s.start) next.push({start:s.start,end:Math.max(s.start,c.startTime),zoom:s.zoom});
-        if(c.endTime<s.end) next.push({start:Math.min(s.end,c.endTime),end:s.end,zoom:s.zoom});
-      });
-      out=next.filter(function(s){ return s.end-s.start>0.05; });
-    });
-    return out;
-  },
-  // ---- preview_renderer integration (ghost bands; does NOT mutate segments) ----
-  renderGhosts:function(){
-    const A=window.ASD; A.clearGhosts();
-    if(!A.previewOn||!A._plan||!mtePps) return;
-    const tl=document.getElementById('mteTl'); if(!tl) return;
-    A._plan.autoEdits.forEach(function(c){
-      const ks=mteSrcToKept(c.startTime), ke=mteSrcToKept(c.endTime);
-      const left=ks*mtePps, w=Math.max(2,(ke-ks)*mtePps);
-      const b=document.createElement('div'); b.className='asd-ghost';
-      b.style.cssText='position:absolute;top:0;bottom:0;left:'+left+'px;width:'+w+'px;background:rgba(215,52,44,.28);border-left:2px dashed #D7342C;border-right:2px dashed #D7342C;border-radius:4px;pointer-events:none;z-index:6;';
-      tl.appendChild(b);
-    });
-  },
-  clearGhosts:function(){ const tl=document.getElementById('mteTl'); if(tl) tl.querySelectorAll('.asd-ghost').forEach(function(e){ e.remove(); }); },
-  reset:function(){ const A=window.ASD; A.previewOn=false; A._sid=null; A._plan=null; A.clearGhosts(); },
-  // ---- toolbar entry point: ONE tap detects + cuts; the normal Undo button restores ----
-  run:function(_retry){
-    const A=window.ASD;
-    if(!A.config.enabled){ toast('Auto-cut is off','err'); return; }
-    if(!(mteWavePeaks&&mteWavePeaks.length>20&&mteDuration>2)){   // peaks may still be decoding -- wait briefly instead of failing
-      if((_retry||0)<8){ toast('Reading audio...','ok'); setTimeout(function(){ A.run((_retry||0)+1); },400); return; }
-      toast('Audio for this clip is still being prepared -- Auto-cut will work once the wave bar appears','err'); return;
-    }
-    const regions=A.silence_detector.detect(mteWavePeaks,mteDuration);
-    if(!regions.length){ toast('No silence or dead space found','ok'); return; }
-    A._sid=A.session_manager.createAutoEditSession();
-    A._plan=A.edit_plan_service.build(mteId,A._sid,regions);
-    const tot=regions.reduce(function(a,r){ return a+(r.endTime-r.startTime); },0);
-    A.session_manager.applyEditPlan(A._sid);   // cut immediately; mtePushUndo inside -> the Undo button fully restores
-    toast('Cut '+regions.length+' gaps (~'+Math.round(tot)+'s) -- tap Undo to restore','ok');
-  }
-};
 async function mteOpen(id){
   let v=swVids.find(x=>x.id===id); if(!v) return;
   // NEVER edit a burned render -- its text is baked into the pixels, so editing it again
@@ -3373,7 +3337,6 @@ async function mteOpen(id){
     v=src; id=src.id;
   }
   mteId=id; mteSelSeg=-1; mteThumbs=[]; mtePlaying=false; mteTexts=[]; mteSegments=[]; mteMedia=[]; mteMovSeq=0; mteSelMedia=null; mteSelText=null; mtePps=0; mteMuted=false; mteResetUndo();
-  try{ if(window.ASD) ASD.reset(); }catch(e){}   // clear any auto-cut preview/plan from the previous clip
   mteRenderOverlays(); mteRenderMedia();   // clear any overlays left on screen from the previous video right away
   let url=signed[id];
   if(!url){ const {data:s}=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); url=s&&s.signedUrl; if(url)signed[id]=url; }
@@ -3381,7 +3344,7 @@ async function mteOpen(id){
   // audio decoding); fall back to decoding in the browser only if none are stored yet.
   mteWavePeaks=null; mteWaveId=null; mteWaveFailed=false;
   (function(){ var wv=(swVids&&swVids.find&&swVids.find(function(x){return x.id===id;}))||(state.videos&&state.videos.find&&state.videos.find(function(x){return x.id===id;})); var st=wv?mteWaveParse(wv.waveform):null; if(st){ mteWaveId=id; mteWavePeaks=st; } else { mteDecodeWave(id); } })();
-  setTimeout(mteRenderWave,400); setTimeout(mteRenderWave,1200); mteAutoTrimSchedule();   // ensure the lane draws once the timeline has laid out (mobile)
+  setTimeout(mteRenderWave,400); setTimeout(mteRenderWave,1200);   // ensure the lane draws once the timeline has laid out (mobile)
   const es=v.edit_state;
   if(es&&es.overlays&&es.overlays.length){ mteTexts=es.overlays.map(o=> o.type==='caption'
       ? {id:++mteOvSeq,type:'caption',words:(o.words||[]).map(w=>({w:w.w,start:+w.start,end:+w.end})),x:o.x,y:o.y,color:o.color||'#ffffff',size:o.size||30,scale:o.scale||1,font:o.font||'classic',style:'outline'}
@@ -3479,7 +3442,7 @@ function mteAdvance(){
   // still hidden+muted. By the time we hit the cut it has been decoding/playing for LEAD
   // and has arrived exactly on the cut point -- so the swap is warm (no decode hitch) and
   // lands on the right frame (no content skip).
-  const LEAD=Math.max(0.06, Math.min(0.32, (run.end-run.start)-0.05));   // pre-roll: capped at 0.32 and never longer than the run itself -> short segments can't get stuck in a broken-record loop
+  const LEAD=0.32;
   if(!mteRolling && t>=run.end-LEAD){
     const sb=mteVB(); sb.muted=true; const warm=Math.max(0,runs[ni].start-LEAD);
     if(Math.abs(sb.currentTime-warm)>0.04){ try{sb.currentTime=warm;}catch(e){} }
@@ -3578,7 +3541,6 @@ function mteRenderTL(keepScroll){
   if(prevSL!=null){ mteProgScroll=true; scroll.scrollLeft=prevSL; clearTimeout(mteProgT); mteProgT=setTimeout(()=>{mteProgScroll=false;},90); }   // keep the marker exactly where it was
   else mteUpdScroll();
   mteApplyVideoZoom(); mteRenderOTrack(); mteRenderWave();
-  try{ if(window.ASD&&ASD.previewOn) ASD.renderGhosts(); }catch(e){}   // keep auto-cut preview bands after a rebuild
 }
 // The on-screen playhead = the centred marker = the scroll position. This (not the video's
 // currentTime, which can lag a scrub) is the source of truth for "where we're up to".
@@ -3625,7 +3587,7 @@ function mteRenderWave(){
   ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(0,mid-0.5,cw,1);
   ctx.font='9px -apple-system,Helvetica,Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.40)'; ctx.fillText('AUDIO',6,11);
   if(!mtePps||!mteDuration)return;
-  if(mteWaveId!==mteId || !mteWavePeaks){ ctx.font='10px -apple-system,Helvetica,Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.55)'; ctx.textAlign='center'; ctx.fillText(mteWaveFailed?'Audio still being prepared -- Auto-cut available once the wave loads':'Loading audio...', cw/2, mid+3); ctx.textAlign='left'; return; }
+  if(mteWaveId!==mteId || !mteWavePeaks){ if(mteWaveFailed){ ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillText('no audio',cw-52,11); } return; }
   const pad=(scroll.clientWidth||320)/2, sl=scroll.scrollLeft, total=mteTotalKept();
   const bd=mteDuration/mteWavePeaks.length;
   ctx.fillStyle='#46a0ff';
@@ -3921,30 +3883,6 @@ function mteRelayout(){ var m=document.getElementById('mte'); if(!m||!m.classLis
 window.addEventListener('resize', mteRelayout);
 window.addEventListener('orientationchange', function(){ setTimeout(mteRelayout,200); setTimeout(mteRelayout,600); });
 try{ if(window.visualViewport){ window.visualViewport.addEventListener('resize', mteRelayout); } }catch(e){}
-// ---- TEMP editor touch diagnostic (build tag b5). Alfie only; removed once the editor is fixed. ----
-(function(){
-  var ts=0,tm=0,te=0,pd=0,lastTgt='';
-  function tgtOf(e){ try{ var t=e.target, c=t.className; if(c&&c.baseVal!==undefined)c=c.baseVal; c=(''+(c||'')).trim().split(/\s+/)[0]||''; return (t.id?('#'+t.id):((t.tagName||'?').toLowerCase()+(c?('.'+c):''))); }catch(_){ return 'err'; } }
-  document.addEventListener('touchstart',function(e){ts++; lastTgt=tgtOf(e); },true);
-  document.addEventListener('touchmove',function(){tm++;},true);
-  document.addEventListener('touchend',function(){te++;},true);
-  document.addEventListener('pointerdown',function(){pd++;},true);
-  setInterval(function(){
-    var d=document.getElementById('mteDbg'); if(!d)return;
-    var alfie=(typeof BUCKET!=='undefined' && BUCKET==='videos');
-    var open=document.getElementById('mte') && document.getElementById('mte').classList.contains('open');
-    if(!alfie || !open){ d.style.display='none'; return; }
-    d.style.display='block';
-    var sc=document.getElementById('mteTlScroll');
-    var cw=sc?sc.clientWidth:-1, sw=sc?Math.round(sc.scrollWidth):-1;
-    var NL=String.fromCharCode(10);
-    d.textContent=['b6  native:'+(isNativeApp()?'YES':'no')+'  open:'+(open?1:0),
-      'w:'+cw+' sw:'+sw+' pps:'+(Math.round(mtePps*10)/10)+' fit:'+(Math.round(mtePpsFit*10)/10)+' seg:'+(mteSegments?mteSegments.length:-1),
-      'touch ts:'+ts+' tm:'+tm+' te:'+te+'  ptr pd:'+pd,
-      'hdl sc:'+(window.__sc||0)+' gp:'+(window.__gp||0)+' ov:'+(window.__ov||0),
-      'tgt:'+lastTgt].join(NL);
-  },400);
-})();
 
 function mteOnTimeUpdate(){ if(!mtePlaying) mteUpdTime(); }   // during playback the 60fps loop (mteAdvance) handles boundaries
 
@@ -4307,7 +4245,7 @@ async function mteAddCaptions(){
   if(mteTexts.some(o=>o.type==='caption')){ toast('Captions already added -- tap a word to edit','ok'); return; }
   let tr=v.transcript; if(typeof tr==='string'){ try{ tr=JSON.parse(tr); }catch(e){ tr=null; } }
   if(!(tr&&tr.length)){
-    toast('Fetching transcript\u2026');
+    toast('Fetching transcript…');
     try{ const {data}=await sb.from('ed_videos').select('transcript').eq('id',mteId).single(); if(data&&data.transcript){ tr=(typeof data.transcript==='string')?JSON.parse(data.transcript):data.transcript; v.transcript=tr; } }catch(e){}
   }
   if(!(tr&&tr.length)){ toast('Captions are still being generated for this clip -- try again in a moment','err'); return; }
@@ -4517,8 +4455,7 @@ function mteUpdTextVis(){
 
 async function mteSave(){
   const v=swVids.find(x=>x.id===mteId); if(!v){ mteClose(); return; }
-  let segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000})).filter(s=>(s.end-s.start)>=0.2);   // drop sub-0.2s slivers: they cause the broken-record preview loop + a flash in the render
-  if(!segs.length) segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000}));
+  const segs=mteSegments.map(s=>({start:Math.round(s.start*100)/100,end:Math.round(s.end*100)/100,zoom:Math.round((s.zoom||1)*1000)/1000}));
   const _otot=mteTotalKept()||0;
   // only store a text overlay's window when it's actually been trimmed below the full clip
   const _win=(o)=>(o.start!=null&&o.end!=null&&(o.start>0.05||o.end<_otot-0.05))?{start:Math.round(o.start*100)/100,end:Math.round(o.end*100)/100}:{};
@@ -4559,7 +4496,7 @@ async function openScheduler(id){
   var autoCap=await tfAutoCaption(v);
   window.schedSelAcct = accs.length ? ((accs.find(function(a){return a.account_tag===preferred;})||accs[0]).account_tag) : '';
   var pills = accs.length
-    ? '<div id="schedAcctPills" style="display:flex;flex-wrap:wrap;gap:8px">'+accs.map(function(a){return '<button type="button" class="schp'+(a.account_tag===window.schedSelAcct?' active':'')+'" data-tag="'+esc(a.account_tag)+'" onclick="schedPickAcct(this)">'+esc(a.account_tag)+'</button>';}).join('')+'</div>'
+    ? '<div id="schedAcctPills" style="display:flex;flex-wrap:wrap;gap:8px">'+accs.map(function(a){return '<button type="button" class="schp'+(a.account_tag===window.schedSelAcct?' active':'')+'" data-tag="'+esc(a.account_tag)+'" onclick="schedPick(this)">'+esc(a.account_tag)+'</button>';}).join('')+'</div>'
     : '<div class="h-sub" style="font-size:13px">No TikTok account connected. Add one in Content Schedule first.</div>';
   var inp='width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#fff;box-sizing:border-box';
   var lbl='font-size:13px;font-weight:600;display:block;margin:14px 0 7px';
@@ -4588,7 +4525,7 @@ async function tfAutoCaption(v){
   if(!hook && v&&v.caption_suggested) hook=String(v.caption_suggested).replace(/\s+/g,' ').trim();
   return (hook?hook+'\n\n':'')+'#tiktokshop #fyp #foryou';
 }
-function schedPickAcct(btn){
+function schedPick(btn){
   window.schedSelAcct = btn.dataset.tag;
   var wrap=document.getElementById('schedAcctPills');
   if(wrap) [].forEach.call(wrap.children,function(b){ b.classList.toggle('active', b===btn); });
@@ -4621,7 +4558,11 @@ async function swDownload(id){
   }
   closeModal();
   const target=edited||v;                    // edited file if ready, else original
-  const handled=await shareToCameraRoll(target.storage_path, target.filename);   // phone -> camera roll via share sheet
+  let handled=false;
+  if(nativeSaveReady()){   // native app -> download + save straight to the camera roll (one tap)
+    try{ const su=await sb.storage.from(BUCKET).createSignedUrl(target.storage_path,3600); if(su&&su.data&&su.data.signedUrl){ await nativeSaveFromUrl(su.data.signedUrl, target.filename); handled=true; } }catch(e){ handled=false; }
+  }
+  if(!handled){ handled=await shareToCameraRoll(target.storage_path, target.filename); }   // web/PWA -> share sheet
   if(handled){ await recordDownload(id); } else { await fileDownload(target, id); }   // desktop falls back to a plain download; both record as Downloaded
   const card=document.querySelector('.sw-card.is-top');
   if(card&&card.dataset.id===id){ card.classList.add('fly-left'); setTimeout(()=>swAdvance(),420); } else { swRender(); }
@@ -4842,7 +4783,7 @@ function renderOverlays(){
   const sugg=state.suggestions||[], jobs=state.aijobs||[];
   empty.classList.toggle('hide', sugg.length>0 || jobs.length>0);
   let html='';
-  if(jobs.length){ html+='<div class="card"><div style="font-weight:700;margin-bottom:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hourglass"></use></svg> Generating\u2026</div>'+jobs.map(j=>`<div class="h-sub">${esc(ovName(j.video_id))} \u2014 ${esc(j.message||j.status)}</div>`).join('')+'</div>'; }
+  if(jobs.length){ html+='<div class="card"><div style="font-weight:700;margin-bottom:6px"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hourglass"></use></svg> Generating…</div>'+jobs.map(j=>`<div class="h-sub">${esc(ovName(j.video_id))} — ${esc(j.message||j.status)}</div>`).join('')+'</div>'; }
   html+=sugg.map(ovCard).join('');
   wrap.innerHTML=html;
 }
@@ -4853,9 +4794,9 @@ function ovCard(s){
     const insp=(o.inspired_by||[]).join(', ');
     const isRej=rej.has(i);
     return `<div class="opt${isRej?' rej':''}">
-      <div class="opt-h">Option ${i+1}${isRej?' \xb7 rejected':''}</div>
+      <div class="opt-h">Option ${i+1}${isRej?' · rejected':''}</div>
       <div class="ovls">${ov||'<span class="h-sub">(no overlay text)</span>'}</div>
-      <div class="desc"><b>Description:</b> ${esc(o.description||'\u2014')}</div>
+      <div class="desc"><b>Description:</b> ${esc(o.description||'—')}</div>
       ${o.rationale?`<div class="h-sub"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"></use></svg> ${esc(o.rationale)}</div>`:''}
       ${insp?`<div class="h-sub"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-corner"></use></svg> from: ${esc(insp)}</div>`:''}
       <div class="vrow">
@@ -4867,27 +4808,27 @@ function ovCard(s){
   const allRej = opts.length>0 && rej.size>=opts.length;
   return `<div class="card">
     <div style="font-weight:700">${esc(ovName(s.video_id))}</div>
-    <div class="h-sub" style="margin-bottom:11px">${esc(prodName(s.product_uid)||'')} \xb7 ${opts.length} ideas \xb7 ${esc(s.model||'')}</div>
+    <div class="h-sub" style="margin-bottom:11px">${esc(prodName(s.product_uid)||'')} · ${opts.length} ideas · ${esc(s.model||'')}</div>
     <div class="opts">${body}</div>
     ${allRej?`<div style="margin-top:11px"><button class="btn" onclick="regenSuggestions('${s.id}','${s.video_id}','${s.product_uid||''}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Regenerate</button></div>`:''}
   </div>`;
 }
 async function approveSuggestion(id,i){
   const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{};
-  const why=prompt('Nice \u2014 what worked about this one? (trains future suggestions)'); if(why===null)return;
+  const why=prompt('Nice — what worked about this one? (trains future suggestions)'); if(why===null)return;
   await sb.from('caption_feedback').insert({suggestion_id:id,video_id:s.video_id,product_uid:s.product_uid,option_index:i,decision:'approved',chosen_overlay:o.overlay||null,chosen_description:o.description||null,reason:why,created_by:displayName(state.user)});
   await sb.from('caption_suggestions').update({status:'decided'}).eq('id',id);
   if(s.video_id) await sb.from('ed_videos').update({caption_final:o.description||null,caption_suggested:JSON.stringify(o.overlay||[])}).eq('id',s.video_id);
-  toast('Approved \u2014 saved to the knowledge base','ok'); loadOverlays();
+  toast('Approved — saved to the knowledge base','ok'); loadOverlays();
 }
 async function rejectSuggestion(id,i){
   const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{};
-  const why=prompt("Got it \u2014 why didn't this one land? (trains future suggestions)"); if(why===null)return;
+  const why=prompt("Got it — why didn't this one land? (trains future suggestions)"); if(why===null)return;
   await sb.from('caption_feedback').insert({suggestion_id:id,video_id:s.video_id,product_uid:s.product_uid,option_index:i,decision:'rejected',chosen_overlay:o.overlay||null,chosen_description:o.description||null,reason:why,created_by:displayName(state.user)});
-  toast('Noted \u2014 thanks','ok'); loadOverlays();
+  toast('Noted — thanks','ok'); loadOverlays();
 }
 function copyOpt(id,i){ const s=(state.suggestions||[]).find(x=>x.id===id); if(!s)return; const o=(s.options||[])[i]||{}; const t=((o.overlay||[]).join('\n'))+(o.description?('\n\n'+o.description):''); copyText(t,'suggestion'); }
-async function regenSuggestions(sid,vid,prod){ await sb.from('caption_suggestions').update({status:'decided'}).eq('id',sid); await sb.from('ai_jobs').insert({video_id:vid,product_uid:prod||null,status:'queued',requested_by:displayName(state.user)}); toast('Regenerating\u2026','ok'); loadOverlays(); }
+async function regenSuggestions(sid,vid,prod){ await sb.from('caption_suggestions').update({status:'decided'}).eq('id',sid); await sb.from('ai_jobs').insert({video_id:vid,product_uid:prod||null,status:'queued',requested_by:displayName(state.user)}); toast('Regenerating…','ok'); loadOverlays(); }
 
 // ---------- UPLOAD (per-video manager, background) ----------
 function tusUpload(file,objectPath,onProgress){ return new Promise(async(res,rej)=>{ if(!window.tus)return rej(new Error('tus')); let token; try{const{data}=await sb.auth.getSession();token=data.session&&data.session.access_token;}catch(e){} if(!token)return rej(new Error('no-session')); const up=new tus.Upload(file,{endpoint:SUPABASE_URL+'/storage/v1/upload/resumable',retryDelays:[0,1000,3000,5000,10000],headers:{authorization:'Bearer '+token,apikey:SUPABASE_KEY,'x-upsert':'true'},uploadDataDuringCreation:false,removeFingerprintOnSuccess:true,chunkSize:1*1024*1024,metadata:{bucketName:BUCKET,objectName:objectPath,contentType:'video/mp4',cacheControl:'3600'},onError:rej,onProgress:(s,t)=>{if(onProgress)onProgress(s,t);},onSuccess:res}); up.findPreviousUploads().then(p=>{if(p&&p.length)up.resumeFromPreviousUpload(p[0]);up.start();}).catch(()=>up.start()); }); }
@@ -4930,7 +4871,7 @@ async function bgUpload(jobs){
   drawBg();
 }
 function openUploadManager(preFiles){
-  if(!state.products.length){ toast('Create a product first (run a scrape, or it\u2019s created on the fly)','err'); }
+  if(!state.products.length){ toast('Create a product first (run a scrape, or it’s created on the fly)','err'); }
   window.__umFiles=(preFiles&&preFiles.length)?[...preFiles]:[];
   const opts=state.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   showModal(`<h3>Upload videos</h3>
@@ -5021,26 +4962,6 @@ async function saveAccount(id){
 // (e.g. on finger-down) so the bytes are already downloading before the tap completes -> the
 // "Save Video" sheet opens as soon as possible instead of waiting for the whole fetch on tap.
 const _mfCache={};
-// ----- download progress modal (creator "Save video" to camera roll) -----
-var __dlBarOpen=false;
-function dlShowProgress(){
-  __dlBarOpen=true;
-  showModal('<div style="text-align:center;padding:8px 4px 2px"><h3 style="margin:0 0 12px">Saving your video</h3>'
-    +'<div style="height:10px;background:#e9e4d8;border-radius:6px;overflow:hidden;margin:0 2px 8px"><div id="dlBar" style="height:100%;width:0%;background:var(--grad);border-radius:6px;transition:width .15s"></div></div>'
-    +'<div id="dlPct" style="font-weight:800;font-size:14px;margin-bottom:10px">0%</div>'
-    +'<p class="h-sub" style="margin:0;font-size:12.5px;line-height:1.5">Please don\'t leave the app while this downloads. If you leave, it will pause and pick back up when you come back.</p></div>');
-}
-function dlSetProgress(p){ if(!__dlBarOpen) return; var pct=Math.max(0,Math.min(100,Math.round((p||0)*100))); var b=document.getElementById('dlBar'); if(b) b.style.width=pct+'%'; var t=document.getElementById('dlPct'); if(t) t.textContent=pct+'%'; }
-function dlCloseProgress(){ if(!__dlBarOpen) return; __dlBarOpen=false; try{ closeModal(); }catch(e){} }
-async function __fetchFileProgress(url, filename){
-  var resp=await fetch(url);
-  var total=+(resp.headers.get('content-length')||0);
-  if(!resp.body||!resp.body.getReader||!total){ var b0=await resp.blob(); dlSetProgress(1); return new File([b0], filename||'video.mp4', {type:b0.type||'video/mp4'}); }
-  var reader=resp.body.getReader(); var chunks=[]; var recv=0;
-  for(;;){ var rd=await reader.read(); if(rd.done) break; chunks.push(rd.value); recv+=rd.value.length; dlSetProgress(recv/total); }
-  var blob=new Blob(chunks,{type:resp.headers.get('content-type')||'video/mp4'});
-  return new File([blob], filename||'video.mp4', {type:blob.type||'video/mp4'});
-}
 function getMediaFile(storage_path, filename){
   if(_mfCache[storage_path]) return _mfCache[storage_path];
   const p=(async()=>{
@@ -5048,7 +4969,8 @@ function getMediaFile(storage_path, filename){
       let {data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600);
       if(error || !(data&&data.signedUrl)){ try{ await sb.auth.refreshSession(); }catch(e){} ({data,error}=await sb.storage.from(BUCKET).createSignedUrl(storage_path,600)); }   // stale/expired login -> refresh + retry
       if(error || !(data&&data.signedUrl)) throw (error||new Error('no signed url'));
-      return await __fetchFileProgress(data.signedUrl, filename);
+      const blob=await (await fetch(data.signedUrl)).blob();
+      return new File([blob], filename||'video.mp4', {type: blob.type||'video/mp4'});
     }catch(e){ return null; }
   })();
   _mfCache[storage_path]=p;
@@ -5057,22 +4979,13 @@ function getMediaFile(storage_path, filename){
 }
 function prefetchMediaFile(storage_path, filename){ if(storage_path) getMediaFile(storage_path, filename); }
 function prefetchTempFile(id){ const f=(state.files||[]).find(x=>x.id===id); if(f) prefetchMediaFile(f.storage_path, f.filename); }
-async function shareToCameraRoll(storage_path, filename, onSaved){
-  if(!(isMobileDevice() && navigator.share)) return false;
+async function shareToCameraRoll(storage_path, filename){
+  if(!(isMobileDevice() && navigator.canShare)) return false;
   let file=null;
   try{ file=await getMediaFile(storage_path, filename); }catch(e){ file=null; }   // reuses the prefetch if it was already started
-  dlCloseProgress();   // file is downloaded -> hide the % bar before the share sheet opens
-  if(!file) return false;
-  // Do NOT hard-gate on canShare({files}) -- in an installed iOS PWA it frequently returns false even
-  // though the share sheet's "Save Video" (camera roll) works fine. Attempt the share; route activation
-  // loss to a fresh-tap Save (still camera roll), and only a real TypeError (files truly unsupported)
-  // falls back to a Files download. onSaved fires ONLY on a genuine completed save.
-  try{ await navigator.share({files:[file]}); if(onSaved)onSaved(); return true; }   // completed -> camera roll
-  catch(err){
-    if(err && err.name==='AbortError') return true;        // cancelled = handled, not saved
-    if(err && err.name==='TypeError') return false;        // platform genuinely can't share files -> caller saves to Files
-    promptShareGeneric(file, onSaved); return true;        // activation expired -> fresh-tap Save, still to camera roll
-  }
+  if(!(file && navigator.canShare({files:[file]}))) return false;
+  try{ await navigator.share({files:[file]}); return true; }              // share sheet -> "Save Video" -> camera roll
+  catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file); return true; }   // activation expired -> fresh tap
 }
 function dlShowLoading(){
   showModal('<div style="text-align:center;padding:10px 4px 4px"><div class="inline-loader" style="margin:4px auto 16px"></div><h3 style="margin:0 0 7px">Preparing your video</h3><p class="h-sub" style="margin:0;font-size:13.5px;line-height:1.5">Hang tight -- the <b>Save</b> sheet will pop up in a moment.<br>Keep the app open; don\'t swipe away.</p></div>');
@@ -5286,7 +5199,7 @@ async function enterApp(){ state.viewAs=state.user.id; ['authName','authEmail','
 function showLogin(){ state.user=null; if(authMode==='signup')toggleAuthMode(); setView('login'); }
 async function refreshAuth(){ const{data}=await sb.auth.getSession(); if(data.session) await gateBySession(data.session); else showLogin(); }
 async function doLogin(){ authMsg(''); const email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!email||!pw){authMsg('Enter email and password');return;} const{data,error}=await sb.auth.signInWithPassword({email,password:pw}); if(error){authMsg(error.message);return;} gateBySession(data.session); }
-async function doSignup(){ authMsg(''); const name=val('authName').trim(),email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!name){authMsg('Enter your first name');return;} if(!email||!pw){authMsg('Enter email and password');return;} if(pw.length<6){authMsg('Password \u2265 6 chars');return;} const{data,error}=await sb.auth.signUp({email,password:pw}); if(error){authMsg(error.message);return;} let session=data.session; if(!session){const r=await sb.auth.signInWithPassword({email,password:pw});session=r.data&&r.data.session;} if(session){ await sb.from('profiles').upsert({id:session.user.id,email:session.user.email,first_name:name,status:'pending',last_seen:new Date().toISOString()}); state.user={id:session.user.id,email:session.user.email,first_name:name,status:'pending',role:'user'}; setView('pending'); } else authMsg('Request submitted \u2014 log in once approved.'); }
+async function doSignup(){ authMsg(''); const name=val('authName').trim(),email=val('authEmail').trim(),pw=document.getElementById('authPass').value; if(!name){authMsg('Enter your first name');return;} if(!email||!pw){authMsg('Enter email and password');return;} if(pw.length<6){authMsg('Password ≥ 6 chars');return;} const{data,error}=await sb.auth.signUp({email,password:pw}); if(error){authMsg(error.message);return;} let session=data.session; if(!session){const r=await sb.auth.signInWithPassword({email,password:pw});session=r.data&&r.data.session;} if(session){ await sb.from('profiles').upsert({id:session.user.id,email:session.user.email,first_name:name,status:'pending',last_seen:new Date().toISOString()}); state.user={id:session.user.id,email:session.user.email,first_name:name,status:'pending',role:'user'}; setView('pending'); } else authMsg('Request submitted — log in once approved.'); }
 async function doLogout(){ await sb.auth.signOut(); showLogin(); }
 function promptName(){ showModal(`<h3>Welcome! What's your first name?</h3><input id="nm" placeholder="First name"><div class="actions"><button class="btn" onclick="saveMyName()">Save</button></div>`); setTimeout(()=>{const e=document.getElementById('nm');if(e)e.focus();},60); }
 async function saveMyName(){ const n=val('nm').trim(); if(!n)return; await sb.from('profiles').update({first_name:n}).eq('id',state.user.id); state.user.first_name=n; document.getElementById('sideName').textContent=displayName(state.user)+(state.isAdmin?' (admin)':''); closeModal(); toast('Thanks, '+n+'!','ok'); }
@@ -5821,9 +5734,7 @@ async function uploadOne(file,prodId,onProgress){
   var cid = state.isAdmin ? (state.creatorFilter||null) : (ME&&ME.id);
   var path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe;
   await tusUpload(file,path,onProgress); if(onProgress)onProgress(file.size||0,file.size||0);
-  var row={creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'};
-  if(state.isAdmin && cid){ row.status='ready'; row.delivered_at=new Date().toISOString(); }   // admin bank upload = a finished edit -> deliver to the client (Ready to post / Sent to Post)
-  var ins=await sb.from('ed_videos').insert(row).select('id').single();
+  var ins=await sb.from('ed_videos').insert({creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'}).select('id').single();
   if(ins.error) throw ins.error;
   // refresh the creator's "Your uploads" list as soon as each upload lands
   if(!state.isAdmin && state.currentView==='upload'){ try{ loadUpload(); }catch(e){} }
@@ -5855,9 +5766,6 @@ async function loadEditor(){
     try{ var mres=await sb.from('ed_videos').select('*').in('id',missing); if(!mres.data||!mres.data.length) break; mres.data.forEach(function(x){ byId[x.id]=x; }); }catch(e){ break; }
   }
   var rootOf=function(v){ var cur=v,g=0; while(cur&&cur.kind==='edited'&&cur.source_video_id&&byId[cur.source_video_id]&&g++<8){ cur=byId[cur.source_video_id]; } return cur; };
-  // collapse duplicate edited renders -> keep only the latest render per source clip. The render worker
-  // can emit several per source, and renders whose source was deleted were each becoming their own deck card.
-  (function(){ var _lr={}; all.forEach(function(v){ if(v.kind==='edited'&&v.source_video_id){ var c=_lr[v.source_video_id]; if(!c||new Date(v.created_at||0)>new Date(c.created_at||0)) _lr[v.source_video_id]=v; } }); all=all.filter(function(v){ return !(v.kind==='edited'&&v.source_video_id&&_lr[v.source_video_id]&&_lr[v.source_video_id]!==v); }); })();
   var editedByRoot={};
   all.forEach(function(v){ if(v.kind==='edited'){ var rid=rootOf(v).id; var cur=editedByRoot[rid]; if(!cur || new Date(v.created_at||0)>new Date(cur.created_at||0)) editedByRoot[rid]=v; } });
   var rootIds=Array.from(new Set(all.map(function(v){ return v.kind==='edited'?rootOf(v).id:v.id; })));
@@ -5866,16 +5774,7 @@ async function loadEditor(){
   list=list.filter(function(v){ return !(v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready'); });   // delivered-to-creator clips leave the editor deck
   list.forEach(function(v){ var er=editedByRoot[v.id]; if(er){ v._editedId=er.id; v._editedAt=er.created_at; } v._srcProxy=null; v._srcES=null; v._rootId=null; });
   try{ var dres=await sb.from('ed_video_downloads').select('video_id').eq('user_id',state.user.id); var dset=new Set((dres.data||[]).map(function(d){ return d.video_id; })); list=list.filter(function(v){ return (v._editedId||(v.edit_state&&v.edit_state.segments))?true:!dset.has(v.id); }); }catch(e){}
-  // A clip is DONE once any of its edited renders was posted/scheduled/delivered. The deck card is the
-  // raw ROOT and the query above excludes posted/scheduled rows, so a posted render is invisible here --
-  // without this lookup an edited-and-sent clip keeps reappearing in the deck. Fetch the done renders by
-  // source and drop their roots.
-  try{ var _rids=list.map(function(v){ return v.id; }); if(_rids.length){ var _dr=await sb.from('ed_videos').select('source_video_id').eq('workspace_id',WS).eq('kind','edited').in('source_video_id',_rids).or('status.in.(posted,scheduled,ready),posted_at.not.is.null,delivered_at.not.is.null'); if(_dr&&!_dr.error){ var _doneSrc=new Set((_dr.data||[]).map(function(r){ return r.source_video_id; })); list=list.filter(function(v){ return !_doneSrc.has(v.id); }); } } }catch(e){}
-  // Collapse duplicate re-uploads of the SAME footage (same creator + filename + EXACT byte size) into a
-  // single deck card, so handling one doesn't leave an identical twin cycling behind it. Strict key only --
-  // clips that merely share a name but differ in size are kept separate. Survivor = the most-edited (or newest) copy.
-  (function(){ var groups={}; list.forEach(function(v){ if(!v.filename||!v.size_bytes) return; var k=(v.creator_id||'')+'|'+v.filename+'|'+v.size_bytes; (groups[k]=groups[k]||[]).push(v); }); var keep=new Set(); Object.keys(groups).forEach(function(k){ var g=groups[k]; var best=g.slice().sort(function(a,b){ var ae=(a._editedId||(a.edit_state&&a.edit_state.segments))?1:0, be=(b._editedId||(b.edit_state&&b.edit_state.segments))?1:0; if(ae!==be) return be-ae; return new Date(b.created_at||0)-new Date(a.created_at||0); })[0]; keep.add(best.id); }); list=list.filter(function(v){ if(!v.filename||!v.size_bytes) return true; var k=(v.creator_id||'')+'|'+v.filename+'|'+v.size_bytes; if(!groups[k]||groups[k].length<2) return true; return keep.has(v.id); }); })();
-  list.sort(function(a,b){ return new Date(b.created_at||0)-new Date(a.created_at||0); });   // newest first -> latest uploads surface at the front of the stack so they're never buried behind older clips
+  list.sort(function(a,b){ return new Date(a.created_at||0)-new Date(b.created_at||0); });   // oldest first -> front of the queue (FIFO), so nothing goes out late
   swVids=list; swIdx=0;
   for(var i=0;i<Math.min(3,swVids.length);i++){ var v=swVids[i]; if(!signed[v.id]){ var s=await sb.storage.from(BUCKET).createSignedUrl(previewPath(v),3600); if(s&&s.data&&s.data.signedUrl) signed[v.id]=s.data.signedUrl; } }
   swRender();
@@ -5904,13 +5803,9 @@ async function loadBank(){
 function bankBuckets(){
   var uid=(state.user&&state.user.id);
   var b={new:[],edited:[],downloaded:[],posted:[]};
-  // A raw clip is done once any of ITS edited renders was sent/posted -- otherwise the root sits in
-  // "To do" forever even though its edit is live (the edited render is hidden from the bank).
-  var doneSrc=new Set();
-  (state.videos||[]).forEach(function(v){ if(v.kind==='edited'&&v.source_video_id&&(v.posted_at||v.delivered_at||v.status==='posted'||v.status==='scheduled'||v.status==='ready')) doneSrc.add(v.source_video_id); });
   (state.videos||[]).filter(function(v){ return !v.pending_approval; }).forEach(function(v){
     if(v.kind==='edited') return;
-    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled' || v.delivered_at || v.status==='ready' || doneSrc.has(v.id);
+    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled';
     if(posted){ b.posted.push(v); }
     else if(typeof downloadedBy==='function' && downloadedBy(v.id,uid)){ b.downloaded.push(v); }
     else { b.new.push(v); }
@@ -5987,137 +5882,63 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,edit_state,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).order('delivered_at',{ascending:false}).limit(150); srcs=r.data||[]; }catch(e){ srcs=[]; }
-  // Tidy: a downloaded clip stays re-downloadable for 3 days after the creator posts it, then drops out of
-  // their list (it still lives in the admin bank). Un-posted clips always stay until they're handled.
-  srcs=srcs.filter(function(c){ return !c.posted_at || (Date.now()-new Date(c.posted_at).getTime()) < 3*24*60*60*1000; });
-  var _ids=srcs.map(function(x){return x.id;}); var _ren={};
-  if(_ids.length){ try{ var rr=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,created_at').eq('creator_id',ME.id).eq('kind','edited').in('source_video_id',_ids).order('created_at',{ascending:false}); (rr.data||[]).forEach(function(x){ if(!_ren[x.source_video_id]) _ren[x.source_video_id]=x; }); }catch(e){} }
-  srcs.forEach(function(c){ c._render=_ren[c.id]||((c.storage_path&&!(c.edit_state&&c.edit_state.segments&&c.edit_state.segments.length))?{id:c.id,storage_path:c.storage_path,filename:c.filename}:null); });
-  srcs.sort(function(a,b){ var ad=!!a.posted_at, bd=!!b.posted_at; if(ad!==bd) return ad?1:-1; var ka=new Date((ad?a.posted_at:a.delivered_at)||0).getTime(), kb=new Date((bd?b.posted_at:b.delivered_at)||0).getTime(); return kb-ka; });
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  for(var i=0;i<srcs.length;i++){
+    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){ srcs[i]._render=null; }
+  }
   state.readyList=srcs; readyRender();
-  clearTimeout(state.readyPollT);
-  var anyRendering=srcs.some(function(x){ return !(x._render&&x._render.storage_path) && !x.posted_at; });
-  if(anyRendering && state.currentView==='ready'){ state.readyPollT=setTimeout(function(){ if(state.currentView==='ready') loadReady(); }, 8000); }   // auto-refresh so 'rendering' flips to 'ready' on its own
 }
 function readyRender(){
   var root=document.getElementById('readyBody'); if(!root) return;
   var list=state.readyList||[];
-  if(!state.rtpSelIds) state.rtpSelIds=new Set();
-  var anyReady=list.some(function(v){ return v._render&&v._render.storage_path; });
-  var ctrls=anyReady?(state.rtpSel?'<div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="rtpSelectAllTodo()" style="white-space:nowrap">Select all</button><button class="btn ghost sm" onclick="rtpToggleSelect()">Done</button></div>':'<button class="btn ghost sm" onclick="rtpToggleSelect()" style="white-space:nowrap">Select multiple</button>'):'';
-  var head='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 2px"><div style="font-size:21px;font-weight:800">Ready to post</div>'+ctrls+'</div><div class="h-sub" style="margin:4px 2px 14px">Save each video and post it in TikTok. Saved ones grey out and drop to Downloaded below.</div>';
+  var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Your finished videos. Save each one, post it in TikTok and tag the product, then tap "Mark posted".</div>';
   if(!list.length){ root.innerHTML=head+'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>'; return; }
-  var todo=list.filter(function(v){ return !v.posted_at; });
-  var done=list.filter(function(v){ return !!v.posted_at; });
-  var html=head;
-  html+='<div class="h-sub" style="font-weight:800;color:#1A1512;margin:0 2px 8px">To download'+(todo.length?(' ('+todo.length+')'):'')+'</div>';
-  html+= todo.length ? todo.map(readyCard).join('') : '<div class="empty" style="margin-bottom:14px">All caught up -- everything here has been downloaded.</div>';
-  if(done.length){ html+='<div class="h-sub" style="font-weight:800;color:#0f6e56;margin:16px 2px 8px;display:flex;align-items:center;gap:6px"><svg class="svic" style="width:1em;height:1em" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded ('+done.length+')</div>'+done.map(readyCard).join(''); }
-  if(state.rtpSel){ var _n=state.rtpSelIds.size; html+='<div style="position:sticky;bottom:calc(72px + env(safe-area-inset-bottom));display:flex;justify-content:center;margin-top:12px;z-index:5"><div style="display:flex;align-items:center;gap:12px;background:#1A1512;color:#fff;border-radius:14px;padding:9px 9px 9px 15px;box-shadow:0 10px 26px rgba(0,0,0,.4)"><span style="font-weight:700;font-size:14px;white-space:nowrap">'+_n+' selected</span><button class="btn" style="background:var(--grad);border:0;'+(_n?'':'opacity:.5;pointer-events:none')+'" onclick="rtpSaveSelected()"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Save'+(_n?(' '+_n):'')+'</button></div></div><div style="height:8px"></div>'; }
-  root.innerHTML=html;
-}
-async function requeueRender(id){
-  try{
-    var r=await sb.from('ed_videos').select('id,storage_path,filename,folder_id,product_uid,edit_state').eq('id',id).single();
-    if(r.error||!r.data){ toast('Could not re-render','err'); return; }
-    var clip=r.data; var es=clip.edit_state;
-    if(!(es&&es.segments&&es.segments.length)){ toast('Nothing to re-render (no saved edit)','err'); return; }
-    var wOverlays=(es.overlays||[]).filter(function(o){return o.type!=='caption';}).map(function(o){ var sty=o.style||'plain'; return Object.assign({text:o.text,x:o.x,y:o.y,color:o.color,size:o.size,scale:(o.scale||1),font:(o.font==='classic'?'TikTok Sans':o.font),weight:600,style:sty,box:(sty==='box'),stroke:(sty==='outline'?2.5:0),outline:(sty==='outline')}, (o.start!=null&&o.end!=null?{start:o.start,end:o.end}:{})); });
-    try{ await sb.from('ed_edit_jobs').delete().eq('video_id',id).in('status',['queued','rendering','error']); }catch(e){}
-    var job={video_id:id,storage_path:clip.storage_path,filename:clip.filename,folder_id:clip.folder_id,product_uid:clip.product_uid,options:{segments:es.segments,source_duration:es.source_duration,overlays:wOverlays,media:(es.media||[]),captions:(es.captions||[]),edited_at:es.edited_at},status:'queued',requested_by:((state.user&&state.user.first_name)||'creator')};
-    var ins=await sb.from('ed_edit_jobs').insert(job);
-    if(ins.error){ toast('Re-render failed: '+ins.error.message,'err'); return; }
-    toast('Re-rendering -- it will appear here shortly','ok');
-    try{ loadReady(); }catch(e){}
-  }catch(e){ toast('Re-render failed','err'); }
-}
-function rtpToggleSelect(){ state.rtpSel=!state.rtpSel; if(!state.rtpSelIds||!state.rtpSel) state.rtpSelIds=new Set(); readyRender(); }
-function rtpToggleId(id){ if(!state.rtpSelIds) state.rtpSelIds=new Set(); if(state.rtpSelIds.has(id)) state.rtpSelIds.delete(id); else state.rtpSelIds.add(id); readyRender(); }
-function rtpSelectAllTodo(){ if(!state.rtpSelIds) state.rtpSelIds=new Set(); var todo=(state.readyList||[]).filter(function(v){ return v._render&&v._render.storage_path && !v.posted_at; }); var allSel=todo.length>0 && todo.every(function(v){ return state.rtpSelIds.has(v.id); }); todo.forEach(function(v){ if(allSel) state.rtpSelIds.delete(v.id); else state.rtpSelIds.add(v.id); }); readyRender(); }
-function dlShowMulti(n){ __dlBarOpen=true; showModal('<div style="text-align:center;padding:8px 4px 2px"><h3 style="margin:0 0 6px">Saving your videos</h3><div id="dlCount" style="font-weight:700;font-size:13px;margin-bottom:10px">Preparing 1 of '+n+'...</div><div style="height:10px;background:#e9e4d8;border-radius:6px;overflow:hidden;margin:0 2px 8px"><div id="dlBar" style="height:100%;width:0%;background:var(--grad);border-radius:6px;transition:width .15s"></div></div><div id="dlPct" style="font-weight:800;font-size:13px;margin-bottom:10px">0%</div><p class="h-sub" style="margin:0;font-size:12.5px;line-height:1.5">Please don\'t leave the app while these download. If you leave, it will pause and pick back up when you come back.</p></div>'); }
-function dlSetCount(i,n){ var c=document.getElementById('dlCount'); if(c) c.textContent='Preparing '+i+' of '+n+'...'; }
-async function rtpSaveSelected(){
-  if(!state.rtpSelIds||!state.rtpSelIds.size){ toast('Select some videos first','err'); return; }
-  var ids=Array.from(state.rtpSelIds);
-  var items=(state.readyList||[]).filter(function(v){ return ids.indexOf(v.id)>=0 && v._render && v._render.storage_path; });
-  if(!items.length){ toast('Nothing to save','err'); return; }
-  dlShowMulti(items.length);
-  var files=[];
-  for(var i=0;i<items.length;i++){ dlSetCount(i+1, items.length); dlSetProgress(0); try{ var f=await getMediaFile(items[i]._render.storage_path, items[i]._render.filename||'video.mp4'); if(f) files.push({file:f,v:items[i]}); }catch(e){} }
-  dlCloseProgress();
-  if(!files.length){ toast('Could not prepare the videos','err'); return; }
-  var fileArr=files.map(function(x){ return x.file; });
-  var saved=false;
-  if(isMobileDevice() && navigator.canShare && navigator.canShare({files:fileArr})){ try{ await navigator.share({files:fileArr}); saved=true; }catch(e){ if(e&&e.name==='AbortError') return; } }
-  if(!saved){
-    if(isMobileDevice()){ toast('Could not open the Save sheet -- save them one at a time by tapping each video','err'); state.rtpSel=false; state.rtpSelIds=new Set(); readyRender(); return; }   // mobile: an anchor-click is NOT a real camera-roll save, so never count these as posted
-    for(var k=0;k<fileArr.length;k++){ var a=document.createElement('a'); a.href=URL.createObjectURL(fileArr[k]); a.download=fileArr[k].name||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); await new Promise(function(r){ setTimeout(r,500); }); } saved=true;
-  }
-  if(saved){ var iso=new Date().toISOString(); var who=((ME&&ME.name)||''); for(var m=0;m<files.length;m++){ var vv=files[m].v; if(!vv.posted_at){ try{ await sb.from('ed_videos').update({posted_at:iso,posted_by:who,status:'posted'}).eq('id',vv.id); }catch(e){} vv.posted_at=iso; vv.posted_by=who; } } state.rtpSel=false; state.rtpSelIds=new Set(); readyRender(); toast('Saved '+files.length+' video'+(files.length>1?'s':''),'ok'); }
+  root.innerHTML=head+list.map(readyCard).join('');
 }
 function readyCard(v){
   var ready=!!(v._render&&v._render.storage_path);
-  var done=!!v.posted_at;
+  var posted=!!v.posted_at;
   var cap=v.caption_suggested||'';
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
-  if(state.rtpSel && ready){
-    var _seld=state.rtpSelIds&&state.rtpSelIds.has(v.id);
-    var _box='<div style="flex:none;width:24px;height:24px;border-radius:50%;border:2px solid '+(_seld?'#0f6e56':'#cbb8a0')+';background:'+(_seld?'#0f6e56':'transparent')+';display:flex;align-items:center;justify-content:center">'+(_seld?'<svg class="svic" style="width:15px;height:15px;color:#fff" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg>':'')+'</div>';
-    var _lbl='<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.filename||'Video')+'</div><div class="h-sub" style="font-size:12px">'+(done?'Downloaded':'Ready to download')+'</div></div>';
-    return '<div class="card" onclick="rtpToggleId(\x27'+esc(v.id)+'\x27)" style="margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;'+(_seld?'outline:2px solid #0f6e56;outline-offset:-1px;':'')+(done?'opacity:.6':'')+'">'+_box+_lbl+'</div>';
-  }
-  var label=done?'Downloaded':(ready?'Ready to post':'Rendering');
-  var pill=done?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56"><svg class="svic" style="width:.95em;height:.95em;vertical-align:-2px" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Downloaded</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
+  var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
+  var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
   var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
-    if(done){
-      btns+='<button class="btn ghost sm" style="font-size:12px;padding:5px 11px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Re-download</button>';
-      if(cap) btns+='<button class="btn ghost sm" style="font-size:12px;padding:5px 11px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
-    } else {
-      btns+='<button class="btn" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Save video</button>';
-      if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
-    }
+    btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
+    if(cap) btns+='<button class="btn ghost" style="flex:1;justify-content:center;min-width:130px" onclick="readyCopy(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"></use></svg> Copy caption</button>';
   } else {
-    var mins=v.delivered_at?((Date.now()-new Date(v.delivered_at).getTime())/60000):0;
-    if(mins<4){
-      btns+='<span class="h-sub" style="font-size:12.5px;display:flex;align-items:center;gap:7px"><span class="ph-spin"></span>Rendering your edited video... this updates by itself -- usually ready in a minute or two.</span>';
-    } else if(mins<10){
-      btns+='<div style="width:100%"><div class="h-sub" style="font-size:12.5px;margin-bottom:7px">Still rendering -- this one is taking a little longer than usual.</div><button class="btn ghost sm" onclick="requeueRender(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Re-render</button></div>';
-    } else {
-      btns+='<div style="width:100%"><div class="h-sub" style="font-size:12.5px;margin-bottom:7px;color:#9a6b00">This is taking longer than expected -- it may have stalled. Tap Re-render to restart it.</div><button class="btn sm" onclick="requeueRender(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"></use></svg> Re-render</button></div>';
-    }
+    btns+='<span class="h-sub" style="font-size:12.5px">Still rendering -- check back shortly.</span>';
   }
   btns+='</div>';
-  return '<div class="card" style="margin-bottom:12px'+(done?';opacity:.62':'')+'">'+top+capBlock+btns+'</div>';
+  var note=posted?'<div class="h-sub" style="font-size:11.5px;margin-top:6px;color:#0f6e56">Counted as posted. Tap "Save again" if you need the file again.</div>':'';
+  return '<div class="card" style="margin-bottom:12px">'+top+capBlock+btns+note+'</div>';
 }
 function readyCopy(id){ var v=(state.readyList||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
 async function readySave(id){
   var v=(state.readyList||[]).find(function(x){return x.id===id;});
   if(!v||!v._render||!v._render.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
   var r=v._render; var fn=r.filename||'video.mp4';
-  // Count as posted ONLY when the video is genuinely saved -- never on a cancelled or failed share.
-  function markPosted(){
-    if(v.posted_at) return;
+  var saved=false;
+  if(nativeSaveReady()){   // native app -> download + save straight to the camera roll (one tap, like Alfie)
+    try{ var su=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,3600); if(su&&su.data&&su.data.signedUrl){ await nativeSaveFromUrl(su.data.signedUrl, fn); saved=true; } }catch(e){ saved=false; }
+  }
+  var ok=false; if(!saved){ try{ ok=await shareToCameraRoll(r.storage_path, fn); }catch(e){ ok=false; } }   // web -> share sheet
+  if(ok){ saved=true; }
+  else if(!saved){
+    try{   // desktop / large clip -> streamed download (saves to Files; then Share -> Save Video)
+      var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
+      if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); toast(isMobileDevice()?'Saving to Files -- open it, then Share -> Save Video':'Downloading...','ok'); saved=true; }
+      else { toast('Could not prepare the video','err'); }
+    }catch(e){ toast('Download failed','err'); }
+  }
+  // Saving the video counts as posted -> updates the creator's "Videos posted" and Aaron's analytics/board.
+  if(saved && !v.posted_at){
     var who=''; try{ who=(ME&&ME.name)||''; }catch(e){}
     var iso=new Date().toISOString();
-    sb.from('ed_videos').update({posted_at:iso, posted_by:who, status:'posted'}).eq('id',id).then(function(ur){
-      if(ur&&ur.error){ toast('Saved (count not updated: '+ur.error.message+')','err'); return; }
-      v.posted_at=iso; v.posted_by=who; readyRender(); toast('Saved -- counted as posted','ok');
-    });
+    try{ var ur=await sb.from('ed_videos').update({posted_at:iso, posted_by:who, status:'posted'}).eq('id',id); if(ur&&ur.error){ toast('Saved (count not updated: '+ur.error.message+')','err'); return; } }catch(e){ return; }
+    v.posted_at=iso; v.posted_by=who; readyRender(); toast('Saved -- counted as posted','ok');
   }
-  if(isMobileDevice() && navigator.canShare){ dlShowProgress(); }
-  var handled=false; try{ handled=await shareToCameraRoll(r.storage_path, fn, markPosted); }catch(e){ handled=false; }
-  if(handled) return;   // the share sheet / fresh-tap prompt owns it -> posted is set only when the save actually completes
-  // No share sheet available: desktop download = a real save; on mobile it goes to Files (NOT auto-counted -- they tap "Mark posted" once it's up on TikTok).
-  try{
-    var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
-    if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove();
-      if(isMobileDevice()){ toast('Saving to Files -- open it, Share -> Save Video, then tap "Mark posted"','ok'); }
-      else { toast('Downloading...','ok'); markPosted(); }
-    } else { toast('Could not prepare the video','err'); }
-  }catch(e){ toast('Download failed','err'); }
 }
 async function readyPosted(id){
   if(!confirm('Mark this video as posted? It moves out of your Ready to post list.')) return;
