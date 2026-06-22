@@ -5882,7 +5882,7 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
   for(var i=0;i<srcs.length;i++){
     try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){ srcs[i]._render=null; }
   }
