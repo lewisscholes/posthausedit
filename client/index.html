@@ -5962,6 +5962,9 @@ async function loadReady(){
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
   try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,edit_state,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).order('delivered_at',{ascending:false}).limit(150); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  // Tidy: a downloaded clip stays re-downloadable for 3 days after the creator posts it, then drops out of
+  // their list (it still lives in the admin bank). Un-posted clips always stay until they're handled.
+  srcs=srcs.filter(function(c){ return !c.posted_at || (Date.now()-new Date(c.posted_at).getTime()) < 3*24*60*60*1000; });
   var _ids=srcs.map(function(x){return x.id;}); var _ren={};
   if(_ids.length){ try{ var rr=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,created_at').eq('creator_id',ME.id).eq('kind','edited').in('source_video_id',_ids).order('created_at',{ascending:false}); (rr.data||[]).forEach(function(x){ if(!_ren[x.source_video_id]) _ren[x.source_video_id]=x; }); }catch(e){} }
   srcs.forEach(function(c){ c._render=_ren[c.id]||((c.storage_path&&!(c.edit_state&&c.edit_state.segments&&c.edit_state.segments.length))?{id:c.id,storage_path:c.storage_path,filename:c.filename}:null); });
