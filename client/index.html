@@ -2635,7 +2635,7 @@ function bankBuckets(){
       b.edited.push(rendering?Object.assign({_finalizing:true},v):v);
       return;
     }
-    if(isPosted(v)||v.status==='scheduled'){ if(!seenEdited.has(v.id)) b.posted.push(v); }   // its edited render already represents it
+    if(isPosted(v)||v.status==='scheduled'||v.status==='ready'||v.delivered_at){ if(!seenEdited.has(v.id)) b.posted.push(v); }   // its edited render already represents it
     else if(downloadedBy(v.id,uid)) b.downloaded.push(v);
     else b.new.push(v);
   });
