@@ -5058,14 +5058,21 @@ function getMediaFile(storage_path, filename){
 function prefetchMediaFile(storage_path, filename){ if(storage_path) getMediaFile(storage_path, filename); }
 function prefetchTempFile(id){ const f=(state.files||[]).find(x=>x.id===id); if(f) prefetchMediaFile(f.storage_path, f.filename); }
 async function shareToCameraRoll(storage_path, filename, onSaved){
-  if(!(isMobileDevice() && navigator.canShare)) return false;
+  if(!(isMobileDevice() && navigator.share)) return false;
   let file=null;
   try{ file=await getMediaFile(storage_path, filename); }catch(e){ file=null; }   // reuses the prefetch if it was already started
   dlCloseProgress();   // file is downloaded -> hide the % bar before the share sheet opens
-  if(!(file && navigator.canShare({files:[file]}))) return false;
-  // onSaved fires ONLY when the save genuinely completes -- never on cancel or a failed sheet.
-  try{ await navigator.share({files:[file]}); if(onSaved)onSaved(); return true; }   // completed now
-  catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file, onSaved); return true; }   // cancelled = handled but NOT saved; activation expired -> fresh-tap fires onSaved only on real completion
+  if(!file) return false;
+  // Do NOT hard-gate on canShare({files}) -- in an installed iOS PWA it frequently returns false even
+  // though the share sheet's "Save Video" (camera roll) works fine. Attempt the share; route activation
+  // loss to a fresh-tap Save (still camera roll), and only a real TypeError (files truly unsupported)
+  // falls back to a Files download. onSaved fires ONLY on a genuine completed save.
+  try{ await navigator.share({files:[file]}); if(onSaved)onSaved(); return true; }   // completed -> camera roll
+  catch(err){
+    if(err && err.name==='AbortError') return true;        // cancelled = handled, not saved
+    if(err && err.name==='TypeError') return false;        // platform genuinely can't share files -> caller saves to Files
+    promptShareGeneric(file, onSaved); return true;        // activation expired -> fresh-tap Save, still to camera roll
+  }
 }
 function dlShowLoading(){
   showModal('<div style="text-align:center;padding:10px 4px 4px"><div class="inline-loader" style="margin:4px auto 16px"></div><h3 style="margin:0 0 7px">Preparing your video</h3><p class="h-sub" style="margin:0;font-size:13.5px;line-height:1.5">Hang tight -- the <b>Save</b> sheet will pop up in a moment.<br>Keep the app open; don\'t swipe away.</p></div>');
