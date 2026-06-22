@@ -5042,14 +5042,15 @@ function getMediaFile(storage_path, filename){
 }
 function prefetchMediaFile(storage_path, filename){ if(storage_path) getMediaFile(storage_path, filename); }
 function prefetchTempFile(id){ const f=(state.files||[]).find(x=>x.id===id); if(f) prefetchMediaFile(f.storage_path, f.filename); }
-async function shareToCameraRoll(storage_path, filename){
+async function shareToCameraRoll(storage_path, filename, onSaved){
   if(!(isMobileDevice() && navigator.canShare)) return false;
   let file=null;
   try{ file=await getMediaFile(storage_path, filename); }catch(e){ file=null; }   // reuses the prefetch if it was already started
   dlCloseProgress();   // file is downloaded -> hide the % bar before the share sheet opens
   if(!(file && navigator.canShare({files:[file]}))) return false;
-  try{ await navigator.share({files:[file]}); return true; }              // share sheet -> "Save Video" -> camera roll
-  catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file); return true; }   // activation expired -> fresh tap
+  // onSaved fires ONLY when the save genuinely completes -- never on cancel or a failed sheet.
+  try{ await navigator.share({files:[file]}); if(onSaved)onSaved(); return true; }   // completed now
+  catch(err){ if(err && err.name==='AbortError') return true; promptShareGeneric(file, onSaved); return true; }   // cancelled = handled but NOT saved; activation expired -> fresh-tap fires onSaved only on real completion
 }
 function dlShowLoading(){
   showModal('<div style="text-align:center;padding:10px 4px 4px"><div class="inline-loader" style="margin:4px auto 16px"></div><h3 style="margin:0 0 7px">Preparing your video</h3><p class="h-sub" style="margin:0;font-size:13.5px;line-height:1.5">Hang tight -- the <b>Save</b> sheet will pop up in a moment.<br>Keep the app open; don\'t swipe away.</p></div>');
@@ -6020,7 +6021,10 @@ async function rtpSaveSelected(){
   var fileArr=files.map(function(x){ return x.file; });
   var saved=false;
   if(isMobileDevice() && navigator.canShare && navigator.canShare({files:fileArr})){ try{ await navigator.share({files:fileArr}); saved=true; }catch(e){ if(e&&e.name==='AbortError') return; } }
-  if(!saved){ for(var k=0;k<fileArr.length;k++){ var a=document.createElement('a'); a.href=URL.createObjectURL(fileArr[k]); a.download=fileArr[k].name||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); await new Promise(function(r){ setTimeout(r,500); }); } saved=true; }
+  if(!saved){
+    if(isMobileDevice()){ toast('Could not open the Save sheet -- save them one at a time by tapping each video','err'); state.rtpSel=false; state.rtpSelIds=new Set(); readyRender(); return; }   // mobile: an anchor-click is NOT a real camera-roll save, so never count these as posted
+    for(var k=0;k<fileArr.length;k++){ var a=document.createElement('a'); a.href=URL.createObjectURL(fileArr[k]); a.download=fileArr[k].name||'video.mp4'; document.body.appendChild(a); a.click(); a.remove(); await new Promise(function(r){ setTimeout(r,500); }); } saved=true;
+  }
   if(saved){ var iso=new Date().toISOString(); var who=((ME&&ME.name)||''); for(var m=0;m<files.length;m++){ var vv=files[m].v; if(!vv.posted_at){ try{ await sb.from('ed_videos').update({posted_at:iso,posted_by:who,status:'posted'}).eq('id',vv.id); }catch(e){} vv.posted_at=iso; vv.posted_by=who; } } state.rtpSel=false; state.rtpSelIds=new Set(); readyRender(); toast('Saved '+files.length+' video'+(files.length>1?'s':''),'ok'); }
 }
 function readyCard(v){
@@ -6064,24 +6068,27 @@ async function readySave(id){
   var v=(state.readyList||[]).find(function(x){return x.id===id;});
   if(!v||!v._render||!v._render.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
   var r=v._render; var fn=r.filename||'video.mp4';
-  var saved=false;
-  if(isMobileDevice() && navigator.canShare){ dlShowProgress(); }
-  var ok=false; try{ ok=await shareToCameraRoll(r.storage_path, fn); }catch(e){ ok=false; }   // small clips -> one-tap Save to camera roll
-  if(ok){ saved=true; }
-  else {
-    try{   // desktop / large clip -> streamed download (saves to Files; then Share -> Save Video)
-      var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
-      if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); toast(isMobileDevice()?'Saving to Files -- open it, then Share -> Save Video':'Downloading...','ok'); saved=true; }
-      else { toast('Could not prepare the video','err'); }
-    }catch(e){ toast('Download failed','err'); }
-  }
-  // Saving the video counts as posted -> updates the creator's "Videos posted" and Aaron's analytics/board.
-  if(saved && !v.posted_at){
+  // Count as posted ONLY when the video is genuinely saved -- never on a cancelled or failed share.
+  function markPosted(){
+    if(v.posted_at) return;
     var who=''; try{ who=(ME&&ME.name)||''; }catch(e){}
     var iso=new Date().toISOString();
-    try{ var ur=await sb.from('ed_videos').update({posted_at:iso, posted_by:who, status:'posted'}).eq('id',id); if(ur&&ur.error){ toast('Saved (count not updated: '+ur.error.message+')','err'); return; } }catch(e){ return; }
-    v.posted_at=iso; v.posted_by=who; readyRender(); toast('Saved -- counted as posted','ok');
+    sb.from('ed_videos').update({posted_at:iso, posted_by:who, status:'posted'}).eq('id',id).then(function(ur){
+      if(ur&&ur.error){ toast('Saved (count not updated: '+ur.error.message+')','err'); return; }
+      v.posted_at=iso; v.posted_by=who; readyRender(); toast('Saved -- counted as posted','ok');
+    });
   }
+  if(isMobileDevice() && navigator.canShare){ dlShowProgress(); }
+  var handled=false; try{ handled=await shareToCameraRoll(r.storage_path, fn, markPosted); }catch(e){ handled=false; }
+  if(handled) return;   // the share sheet / fresh-tap prompt owns it -> posted is set only when the save actually completes
+  // No share sheet available: desktop download = a real save; on mobile it goes to Files (NOT auto-counted -- they tap "Mark posted" once it's up on TikTok).
+  try{
+    var s=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,600,{download:fn});
+    if(s&&s.data&&s.data.signedUrl){ var a=document.createElement('a'); a.href=s.data.signedUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove();
+      if(isMobileDevice()){ toast('Saving to Files -- open it, Share -> Save Video, then tap "Mark posted"','ok'); }
+      else { toast('Downloading...','ok'); markPosted(); }
+    } else { toast('Could not prepare the video','err'); }
+  }catch(e){ toast('Download failed','err'); }
 }
 async function readyPosted(id){
   if(!confirm('Mark this video as posted? It moves out of your Ready to post list.')) return;
