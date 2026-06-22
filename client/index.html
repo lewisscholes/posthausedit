@@ -5896,12 +5896,13 @@ function readyRender(){
   root.innerHTML=head+list.map(readyCard).join('');
 }
 function readyCard(v){
-  var ready=!!(v._render&&v._render.storage_path);
+  var hasEdit=!!(v._render&&v._render.storage_path);
+  var ready=hasEdit||!!v.storage_path;   // edited render if present, else the delivered original is still saveable
   var posted=!!v.posted_at;
   var cap=v.caption_suggested||'';
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
   var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
-  var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(ready?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>');
+  var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(hasEdit?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':(ready?'<span class="tf-pill" style="background:#eef1ff;color:#3340b6">Ready</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>'));
   var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
@@ -5917,8 +5918,10 @@ function readyCard(v){
 function readyCopy(id){ var v=(state.readyList||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
 async function readySave(id){
   var v=(state.readyList||[]).find(function(x){return x.id===id;});
-  if(!v||!v._render||!v._render.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
-  var r=v._render; var fn=r.filename||'video.mp4';
+  if(!v){ return; }
+  var r=(v._render&&v._render.storage_path)?v._render:{storage_path:v.storage_path, filename:v.filename};   // edited render, else the delivered original
+  if(!r.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
+  var fn=r.filename||'video.mp4';
   var saved=false;
   if(nativeSaveReady()){   // native app -> download + save straight to the camera roll (one tap, like Alfie)
     try{ var su=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,3600); if(su&&su.data&&su.data.signedUrl){ await nativeSaveFromUrl(su.data.signedUrl, fn); saved=true; } }catch(e){ saved=false; }
