@@ -2602,6 +2602,21 @@ function bankResolveEdited(id){
 }
 // "Edited" = a burned render exists OR the clip has saved edit segments. Otherwise it's still raw.
 function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) return true; if(v.edit_state&&v.edit_state.segments&&v.edit_state.segments.length) return true; return false; }
+// Deliver an edited clip straight from the bank to the creator's Ready-to-post (and into "Sent to Post").
+// For clips that were edited but never sent, so they don't sit stuck in "To do" with no action.
+async function bankSendToPost(id){
+  var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v){ toast('Clip not found','err'); return; }
+  if(!v.creator_id){ toast('Assign a client to this clip first','err'); return; }
+  if(!bankIsEdited(v)){ toast('This clip has not been edited yet','err'); return; }
+  var who=''; try{ var c=(state.clientList||[]).find(function(x){ return String(x.id)===String(v.creator_id); }); if(c&&c.name) who=c.name; }catch(e){}
+  var up={delivered_at:new Date().toISOString(), status:'ready'};
+  try{ if(!v.caption_suggested){ var cap=await tfAutoCaption(v); if(cap) up.caption_suggested=cap; } }catch(e){}
+  var r=await sb.from('ed_videos').update(up).eq('id',id);
+  if(r&&r.error){ toast('Could not send: '+r.error.message,'err'); return; }
+  v.delivered_at=up.delivered_at; v.status='ready';
+  toast(who?('Sent to '+who+'\x27s Ready to post'):'Sent to post','ok');
+  try{ loadBank(); }catch(e){}
+}
 // Tap a bank thumbnail -> play it full-size. Prefer the edited (text burned-in) render; fall back to raw.
 async function bankPlay(id){
   const v=(state.videos||[]).find(x=>x.id===id); if(!v) return;
@@ -2648,7 +2663,7 @@ function bankCard(v){
       <div class="vstats">${v.product_uid?`<span class="vtag">${esc(prodName(v.product_uid))}</span>`:''}<span>${size}</span><span>${(v.created_at||'').slice(0,10)}</span></div>
       ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'\u2026':''}</div>`:''}
       ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' \xb7 '+esc(v.posted_by)):''}</div>`:''}
-      <div class="vrow"><button class="btn sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
+      <div class="vrow">${edited&&!posted?`<button class="btn sm" onclick="bankSendToPost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}<button class="btn ghost sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
     </div>`;
   return card;
 }
