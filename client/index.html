@@ -1334,6 +1334,8 @@ a{color:#B0211A}
   <nav class="bottomnav">
     <button id="bnav-dashboard" onclick="showView('dashboard')" class="active"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"></use></svg></span>Dashboard</button>
     <button id="bnav-clients" onclick="showView('clients')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span>Clients</button>
+    <button id="bnav-bank" onclick="edOpenClient(state.creatorFilter||null);showView('bank')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span>Bank</button>
+    <button id="bnav-editor" onclick="showView('editor')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg></span>Editor</button>
     <button id="bnav-cdash" onclick="showView('cdash')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span>Dashboard</button>
     <button id="bnav-upload" onclick="showView('upload')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"></use></svg></span>Upload</button>
     <button id="bnav-ready" onclick="showView('ready')"><span class="bi"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span>To post</button>
@@ -5285,8 +5287,8 @@ function edApplyRole(){
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
   var ag=document.getElementById('adminGroup'); if(ag) ag.style.display='none';
   var tl=document.getElementById('teamLink'); if(tl) tl.style.display='none';
-  // Bottom bar: admin = Clients, Board, Analytics, plus; creator = Dashboard, Upload, Board, To post.
-  var bshow={'bnav-dashboard':false,'bnav-clients':admin,'bnav-cdash':!admin,'bnav-upload':!admin,'bnav-ready':!admin,'bnav-board':true,'bnav-analytics':admin};
+  // Bottom bar: admin = Clients, Bank, Editor, Analytics; creator = Dashboard, Upload, Board, To post.
+  var bshow={'bnav-dashboard':false,'bnav-clients':admin,'bnav-bank':admin,'bnav-editor':admin,'bnav-cdash':!admin,'bnav-upload':!admin,'bnav-ready':!admin,'bnav-board':!admin,'bnav-analytics':admin};
   Object.keys(bshow).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=bshow[id]?'':'none'; });
   var bd=document.getElementById('bnav-dashboard'); if(bd) bd.style.display='none';
   var plus=document.querySelector('.bnav-plus'); if(plus) plus.style.display='none';
@@ -5823,7 +5825,7 @@ function bankBuckets(){
   var b={new:[],edited:[],downloaded:[],posted:[]};
   (state.videos||[]).filter(function(v){ return !v.pending_approval; }).forEach(function(v){
     if(v.kind==='edited') return;
-    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled';
+    var posted = v.posted_at || v.status==='posted' || v.status==='scheduled' || v.status==='ready' || v.delivered_at;
     if(posted){ b.posted.push(v); }
     else if(typeof downloadedBy==='function' && downloadedBy(v.id,uid)){ b.downloaded.push(v); }
     else { b.new.push(v); }
