@@ -5285,8 +5285,8 @@ function edApplyRole(){
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
   var ag=document.getElementById('adminGroup'); if(ag) ag.style.display='none';
   var tl=document.getElementById('teamLink'); if(tl) tl.style.display='none';
-  // Bottom bar (quick access): admin = Analytics, Video bank, Editor, Scheduler; creator = Dashboard, Upload, Board.
-  var bshow={'bnav-clients':false,'bnav-bank':admin,'bnav-editor':admin,'bnav-schedule':admin,'bnav-analytics':admin,'bnav-upload':!admin,'bnav-cdash':!admin,'bnav-board':!admin,'bnav-ready':!admin};
+  // Bottom bar: admin = Clients, Board, Analytics, plus; creator = Dashboard, Upload, Board, To post.
+  var bshow={'bnav-dashboard':false,'bnav-clients':admin,'bnav-cdash':!admin,'bnav-upload':!admin,'bnav-ready':!admin,'bnav-board':true,'bnav-analytics':admin};
   Object.keys(bshow).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=bshow[id]?'':'none'; });
   var bd=document.getElementById('bnav-dashboard'); if(bd) bd.style.display='none';
   var plus=document.querySelector('.bnav-plus'); if(plus) plus.style.display='none';
