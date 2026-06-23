@@ -2734,7 +2734,7 @@ async function downloadAllEdited(){
           const {data}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,900);
           if(data&&data.signedUrl){
             const blob=await (await fetch(data.signedUrl)).blob();
-            results[i]=new File([blob], v.filename||'video.mp4',{type:blob.type||'video/mp4'});
+            results[i]=new File([blob], (v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'),{type:blob.type||'video/mp4'});
           }
         }catch(e){}
         done++; doneBytes+=(v.size_bytes||0);
@@ -2857,7 +2857,7 @@ async function hydrateBankUrls(){ for(const v of state.videos){ if(signed[v.id])
 function renderBankVideos(){ const b=bankBuckets(); const list=b[state.bankTab]; if(list.length) paintBank(list); }
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints>1); }
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
-async function fileDownload(v,id){ toast('Preparing download…'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:v.filename}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=v.filename; a.click(); await recordDownload(id); }
+async function fileDownload(v,id){ toast('Preparing download…'); const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:fn}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
   const v=state.videos.find(x=>x.id===id); if(!v)return;
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
@@ -2869,7 +2869,7 @@ async function downloadVideo(id){
       toast('Preparing video…');
       const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300); if(error) throw error;
       const blob=await (await fetch(data.signedUrl)).blob();
-      file=new File([blob], v.filename||'video.mp4', {type: blob.type||'video/mp4'});
+      file=new File([blob], (v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'), {type: blob.type||'video/mp4'});
     }catch(e){ file=null; }
     if(file && navigator.canShare({files:[file]})){
       try{
