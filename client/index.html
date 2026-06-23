@@ -5941,7 +5941,7 @@ async function readySave(id){
   if(!v){ return; }
   var r=(v._render&&v._render.storage_path)?v._render:{storage_path:v.storage_path, filename:v.filename};   // edited render, else the delivered original
   if(!r.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
-  var fn=r.filename||'video.mp4';
+  var fn=(r.filename||'video.mp4').replace(/\.mov$/i,'.mp4');
   var saved=false;
   if(nativeSaveReady()){   // native app -> download + save straight to the camera roll (one tap, like Alfie)
     try{ var su=await sb.storage.from(BUCKET).createSignedUrl(r.storage_path,3600); if(su&&su.data&&su.data.signedUrl){ await nativeSaveFromUrl(su.data.signedUrl, fn); saved=true; } }catch(e){ saved=false; }
