@@ -2859,7 +2859,9 @@ function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.use
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
 async function fileDownload(v,id){ toast('Preparing download…'); const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:fn}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
-  const v=state.videos.find(x=>x.id===id); if(!v)return;
+  let v=state.videos.find(x=>x.id===id);
+  if(!v){ try{ const r=await sb.from('ed_videos').select('*').eq('id',id).single(); v=r.data; }catch(e){} }
+  if(!v){ toast('Could not find video -- tap Refresh and try again','err'); return; }
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
   // navigator.share() must run inside a real tap; downloading the video first can use up
   // that tap's activation, so if the direct share is blocked we re-offer it behind a fresh tap.
