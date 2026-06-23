@@ -5471,7 +5471,7 @@ var UF_IMG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="
 var UF_AUD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
 var UF_NOTE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
 var UF_LINK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); }
+function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); try{ edRefreshAccounts(); }catch(e){} }
 async function edRefreshAccounts(){ try{ var ar=await sb.from('ed_member_accounts').select('account_id,handle').eq('member_id',ME.id).order('created_at'); state.myAccounts=(ar.data||[]).map(function(a){ return {id:a.account_id, handle:a.handle}; }); if(state.myAccounts.length===1 && !ufState.account) ufState.account=state.myAccounts[0]; ufRender(); }catch(e){} }
 function ufSetMode(m){ ufState.mode=m; ufRender(); }
 function ufAcctPicker(){
@@ -5628,7 +5628,7 @@ async function uqUploadVideo(file,onProg,account,path,fp){
   var cid=(ME&&ME.id);
   if(!path){ var safe=file.name.replace(/[^\w.\-]+/g,'_'); path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe; }
   await tusUpload(file,path,onProg,fp);
-  var row={creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'};
+  var row={workspace_id:WS,creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'};
   if(account&&account.id){ row.account_id=account.id; row.account_handle=account.handle||''; }   // tag the TikTok account the client chose
   var ins=await sb.from('ed_videos').insert(row).select('id').single();
   if(ins.error) throw ins.error; return ins.data.id;
