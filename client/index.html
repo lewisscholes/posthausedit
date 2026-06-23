@@ -5065,9 +5065,16 @@ async function nativeSaveFromUrl(url, filename){
         showModal('<div style="text-align:center;padding:14px 6px 6px"><div style="font-size:34px;margin:2px 0 8px">&#10003;</div><h3 style="margin:0 0 7px">Saved to your camera roll</h3><p class="h-sub" style="margin:0;font-size:13px">In Photos it is in <b>Recents</b> and the album <b>'+esc(ALBUM)+'</b>.</p><div style="margin-top:14px"><button class="btn" onclick="closeModal()">Done</button></div></div>');
         return true;
       }
-      // every attempt failed - show the real error so we can fix it, plus a Save-sheet button
-      showModal('<div style="text-align:left;padding:10px 4px"><h3 style="margin:0 0 8px">Could not save to camera roll</h3><p class="h-sub" style="font-size:11px;word-break:break-all;margin:0 0 6px">uri: '+esc(uri)+'</p><pre style="font-size:11px;white-space:pre-wrap;background:rgba(0,0,0,.35);padding:8px;border-radius:8px;max-height:190px;overflow:auto;margin:0">'+esc(log.join('\n'))+'</pre><div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="closeModal()">Close</button><button class="btn" id="dbgShareBtn">Use Save sheet</button></div></div>');
-      var sbn=document.getElementById('dbgShareBtn'); if(sbn){ sbn.onclick=async function(){ try{ await C.Share.share({ title:filename||'Video', url:uri, files:[uri] }); }catch(e){} closeModal(); }; }
+      // Media.saveVideo failed -- automatically fall through to the iOS share sheet (Save Video)
+      // so the user doesn't have to tap an extra "Use Save sheet" button.
+      try{
+        var p2=document.getElementById('dlPct'); if(p2) p2.textContent='Opening Save sheet...';
+        closeModal();
+        await C.Share.share({ title:filename||'Video', url:uri, files:[uri] });
+      }catch(se){
+        // Share sheet also failed -- show the debug modal as a last resort
+        showModal('<div style="text-align:left;padding:10px 4px"><h3 style="margin:0 0 8px">Could not save video</h3><p class="h-sub" style="font-size:11px;word-break:break-all;margin:0 0 6px">uri: '+esc(uri)+'</p><pre style="font-size:11px;white-space:pre-wrap;background:rgba(0,0,0,.35);padding:8px;border-radius:8px;max-height:190px;overflow:auto;margin:0">'+esc(log.join('\n'))+'\nShare: '+((se&&se.message)||se)+'</pre><div style="margin-top:12px"><button class="btn" onclick="closeModal()">Close</button></div></div>');
+      }
       return true;
     }
     var p=document.getElementById('dlPct'); if(p) p.textContent='Opening the Save sheet...';
