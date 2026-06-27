@@ -2875,6 +2875,8 @@ async function downloadVideo(id){
   let v=state.videos.find(x=>x.id===id);
   if(!v){ try{ const r=await sb.from('ed_videos').select('*').eq('id',id).single(); v=r.data; }catch(e){} }
   if(!v){ toast('Could not find video -- tap Refresh and try again','err'); return; }
+  // If an edited render exists, download that instead of the raw file
+  try{ const ed=await swResolveEdited(id); if(ed&&ed.storage_path){ v={storage_path:ed.storage_path, filename:(ed.filename||v.filename||'video.mp4')}; } }catch(e){}
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
   // navigator.share() must run inside a real tap; downloading the video first can use up
   // that tap's activation, so if the direct share is blocked we re-offer it behind a fresh tap.
