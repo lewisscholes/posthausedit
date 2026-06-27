@@ -2790,6 +2790,7 @@ function bankCard(v){
   card.innerHTML=`
     <div class="vthumb" style="position:relative"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
       <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:${edited?'#0f6e56':'#8a7f72'}">${edited?'Edited':'Not edited'}</div>
+      ${(v.edit_state&&v.edit_state.externally_downloaded)?'<div style="position:absolute;top:7px;right:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#1d4ed8">Downloaded</div>':''}
     </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
@@ -2803,6 +2804,7 @@ function bankCard(v){
 }
 function bankResolveEdited(id){ let best=null; (state.videos||[]).forEach(function(x){ if(x&&x.kind==='edited'&&x.source_video_id===id&&x.storage_path){ if(!best||(x.created_at||'')>(best.created_at||'')) best=x; } }); return best; }
 function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) return true; if(v.edit_state&&v.edit_state.segments&&v.edit_state.segments.length) return true; if(v.edit_state&&v.edit_state.externally_edited) return true; return false; }
+async function bankToggleDownloaded(id){ var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v) return; var cur=!!(v.edit_state&&v.edit_state.externally_downloaded); var es=Object.assign({},v.edit_state||{}); if(cur){ delete es.externally_downloaded; } else { es.externally_downloaded=true; } try{ await sb.from('ed_videos').update({edit_state:es}).eq('id',id); v.edit_state=es; toast(cur?'Download mark removed':'Marked as downloaded','ok'); loadBank(); }catch(e){ toast('Could not update','err'); } }
 async function bankSendToPost(id){
   var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v){ toast('Clip not found','err'); return; }
   if(!v.creator_id){ toast('Assign a client to this clip first','err'); return; }
@@ -2833,6 +2835,7 @@ function toggleMenu(e,id){ e.stopPropagation(); document.querySelectorAll('.menu
     <button onclick="downloadVideo('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>
     ${isPosted(v)?`<button onclick="unpost('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:`<button onclick="markPosted('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Mark posted</button>`}
     ${v.kind!=='edited'?`<button onclick="editVideo('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg> Edit video</button>`:''}
+    <button onclick="bankToggleDownloaded('${id}')">${(v.edit_state&&v.edit_state.externally_downloaded)?'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unmark downloaded':'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Mark as downloaded'}</button>
     <button onclick="suggestOverlays('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"></use></svg> Suggest overlays</button>
     <button onclick="openVideoTypeModal('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-music"></use></svg> Video type${v.video_type?(' &middot; '+(v.video_type==='music_text'?'Music+Text':'Speech')):' &middot; Auto'}</button>
     <button onclick="openMoveModal('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tag"></use></svg> Change product</button>
