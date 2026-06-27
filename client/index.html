@@ -5609,7 +5609,7 @@ function ufAcctPicker(){
 function ufPickAcct(id){ ufState.account=(state.myAccounts||[]).find(function(x){return String(x.id)===String(id);})||null; ufRender(); }
 function ufInputs(){ return '<input id="uf_video" type="file" accept="video/*" style="display:none" onchange="ufPickVideo(this.files)">'
   +'<input id="uf_imgs" type="file" accept="image/*" multiple style="display:none" onchange="ufAddImages(this.files)">'
-  +'<input id="uf_voice" type="file" accept="audio/*" style="display:none" onchange="ufAddVoice(this.files)">'
+  +'<input id="uf_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddVoice(this.files)">'
   +'<input id="uf_bulk" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBulk(this.files)">'; }
 function ufClick(id){ var e=document.getElementById(id); if(e) e.click(); }
 function ufPickVideoBtn(){ ufClick('uf_video'); }
@@ -5640,8 +5640,8 @@ function ufSingle(){
   var imgBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon img">'+UF_IMG+'</div><div><div class="uam-btitle">Image overlays</div><div class="uam-bdesc">Logos / graphics to overlay on the video</div></div><div class="uam-bplus" onclick="ufPickImgs()">+</div></div><div class="uam-bbody"><div class="uam-thumbrow">'+imgs+'<div class="uam-thumb add" onclick="ufPickImgs()">+</div></div></div></div>';
   var voiceInner=ufState.voice
     ?('<div class="uam-audrow"><div class="play">'+UF_PLAY+'</div><div class="uam-wave"></div><div class="nm">'+esc(ufState.voice.name)+'</div><div class="x" onclick="ufRemoveVoice()">&times;</div></div>')
-    :('<div class="uam-drop" style="padding:14px" onclick="ufPickVoice()"><b>Add a voiceover MP3</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file</div></div>');
-  var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover <span class="o">MP3</span></div><div class="uam-bdesc">Upload an audio file to use as the voiceover</div></div><div class="uam-bplus" onclick="ufPickVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
+    :('<div class="uam-drop" style="padding:14px" onclick="ufPickVoice()"><b>Add a voiceover</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file (MP3, M4A, Voice Memos, WAV)</div></div>');
+  var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">Upload an audio file -- MP3, M4A and Voice Memos all work</div></div><div class="uam-bplus" onclick="ufPickVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
@@ -5668,7 +5668,8 @@ async function uploadAsset(file,vid,kind){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
   var cid=(ME&&ME.id);
   var path=(cid||'root')+'/assets/'+vid+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+safe;
-  var up=await sb.storage.from(BUCKET).upload(path,file,{contentType:(file.type||(kind==='image'?'image/jpeg':'audio/mpeg')),upsert:true});
+  var _ct=file.type; if(_ct==='audio/x-m4a'||(!_ct&&(file.name||'').toLowerCase().endsWith('.m4a'))) _ct='audio/mp4'; if(!_ct) _ct=(kind==='image'?'image/jpeg':'audio/mp4');
+  var up=await sb.storage.from(BUCKET).upload(path,file,{contentType:_ct,upsert:true});
   if(up.error) throw up.error;
   var ins=await sb.from('ed_video_assets').insert({video_id:vid,creator_id:cid,kind:kind,storage_path:path,filename:file.name,content_type:file.type||null,size_bytes:file.size});
   if(ins.error) throw ins.error;
@@ -6250,7 +6251,7 @@ async function jbRenderEdit(){
     +'<div class="lbl-ed">Video inspiration</div><input id="jb_inspo" type="url" value="'+esc(window.jbInspo||'')+'" placeholder="https://www.tiktok.com/..." style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;margin-bottom:10px">'
     +'<div class="lbl-ed">Notes</div><textarea id="jb_notes" rows="4" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px">'+esc(window.jbNotes||'')+'</textarea>'
     +'<input id="jb_imgs" type="file" accept="image/*" multiple style="display:none" onchange="jbAddImgs(this.files)">'
-    +'<input id="jb_voice" type="file" accept="audio/*" style="display:none" onchange="jbAddVoice(this.files)">'
+    +'<input id="jb_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="jbAddVoice(this.files)">'
     +'<div class="actions"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="jbSaveExtras()">Save</button></div>';
   showModal(h);
 }
