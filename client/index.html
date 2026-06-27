@@ -2804,7 +2804,17 @@ function bankIsEdited(v){ if(!v) return false; if(bankResolveEdited(v.id)) retur
 async function bankSendToPost(id){
   var v=(state.videos||[]).find(function(x){ return x.id===id; }); if(!v){ toast('Clip not found','err'); return; }
   if(!v.creator_id){ toast('Assign a client to this clip first','err'); return; }
-  if(!bankIsEdited(v)){ if(!confirm('This clip has no in-app edit. Send as-is? (Use when edited externally.)')) return; }
+  var hasInAppEdit=!!(v.edit_state&&v.edit_state.segments&&v.edit_state.segments.length);
+  if(hasInAppEdit){
+    // clip was edited in-app -- make sure the render worker has finished before delivering
+    var rendered=null; try{ rendered=await swResolveEdited(id); }catch(e){}
+    if(!rendered){
+      var pending=false; try{ var pj=await sb.from('ed_edit_jobs').select('id').eq('video_id',id).in('status',['queued','rendering']).limit(1); pending=!!(pj.data&&pj.data.length); }catch(e){}
+      toast(pending?'The edited render is still processing -- try again in a moment':'Could not find the edited render -- re-save the edit and wait for it to finish','err'); return;
+    }
+  } else if(!bankIsEdited(v)){
+    if(!confirm('This clip has no in-app edit. Send as-is? (Use when edited externally.)')) return;
+  }
   var up={delivered_at:new Date().toISOString(), status:'ready'};
   try{ if(!v.caption_suggested){ var cap=await tfAutoCaption(v); if(cap) up.caption_suggested=cap; } }catch(e){}
   var r=await sb.from('ed_videos').update(up).eq('id',id);
@@ -6019,7 +6029,13 @@ async function loadReady(){
   var srcs=[];
   try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
   for(var i=0;i<srcs.length;i++){
-    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){ srcs[i]._render=null; }
+    srcs[i]._render=null;
+    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){}
+    // fallback: render worker may not have set source_video_id -- look via the edit job's result_video_id
+    if(!srcs[i]._render){
+      try{ var ej=await sb.from('ed_edit_jobs').select('result_video_id').eq('video_id',srcs[i].id).eq('status','done').not('result_video_id','is',null).order('finished_at',{ascending:false}).limit(1);
+        if(ej.data&&ej.data[0]&&ej.data[0].result_video_id){ var ev=await sb.from('ed_videos').select('id,storage_path,filename').eq('id',ej.data[0].result_video_id).limit(1); if(ev.data&&ev.data[0]&&ev.data[0].storage_path) srcs[i]._render=ev.data[0]; } }catch(e){}
+    }
   }
   state.readyList=srcs; readyRender();
 }
