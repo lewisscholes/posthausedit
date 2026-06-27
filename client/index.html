@@ -867,6 +867,7 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-board" onclick="showView('board')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span> Job board</button>
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
+      <button class="nav-btn" id="nav-voiceovers" onclick="showView('voiceovers')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/></svg></span> Voiceovers</button>
 
     </div>
     <div class="nav-grow"></div>
@@ -1329,6 +1330,7 @@ a{color:#B0211A}
   <section id="view-board" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:1100px;margin:0 auto;padding:16px"><div id="boardBody"></div></div></section>
   <section id="view-analytics" class="hide"><div style="max-width:780px;margin:0 auto;padding:16px"><div id="analyticsBody"></div></div></section>
   <section id="view-imgov" class="hide"><div style="max-width:980px;margin:0 auto;padding:16px"><div id="imgovBody"></div></div></section>
+  <section id="view-voiceovers" class="hide"><div style="max-width:980px;margin:0 auto;padding:16px"><div id="voiceoversBody"></div></div></section>
   <section id="view-ready" class="hide"><div class="ph-top"><img class="ph-logo" src="posthaus-logo-180.png" alt="The Post Haus"><span class="ph-ttl">The Post Haus<small class="ph-tag">Creators create, we edit</small></span><span class="ph-who"></span></div><div style="max-width:620px;margin:0 auto;padding:16px"><div id="readyBody"></div></div></section>
   </main>
 
@@ -5437,9 +5439,9 @@ async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter yo
 function showView(v){
   if(!state.isAdmin && v!=='upload' && v!=='cdash' && v!=='board' && v!=='ready') v='cdash';
   state.currentView=v;
-  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','ready'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
+  ['dashboard','bank','files','products','priority','scraper','editor','schedule','overlays','training','team','clients','upload','cdash','board','analytics','imgov','voiceovers','ready'].forEach(function(n){ var s=document.getElementById('view-'+n); if(s) s.classList.toggle('hide', n!==v); var b=document.getElementById('nav-'+n); if(b) b.classList.toggle('active', n===v); var bb=document.getElementById('bnav-'+n); if(bb) bb.classList.toggle('active', n===v); });
   try{ closeDrawer(); }catch(e){} try{ closeToolsSheet(); }catch(e){}
-  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays'})[v]||'Editor Studio'; }catch(e){}
+  try{ var _bt=document.getElementById('edAdmTtl'); if(_bt) _bt.textContent=({clients:'Clients',board:'Job board',bank:'Video bank',editor:'Editor',schedule:'Content schedule',analytics:'Analytics',imgov:'Image overlays',voiceovers:'Voiceovers'})[v]||'Editor Studio'; }catch(e){}
   if(v==='clients') loadClients();
   if(v==='bank') loadBank();
   if(v==='editor') loadEditor();
@@ -5449,6 +5451,7 @@ function showView(v){
   if(v==='board') loadBoard();
   if(v==='analytics') loadAnalytics();
   if(v==='imgov') loadImgOverlays();
+  if(v==='voiceovers') loadVoiceovers();
   if(v==='ready') loadReady();
 }
 
@@ -5649,7 +5652,8 @@ function ufSingle(){
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
-  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+btn;
+  var standaloneVoice='<div class="uam-block" style="margin-top:18px"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Upload a voiceover only</div><div class="uam-bdesc">No video needed -- Aaron can attach it later</div></div></div><div class="uam-bbody">'+(window.__saVoiceFile?('<div class="uam-audrow"><div class="nm">'+esc(window.__saVoiceFile.name)+'</div><div class="x" onclick="window.__saVoiceFile=null;ufRender()">&times;</div></div><button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="ufUploadStandaloneVoice()">Send to Aaron</button>'):('<div class="uam-drop" style="padding:14px" onclick="document.getElementById(\'uf_sa_voice\').click()"><b>Tap to choose audio</b><div class="h-sub" style="margin-top:3px">M4A, Voice Memos, MP3, WAV all work</div></div>'))+'<input id="uf_sa_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="window.__saVoiceFile=this.files&&this.files[0];this.value=\'\';ufRender()"></div></div>';
+  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+btn+standaloneVoice;
 }
 function ufBulk(){
   var b=ufState.bulk||[];
@@ -6323,6 +6327,57 @@ function imgovRender(){
 function imgovThumb(a){
   var el=document.getElementById('iovt-'+a.id); if(!el||el.__done) return; el.__done=true;
   sb.storage.from(BUCKET).createSignedUrl(a.storage_path,3600).then(function(s){ if(s&&s.data&&s.data.signedUrl){ el.style.backgroundImage='url('+s.data.signedUrl+')'; } }).catch(function(){});
+}
+
+async function ufUploadStandaloneVoice(){
+  var f=window.__saVoiceFile; if(!f){ toast('Pick an audio file first','err'); return; }
+  toast('Uploading voiceover...','ok');
+  try{
+    var cid=(ME&&ME.id); if(!cid){ toast('Not logged in','err'); return; }
+    var safe=f.name.replace(/[^\w.\-]+/g,'_');
+    var path=cid+'/assets/standalone_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+safe;
+    var ct=f.type; if(ct==='audio/x-m4a'||(!ct&&f.name.toLowerCase().endsWith('.m4a'))) ct='audio/mp4'; if(!ct) ct='audio/mp4';
+    var up=await sb.storage.from(BUCKET).upload(path,f,{contentType:ct,upsert:true}); if(up.error) throw up.error;
+    await sb.from('ed_video_assets').insert({creator_id:cid,kind:'voiceover',storage_path:path,filename:f.name,content_type:ct,size_bytes:f.size,video_id:null});
+    window.__saVoiceFile=null; ufRender(); toast('Voiceover sent to Aaron -- he can attach it to your video','ok');
+  }catch(e){ toast('Upload failed: '+((e&&e.message)||e),'err'); }
+}
+
+// ===================== VOICEOVERS LIBRARY (admin) =====================
+async function loadVoiceovers(){
+  var root=document.getElementById('voiceoversBody'); if(!root) return;
+  root.innerHTML='<div class="h-sub">Loading voiceovers...</div>';
+  var assets=[], members=[];
+  try{ var mr=await sb.from('ed_members').select('id,name').eq('workspace_id',WS); members=mr.data||[]; }catch(e){}
+  try{ var ar=await sb.from('ed_video_assets').select('id,creator_id,storage_path,filename,size_bytes,created_at,video_id').eq('kind','voiceover').order('created_at',{ascending:false}); assets=ar.data||[]; }catch(e){}
+  var nameOf={}; members.forEach(function(m){ nameOf[m.id]=m.name||'Creator'; });
+  assets=assets.filter(function(a){ return nameOf[a.creator_id]; });
+  state.voiceAssets=assets; state.voiceNames=nameOf;
+  voiceoversRender();
+}
+function voiceoversSetClient(id){ state.voiceClient=(id==='__all'?null:id); voiceoversRender(); }
+function voiceoversRender(){
+  var root=document.getElementById('voiceoversBody'); if(!root) return;
+  var assets=state.voiceAssets||[]; var nameOf=state.voiceNames||{};
+  var groups={}; assets.forEach(function(a){ var k=a.creator_id; (groups[k]=groups[k]||[]).push(a); });
+  var clientIds=Object.keys(groups).sort(function(a,b){ return (nameOf[a]||'').localeCompare(nameOf[b]||''); });
+  var pills='<button class="edf'+(!state.voiceClient?' on':'')+'" onclick="voiceoversSetClient(\x27__all\x27)">All clients</button>';
+  clientIds.forEach(function(cid){ pills+='<button class="edf'+(state.voiceClient===cid?' on':'')+'" onclick="voiceoversSetClient(\x27'+esc(cid)+'\x27)">'+esc(nameOf[cid]||'Creator')+' ('+groups[cid].length+')</button>'; });
+  var head='<div style="font-size:22px;font-weight:800;margin:2px 2px 2px">Voiceovers</div><div class="h-sub" style="margin:0 2px 12px">Standalone voiceovers uploaded by creators, ready to attach to a video. Download any to use it in your edit.</div><div id="edFilterBar" style="margin-bottom:14px">'+pills+'</div>';
+  if(!assets.length){ root.innerHTML=head+'<div class="empty">No standalone voiceovers yet. They appear here when a creator uploads one from the Upload screen.</div>'; return; }
+  var showIds=state.voiceClient?[state.voiceClient]:clientIds;
+  var body='';
+  showIds.forEach(function(cid){
+    var items=groups[cid]||[]; if(!items.length) return;
+    body+='<div class="iov-folder"><div class="iov-fhead"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><use href="#i-folder"></use></svg> <b>'+esc(nameOf[cid]||'Creator')+'</b> <span class="h-sub" style="font-weight:500;font-size:13px">'+items.length+' voiceover'+(items.length===1?'':'s')+'</span></div>';
+    body+=items.map(function(a){
+      var nm=esc(String(a.filename||'voiceover').replace(/\x27/g,''));
+      var tag=a.video_id?'':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00;margin-left:6px">Unattached</span>';
+      return '<div class="card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;height:28px;flex-shrink:0;color:#6366f1"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/></svg><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(a.filename||'voiceover')+tag+'</div><div class="h-sub" style="font-size:11.5px">'+new Date(a.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+'</div></div><button class="btn ghost sm" onclick="jbDl(\x27'+a.id+'\x27,\x27'+nm+'\x27)">Download</button></div>';
+    }).join('');
+    body+='</div>';
+  });
+  root.innerHTML=head+body;
 }
 
 // ===================== TIKTOK ACCOUNTS SYNC (admin) =====================
