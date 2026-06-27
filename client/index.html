@@ -6054,7 +6054,8 @@ function readyCard(v){
   var capBlock=cap?'<div class="h-sub" style="font-size:13px;white-space:pre-wrap;word-break:break-word;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(cap)+'</div>':'<div class="h-sub" style="font-size:13px;margin:6px 0 10px">(No caption set)</div>';
   var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
   var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(hasEdit?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':(ready?'<span class="tf-pill" style="background:#eef1ff;color:#3340b6">Ready</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>'));
-  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>';
+  var sentAt=''; if(v.delivered_at){ try{ var _d=new Date(v.delivered_at); sentAt='<div class="h-sub" style="font-size:11.5px;margin:2px 0 0">Sent to post '+_d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' at '+_d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</div>'; }catch(e){} }
+  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>'+sentAt;
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
     btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
