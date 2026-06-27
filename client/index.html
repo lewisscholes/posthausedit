@@ -6028,23 +6028,32 @@ async function loadReady(){
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
   try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
-  for(var i=0;i<srcs.length;i++){
-    srcs[i]._render=null;
-    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',srcs[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); srcs[i]._render=(er.data&&er.data[0])||null; }catch(e){}
+  var cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
+  var arch=[]; try{ var ra=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('posted_at','is',null).gte('posted_at',cutoff).order('posted_at',{ascending:false}).limit(30); arch=ra.data||[]; }catch(e){ arch=[]; }
+  var allVids=srcs.concat(arch);
+  for(var i=0;i<allVids.length;i++){
+    allVids[i]._render=null;
+    try{ var er=await sb.from('ed_videos').select('id,storage_path,filename').eq('source_video_id',allVids[i].id).eq('kind','edited').order('created_at',{ascending:false}).limit(1); allVids[i]._render=(er.data&&er.data[0])||null; }catch(e){}
     // fallback: render worker may not have set source_video_id -- look via the edit job's result_video_id
-    if(!srcs[i]._render){
-      try{ var ej=await sb.from('ed_edit_jobs').select('result_video_id').eq('video_id',srcs[i].id).eq('status','done').not('result_video_id','is',null).order('finished_at',{ascending:false}).limit(1);
-        if(ej.data&&ej.data[0]&&ej.data[0].result_video_id){ var ev=await sb.from('ed_videos').select('id,storage_path,filename').eq('id',ej.data[0].result_video_id).limit(1); if(ev.data&&ev.data[0]&&ev.data[0].storage_path) srcs[i]._render=ev.data[0]; } }catch(e){}
+    if(!allVids[i]._render){
+      try{ var ej=await sb.from('ed_edit_jobs').select('result_video_id').eq('video_id',allVids[i].id).eq('status','done').not('result_video_id','is',null).order('finished_at',{ascending:false}).limit(1);
+        if(ej.data&&ej.data[0]&&ej.data[0].result_video_id){ var ev=await sb.from('ed_videos').select('id,storage_path,filename').eq('id',ej.data[0].result_video_id).limit(1); if(ev.data&&ev.data[0]&&ev.data[0].storage_path) allVids[i]._render=ev.data[0]; } }catch(e){}
     }
   }
-  state.readyList=srcs; readyRender();
+  state.readyList=srcs; state.readyArchive=arch; readyRender();
 }
 function readyRender(){
   var root=document.getElementById('readyBody'); if(!root) return;
   var list=state.readyList||[];
+  var arch=state.readyArchive||[];
   var head='<div style="font-size:21px;font-weight:800;margin:2px 2px 2px">Ready to post</div><div class="h-sub" style="margin:0 2px 14px">Your finished videos. Save each one, post it in TikTok and tag the product, then tap "Mark posted".</div>';
-  if(!list.length){ root.innerHTML=head+'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>'; return; }
-  root.innerHTML=head+list.map(readyCard).join('');
+  var main=list.length?list.map(readyCard).join(''):'<div class="empty">Nothing to post yet. When we finish editing your clips they will appear here.</div>';
+  var archHtml='';
+  if(arch.length){
+    var inner=arch.map(readyCard).join('');
+    archHtml='<div style="margin-top:28px"><div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;margin-bottom:10px"><span style="font-size:15px;font-weight:700">Recent downloads</span><span class="tf-pill" style="background:#f2ede8;color:#6b5c4e">'+arch.length+' video'+(arch.length===1?'':'s')+'</span><span class="h-sub" style="font-size:12px;margin-left:auto">Last 24h -- tap to expand</span></div><div style="display:none">'+inner+'</div></div>';
+  }
+  root.innerHTML=head+main+archHtml;
 }
 function readyCard(v){
   var hasEdit=!!(v._render&&v._render.storage_path);
@@ -6067,9 +6076,9 @@ function readyCard(v){
   var note=posted?'<div class="h-sub" style="font-size:11.5px;margin-top:6px;color:#0f6e56">Counted as posted. Tap "Save again" if you need the file again.</div>':'';
   return '<div class="card" style="margin-bottom:12px">'+top+capBlock+btns+note+'</div>';
 }
-function readyCopy(id){ var v=(state.readyList||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
+function readyCopy(id){ var v=(state.readyList||[]).concat(state.readyArchive||[]).find(function(x){return x.id===id;}); if(v&&v.caption_suggested) copyText(v.caption_suggested,'caption'); else toast('No caption to copy','err'); }
 async function readySave(id){
-  var v=(state.readyList||[]).find(function(x){return x.id===id;});
+  var v=(state.readyList||[]).concat(state.readyArchive||[]).find(function(x){return x.id===id;});
   if(!v){ return; }
   var r=(v._render&&v._render.storage_path)?v._render:{storage_path:v.storage_path, filename:v.filename};   // edited render, else the delivered original
   if(!r.storage_path){ toast('This video is still being prepared -- check back shortly','err'); return; }
