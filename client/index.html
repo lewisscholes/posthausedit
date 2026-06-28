@@ -5630,7 +5630,7 @@ var UF_IMG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="
 var UF_AUD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
 var UF_NOTE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
 var UF_LINK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); try{ edRefreshAccounts(); }catch(e){} }
+function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); try{ edRefreshAccounts(); }catch(e){} try{ ufLoadToday(); }catch(e){} }
 async function edRefreshAccounts(){ try{ var ar=await sb.from('ed_member_accounts').select('account_id,handle').eq('member_id',ME.id).order('created_at'); state.myAccounts=(ar.data||[]).map(function(a){ return {id:a.account_id, handle:a.handle}; }); if(state.myAccounts.length===1 && !ufState.account) ufState.account=state.myAccounts[0]; ufRender(); }catch(e){} }
 function ufSetMode(m){ ufState.mode=m; ufRender(); }
 function ufAcctPicker(){
@@ -5662,7 +5662,34 @@ function ufRender(){
   var seg='<div class="uam-seg"><button class="'+(ufState.mode==='single'?'on':'')+'" onclick="ufSetMode(\'single\')">Single upload<span class="s">1 video + extras</span></button>'
     +'<button class="'+(ufState.mode==='bulk'?'on':'')+'" onclick="ufSetMode(\'bulk\')">Bulk upload<span class="s">many at once</span></button></div>';
   var head='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 14px">Upload your clips for Aaron to edit.</div>';
-  root.innerHTML=head+seg+(ufState.mode==='single'?ufSingle():ufBulk())+ufInputs();
+  root.innerHTML=head+seg+(ufState.mode==='single'?ufSingle():ufBulk())+ufInputs()+'<div id="uf-today">'+(state.ufTodayHtml||'')+'</div>';
+}
+async function ufLoadToday(){
+  var el=document.getElementById('uf-today'); if(!el || !ME) return;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var iso=today.toISOString();
+  var rows=[]; try{ var r=await sb.from('ed_videos').select('id,filename,title,created_at').eq('creator_id',ME.id).neq('kind','edited').gte('created_at',iso).order('created_at',{ascending:false}).limit(50); rows=r.data||[]; }catch(e){ return; }
+  if(!rows.length){ state.ufTodayHtml=''; var _e=document.getElementById('uf-today'); if(_e) _e.innerHTML=''; return; }
+  var items=rows.map(function(v){
+    var name=v.title||v.filename||'clip';
+    var t=''; try{ var d=new Date(v.created_at); t=d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }catch(e){}
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2)">'
+      +'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0;opacity:.5"><use href="#i-film"></use></svg>'
+      +'<div style="flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(name)+'</div>'
+      +'<div style="font-size:12px;color:#888;flex-shrink:0">'+esc(t)+'</div>'
+      +'</div>';
+  }).join('');
+  var count=rows.length;
+  var html='<div style="margin-top:24px;padding:14px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">'
+    +'<span style="font-size:14px;font-weight:800">Uploaded today</span>'
+    +'<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--sub)">'+count+' clip'+(count===1?'':'s')+'</span>'
+    +'</div>'
+    +'<div style="font-size:12px;color:#888;margin-bottom:10px">These have all made it through to Aaron.</div>'
+    +items
+    +'</div>';
+  state.ufTodayHtml=html;
+  var _e=document.getElementById('uf-today'); if(_e) _e.innerHTML=html;
 }
 function ufSingle(){
   var v=ufState.video;
