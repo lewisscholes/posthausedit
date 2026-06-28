@@ -2769,16 +2769,37 @@ function promptShareAll(files,list){
   if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 const signed={};
+// Returns the 1-based clip number for a video, stable across all views.
+// Ordering: upload date ascending within the same creator -- oldest clip = #1.
+function videoNum(v){
+  if(!v) return 0;
+  // Admin bank: state.videos has all videos with creator_id
+  if(v.creator_id && state.videos && state.videos.length){
+    var _pool=state.videos.filter(function(x){ return x.creator_id===v.creator_id && x.kind!=='edited'; }).sort(function(a,b){ return (a.created_at||'')<(b.created_at||'')?-1:1; });
+    var _idx=_pool.findIndex(function(x){ return x.id===v.id; });
+    return _idx>=0?_idx+1:0;
+  }
+  // Creator board: state.jbNumMap built by loadBoard
+  if(state.jbNumMap && state.jbNumMap[v.id]) return state.jbNumMap[v.id];
+  // Creator ready-to-post: state.videoIndex built by loadReady
+  if(state.videoIndex){
+    var _ri=state.videoIndex.findIndex(function(x){ return x.id===v.id; });
+    return _ri>=0?_ri+1:0;
+  }
+  return 0;
+}
 function bankCard(v){
   const card=document.createElement('div'); card.className='vcard';
   const url=signed[v.id]||'';
   const size=v.size_bytes?((v.size_bytes/1048576).toFixed(1)+' MB'):'';
   const posted=isPosted(v); const self=state.isAdmin||isSelf(); const edited=bankIsEdited(v);
+  const vn=videoNum(v); const vnBadge=vn?'<div style="position:absolute;bottom:7px;left:7px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.55)">#'+vn+'</div>':'';
   if(v._finalizing){
     // Landed in Edited instantly -- the workhorse is still rendering the final file.
     card.innerHTML=`
     <div class="vthumb" style="position:relative"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
       <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,8,24,.45);color:#fff;gap:8px"><div class="inline-loader"></div><div style="font-weight:700;font-size:12px;letter-spacing:.02em">Finalizing</div></div>
+      ${vnBadge}
     </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div></div>
@@ -2791,6 +2812,7 @@ function bankCard(v){
     <div class="vthumb" style="position:relative"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
       <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:${edited?'#0f6e56':'#8a7f72'}">${edited?'Edited':'Not edited'}</div>
       ${(v.edit_state&&v.edit_state.externally_downloaded)?'<div style="position:absolute;top:7px;right:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#1d4ed8">Downloaded</div>':''}
+      ${vnBadge}
     </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
@@ -6052,6 +6074,7 @@ async function loadReady(){
         if(ej.data&&ej.data[0]&&ej.data[0].result_video_id){ var ev=await sb.from('ed_videos').select('id,storage_path,filename').eq('id',ej.data[0].result_video_id).limit(1); if(ev.data&&ev.data[0]&&ev.data[0].storage_path) allVids[i]._render=ev.data[0]; } }catch(e){}
     }
   }
+  try{ var _vi=await sb.from('ed_videos').select('id,created_at').eq('creator_id',ME.id).neq('kind','edited').order('created_at',{ascending:true}).limit(200); state.videoIndex=_vi.data||[]; }catch(e){ state.videoIndex=[]; }
   state.readyList=srcs; state.readyArchive=arch; readyRender();
 }
 function readyRender(){
@@ -6076,7 +6099,8 @@ function readyCard(v){
   var label=posted?'Posted':(ready?'Ready to post':'Preparing...');
   var pill=posted?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Posted</span>':(hasEdit?'<span class="tf-pill" style="background:#e7f7ee;color:#0f6e56">Edited</span>':(ready?'<span class="tf-pill" style="background:#eef1ff;color:#3340b6">Ready</span>':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00">Rendering</span>'));
   var sentAt=''; if(v.delivered_at){ try{ var _d=new Date(v.delivered_at); sentAt='<div class="h-sub" style="font-size:11.5px;margin:2px 0 0">Sent to post '+_d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' at '+_d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</div>'; }catch(e){} }
-  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>'+sentAt;
+  var _rn=videoNum(v); var _rnSpan=_rn?'<span style="font-size:12px;font-weight:700;color:#aaa;margin-right:2px">#'+_rn+'</span>':'';
+  var top='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">'+_rnSpan+'<span style="font-weight:800;font-size:14px">'+label+'</span>'+pill+'</div>'+sentAt;
   var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">';
   if(ready){
     btns+='<button class="btn'+(posted?' ghost':'')+'" style="flex:1;justify-content:center;min-width:130px" onclick="readySave(\x27'+esc(v.id)+'\x27)"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> '+(posted?'Save again':'Save video')+'</button>';
@@ -6192,6 +6216,7 @@ async function loadBoard(){
   var assetMap={}; try{ var ids=roots.map(function(v){return v.id;}); if(ids.length){ var ar=await sb.from('ed_video_assets').select('video_id,kind').in('video_id',ids); (ar.data||[]).forEach(function(a){ (assetMap[a.video_id]=assetMap[a.video_id]||{})[a.kind]=true; }); } }catch(e){}
   if(!state.jbUrls) state.jbUrls={};
   for(var i=0;i<roots.length;i++){ var v=roots[i]; var pth=v.proxy_path||v.storage_path; if(pth && !state.jbUrls[v.id]){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(pth,3600); if(s&&s.data&&s.data.signedUrl) state.jbUrls[v.id]=s.data.signedUrl; }catch(e){} } }
+  var _byC={}; roots.forEach(function(v){ (_byC[v.creator_id]=_byC[v.creator_id]||[]).push(v); }); var _nm={}; Object.keys(_byC).forEach(function(cid){ _byC[cid].slice().sort(function(a,b){ return (a.created_at||'')<(b.created_at||'')?-1:1; }).forEach(function(v,i){ _nm[v.id]=i+1; }); }); state.jbNumMap=_nm;
   var cols={uploaded:[],posted:[]};
   roots.forEach(function(v){ v._assets=assetMap[v.id]||{}; cols[jbColOf(v)].push(v); });
   function colHtml(key,label,dot){ var list=cols[key]; var cards=list.length?list.map(jbCard).join(''):'<div class="jb-empty">Nothing here.</div>'; return '<div class="jb-col"><div class="jb-colh"><span style="width:9px;height:9px;border-radius:50%;background:'+dot+'"></span>'+label+'<span class="jb-cnt">'+list.length+'</span></div>'+cards+'</div>'; }
@@ -6232,7 +6257,8 @@ function jbCard(v){
   if(state.isAdmin) click='onclick="jbAaronOpen(\''+v.id+'\')"';
   else if(jbColOf(v)==='uploaded') click='onclick="jbEditExtras(\''+v.id+'\')"';
   else click='onclick="jbView(\''+v.id+'\')"';
-  return '<div class="jb-card" '+click+'><div class="jb-thumb" data-vid="'+v.id+'"></div><div class="jb-meta"><div class="jb-nm">'+esc(v.title||v.filename||'clip')+'</div><div class="jb-sub">'+acct+chips+'</div></div></div>';
+  var _jn=videoNum(v); var _jnSpan=_jn?'<span style="font-size:10px;font-weight:800;color:#aaa;margin-right:3px">#'+_jn+'</span>':'';
+  return '<div class="jb-card" '+click+'><div class="jb-thumb" data-vid="'+v.id+'"></div><div class="jb-meta"><div class="jb-nm">'+_jnSpan+esc(v.title||v.filename||'clip')+'</div><div class="jb-sub">'+acct+chips+'</div></div></div>';
 }
 // ---- live sync: poll while the board is open + realtime push when available ----
 function jbStartLive(){
