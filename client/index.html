@@ -2800,24 +2800,43 @@ function promptShareAll(files,list){
   if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 const signed={};
-// Returns the 1-based clip number for a video, stable across all views.
-// Ordering: upload date ascending within the same creator -- oldest clip = #1.
+// Returns the permanent 1-based clip number for a video.
+// Stored in edit_state.clip_number so deletion of other videos never reuses a number.
+// Falls back to position-based ordering until assignClipNumbers() has run.
 function videoNum(v){
   if(!v) return 0;
-  // Admin bank: state.videos has all videos with creator_id
+  if(v.edit_state && v.edit_state.clip_number) return v.edit_state.clip_number;
+  // Admin bank fallback before numbers assigned
   if(v.creator_id && state.videos && state.videos.length){
     var _pool=state.videos.filter(function(x){ return x.creator_id===v.creator_id && x.kind!=='edited'; }).sort(function(a,b){ return (a.created_at||'')<(b.created_at||'')?-1:1; });
     var _idx=_pool.findIndex(function(x){ return x.id===v.id; });
     return _idx>=0?_idx+1:0;
   }
-  // Creator board: state.jbNumMap built by loadBoard
   if(state.jbNumMap && state.jbNumMap[v.id]) return state.jbNumMap[v.id];
-  // Creator ready-to-post: state.videoIndex built by loadReady
   if(state.videoIndex){
     var _ri=state.videoIndex.findIndex(function(x){ return x.id===v.id; });
     return _ri>=0?_ri+1:0;
   }
   return 0;
+}
+// Permanently stamps clip_number into edit_state for any video that doesn't have one yet.
+// Called after admin loadBank. Only writes to unnumbered videos -- a no-op once all are stamped.
+async function assignClipNumbers(){
+  var raw=(state.videos||[]).filter(function(v){ return v.kind!=='edited' && v.creator_id; });
+  var byC={};
+  raw.forEach(function(v){ (byC[v.creator_id]=byC[v.creator_id]||[]).push(v); });
+  for(var cid in byC){
+    var sorted=byC[cid].slice().sort(function(a,b){ return (a.created_at||'')<(b.created_at||'')?-1:1; });
+    var maxN=0;
+    sorted.forEach(function(v){ var n=v.edit_state&&v.edit_state.clip_number; if(n&&n>maxN) maxN=n; });
+    for(var i=0;i<sorted.length;i++){
+      var v=sorted[i];
+      if(v.edit_state&&v.edit_state.clip_number) continue;
+      maxN++;
+      var es=Object.assign({},v.edit_state||{}); es.clip_number=maxN;
+      try{ await sb.from('ed_videos').update({edit_state:es}).eq('id',v.id); v.edit_state=es; }catch(e){}
+    }
+  }
 }
 function bankCard(v){
   const card=document.createElement('div'); card.className='vcard';
@@ -6049,6 +6068,7 @@ async function loadBank(){
   if(state.bankTab==='edited') state.bankTab='new';
   try{ var _te=document.getElementById('tab-edited'); if(_te) _te.style.display='none'; }catch(e){}
   renderBank();
+  try{ assignClipNumbers(); }catch(e){}
 }
 // Bank bucketing under the new rules: a clip stays in New (uploaded) -- even while Aaron edits --
 // and only moves to Posted once scheduled/sent. Edited renders are represented by their root clip.
@@ -6134,9 +6154,9 @@ async function loadReady(){
   edSetWho((ME&&ME.name)||'');
   if(!root.dataset.init){ root.innerHTML='<div class="h-sub">Loading...</div>'; root.dataset.init='1'; }
   var srcs=[];
-  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
+  try{ var r=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at,edit_state').eq('creator_id',ME.id).not('delivered_at','is',null).is('posted_at',null).order('delivered_at',{ascending:false}).limit(60); srcs=r.data||[]; }catch(e){ srcs=[]; }
   var cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
-  var arch=[]; try{ var ra=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at').eq('creator_id',ME.id).not('posted_at','is',null).gte('posted_at',cutoff).order('posted_at',{ascending:false}).limit(30); arch=ra.data||[]; }catch(e){ arch=[]; }
+  var arch=[]; try{ var ra=await sb.from('ed_videos').select('id,filename,caption_suggested,delivered_at,storage_path,status,posted_at,edit_state').eq('creator_id',ME.id).not('posted_at','is',null).gte('posted_at',cutoff).order('posted_at',{ascending:false}).limit(30); arch=ra.data||[]; }catch(e){ arch=[]; }
   var allVids=srcs.concat(arch);
   for(var i=0;i<allVids.length;i++){
     allVids[i]._render=null;
@@ -6281,7 +6301,7 @@ async function loadBoard(){
   edSetWho((ME&&ME.name)||'');
   var root=document.getElementById('boardBody'); if(!root) return;
   if(!root.innerHTML) root.innerHTML='<div class="h-sub">Loading...</div>';
-  var q=sb.from('ed_videos').select('id,creator_id,kind,status,title,filename,storage_path,proxy_path,account_handle,source_video_id,posted_at,posted_by,inspo_url,notes,created_at').eq('workspace_id',WS).order('created_at',{ascending:false});
+  var q=sb.from('ed_videos').select('id,creator_id,kind,status,title,filename,storage_path,proxy_path,account_handle,source_video_id,posted_at,posted_by,inspo_url,notes,created_at,edit_state').eq('workspace_id',WS).order('created_at',{ascending:false});
   if(!state.isAdmin) q=q.eq('creator_id',ME.id);
   else if(state.creatorFilter) q=q.eq('creator_id',state.creatorFilter);
   var res=await q; var all=res.data||[];
