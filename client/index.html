@@ -5409,7 +5409,7 @@ function applyWhatsApp(){
   var err=document.getElementById('applyErr');
   if(!name||!handle||!vpd||!gmv){ if(err) err.textContent='Please fill in all fields.'; return; }
   if(err) err.textContent='';
-  var msg='Hey Aaron, its '+name+' I\'m reaching out about working together with the Post Haus! My TikTok is @'+handle+' and I\'m looking for '+vpd+' videos per day. My current monthly GMV is '+gmv+'. Hope to hear from you soon!';
+  var msg='Hey Aaron, its '+name+' I\'m reaching out about working together! My TikTok is @'+handle+' and I\'m looking for '+vpd+' videos per day. My current monthly GMV is '+gmv+'. Hope to hear from you soon!';
   window.open('https://wa.me/447539256694?text='+encodeURIComponent(msg),'_blank');
 }
 function toggleAuthMode(){ authMode=authMode==='login'?'signup':'login'; const s=authMode==='signup'; document.getElementById('authName').classList.toggle('hide',!s); document.getElementById('authSub').textContent=s?'Request access':'Sign in to your team'; document.getElementById('authPrimaryBtn').textContent=s?'Request access':'Log in'; document.getElementById('authToggleText').textContent=s?'Already have access?':"Don't have access yet?"; document.getElementById('authToggle').textContent=s?'Log in':'Request access'; authMsg(''); }
