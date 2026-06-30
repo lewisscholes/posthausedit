@@ -2891,7 +2891,7 @@ async function bankSendToPost(id){
   } else if(!bankIsEdited(v)){
     if(!confirm('This clip has no in-app edit. Send as-is? (Use when edited externally.)')) return;
     // confirmed externally edited -- stamp it so the badge shows "Edited"
-    try{ await sb.from('ed_videos').update({edit_state:{externally_edited:true}}).eq('id',id); v.edit_state={externally_edited:true}; }catch(e){}
+    try{ var _es=Object.assign({},v.edit_state||{},{externally_edited:true}); await sb.from('ed_videos').update({edit_state:_es}).eq('id',id); v.edit_state=_es; }catch(e){}
   }
   var up={delivered_at:new Date().toISOString(), status:'ready'};
   try{ if(!v.caption_suggested){ var cap=await tfAutoCaption(v); if(cap) up.caption_suggested=cap; } }catch(e){}
