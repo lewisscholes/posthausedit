@@ -2822,7 +2822,7 @@ function videoNum(v){
 // Permanently stamps clip_number into edit_state for any video that doesn't have one yet.
 // Called after admin loadBank. Only writes to unnumbered videos -- a no-op once all are stamped.
 async function assignClipNumbers(){
-  var raw=(state.videos||[]).filter(function(v){ return v.kind!=='edited' && v.creator_id; });
+  var raw=(state.videos||[]).filter(function(v){ return v.kind!=='edited' && v.creator_id && !(v.edit_state&&v.edit_state.admin_reupload); });
   var byC={};
   raw.forEach(function(v){ (byC[v.creator_id]=byC[v.creator_id]||[]).push(v); });
   for(var cid in byC){
@@ -5732,18 +5732,29 @@ async function ufLoadToday(){
   var today=new Date(); today.setHours(0,0,0,0);
   var iso=today.toISOString();
   var rows=[]; try{ var r=await sb.from('ed_videos').select('id,filename,title,created_at').eq('creator_id',ME.id).neq('kind','edited').gte('created_at',iso).order('created_at',{ascending:false}).limit(50); rows=r.data||[]; }catch(e){ return; }
-  if(!rows.length){ state.ufTodayHtml=''; var _e=document.getElementById('uf-today'); if(_e) _e.innerHTML=''; return; }
+  // batch progress totals (all time, not just today)
+  var totals={up:0,ready:0,posted:0};
+  try{ var tr=await sb.from('ed_videos').select('id,delivered_at,posted_at,edit_state').eq('creator_id',ME.id).neq('kind','edited');
+    (tr.data||[]).forEach(function(v){ if(v.edit_state&&v.edit_state.admin_reupload) return; totals.up++; if(v.delivered_at) totals.ready++; if(v.posted_at) totals.posted++; }); }catch(e){}
+  var progressHtml='<div style="margin-top:24px;padding:14px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px">'
+    +'<div style="font-size:14px;font-weight:800;margin-bottom:10px">Your progress</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">'
+    +'<div style="padding:10px 6px;background:var(--bg);border-radius:10px"><div style="font-size:22px;font-weight:800;color:var(--ink)">'+totals.up+'</div><div style="font-size:11px;color:#888;margin-top:2px">Uploaded</div></div>'
+    +'<div style="padding:10px 6px;background:var(--bg);border-radius:10px"><div style="font-size:22px;font-weight:800;color:#0f6e56">'+totals.ready+'</div><div style="font-size:11px;color:#888;margin-top:2px">Ready to post</div></div>'
+    +'<div style="padding:10px 6px;background:var(--bg);border-radius:10px"><div style="font-size:22px;font-weight:800;color:#D7342C">'+totals.posted+'</div><div style="font-size:11px;color:#888;margin-top:2px">Posted</div></div>'
+    +'</div></div>';
+  if(!rows.length){ state.ufTodayHtml=progressHtml; var _e=document.getElementById('uf-today'); if(_e) _e.innerHTML=progressHtml; return; }
   var items=rows.map(function(v){
     var name=v.title||v.filename||'clip';
     var t=''; try{ var d=new Date(v.created_at); t=d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }catch(e){}
     return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2)">'
       +'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0;opacity:.5"><use href="#i-film"></use></svg>'
-      +'<div style="flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(name)+'</div>'
+      +'<div style="flex:1;min-width:0;font-size:13px;font-weight:600;word-break:break-all">'+esc(name)+'</div>'
       +'<div style="font-size:12px;color:#888;flex-shrink:0">'+esc(t)+'</div>'
       +'</div>';
   }).join('');
   var count=rows.length;
-  var html='<div style="margin-top:24px;padding:14px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px">'
+  var todayHtml='<div style="margin-top:24px;padding:14px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">'
     +'<span style="font-size:14px;font-weight:800">Uploaded today</span>'
     +'<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--sub)">'+count+' clip'+(count===1?'':'s')+'</span>'
@@ -5751,6 +5762,7 @@ async function ufLoadToday(){
     +'<div style="font-size:12px;color:#888;margin-bottom:10px">These have all made it through to Aaron.</div>'
     +items
     +'</div>';
+  var html=progressHtml+todayHtml;
   state.ufTodayHtml=html;
   var _e=document.getElementById('uf-today'); if(_e) _e.innerHTML=html;
 }
@@ -6005,7 +6017,8 @@ async function uploadOne(file,prodId,onProgress){
   var cid = state.isAdmin ? (state.creatorFilter||null) : (ME&&ME.id);
   var path=(cid||'root')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+safe;
   await tusUpload(file,path,onProgress); if(onProgress)onProgress(file.size||0,file.size||0);
-  var ins=await sb.from('ed_videos').insert({creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new'}).select('id').single();
+  var _es=state.isAdmin?{admin_reupload:true}:null;
+  var ins=await sb.from('ed_videos').insert({creator_id:cid,kind:'raw',title:file.name,filename:file.name,storage_path:path,size_bytes:file.size,content_type:'video/mp4',status:'new',edit_state:_es}).select('id').single();
   if(ins.error) throw ins.error;
   // refresh the creator's "Your uploads" list as soon as each upload lands
   if(!state.isAdmin && state.currentView==='upload'){ try{ loadUpload(); }catch(e){} }
@@ -6689,9 +6702,9 @@ async function loadAnalytics(){
   var root=document.getElementById('analyticsBody'); if(!root) return;
   if(!root.innerHTML) root.innerHTML='<div class="h-sub">Loading...</div>';
   var mq=await sb.from('ed_members').select('id,name').eq('workspace_id',WS).eq('role','creator').order('created_at'); var members=mq.data||[];
-  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at,posted_at,delivered_at').eq('workspace_id',WS); var vids=vq.data||[];
+  var vq=await sb.from('ed_videos').select('id,creator_id,kind,created_at,posted_at,delivered_at,edit_state').eq('workspace_id',WS); var vids=vq.data||[];
   var r=anRange(); var cf=state.anClient||null;
-  function up(c){ return vids.filter(function(v){ return v.kind!=='edited'&&anInRange(v.created_at,r)&&(c?v.creator_id===c:true); }).length; }
+  function up(c){ return vids.filter(function(v){ return v.kind!=='edited'&&!(v.edit_state&&v.edit_state.admin_reupload)&&anInRange(v.created_at,r)&&(c?v.creator_id===c:true); }).length; }
   function ed(c){ return vids.filter(function(v){ return v.kind!=='edited'&&v.delivered_at&&anInRange(v.delivered_at,r)&&(c?v.creator_id===c:true); }).length; }   // Edited = delivered to the creator's "To post"
   function po(c){ return vids.filter(function(v){ return v.kind!=='edited'&&v.posted_at&&anInRange(v.posted_at,r)&&(c?v.creator_id===c:true); }).length; }   // Posted = creator saved/posted it
   var U=up(cf),E=ed(cf),P=po(cf);
