@@ -5664,7 +5664,7 @@ async function loadCDash(){
   state.myAccounts=[];
   var conn='';   // TikTok connect/disconnect removed -- finished videos are delivered in-app via "To post"
   var q=await sb.from('ed_videos').select('*').eq('workspace_id',WS).eq('creator_id',ME.id).order('created_at',{ascending:false});
-  var vids=q.data||[];
+  var vids=(q.data||[]).filter(function(v){ return !(v.edit_state&&v.edit_state.admin_reupload); });
   // this client's own stats (their uploads + their posted), with a date filter, shown under the greeting
   var cr=cdRangeFor(state.cdRange);
   var statUp=vids.filter(function(v){ return v.kind!=='edited' && cdIn(v.created_at,cr); }).length;
