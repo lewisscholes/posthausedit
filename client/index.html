@@ -5731,7 +5731,7 @@ async function ufLoadToday(){
   var el=document.getElementById('uf-today'); if(!el || !ME) return;
   var today=new Date(); today.setHours(0,0,0,0);
   var iso=today.toISOString();
-  var rows=[]; try{ var r=await sb.from('ed_videos').select('id,filename,title,created_at').eq('creator_id',ME.id).neq('kind','edited').gte('created_at',iso).order('created_at',{ascending:false}).limit(50); rows=r.data||[]; }catch(e){ return; }
+  var rows=[]; try{ var r=await sb.from('ed_videos').select('id,filename,title,created_at,edit_state').eq('creator_id',ME.id).neq('kind','edited').gte('created_at',iso).order('created_at',{ascending:false}).limit(50); rows=(r.data||[]).filter(function(v){ return !(v.edit_state&&v.edit_state.admin_reupload); }); }catch(e){ return; }
   // batch progress totals (all time, not just today)
   var totals={up:0,ready:0,posted:0};
   try{ var tr=await sb.from('ed_videos').select('id,delivered_at,posted_at,edit_state').eq('creator_id',ME.id).neq('kind','edited');
