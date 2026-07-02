@@ -5485,7 +5485,7 @@ async function edLoginWithCode(code){
   var w=await sb.from('ed_workspaces').select('*').eq('admin_code',code).maybeSingle();
   if(w.data){ WS=w.data.id; ME={id:'admin:'+w.data.id, name:w.data.name||'Admin', role:'admin'}; state.user={id:ME.id, first_name:ME.name, role:'admin'}; state.isAdmin=true; return {ok:true,role:'admin'}; }
   var m=await sb.from('ed_members').select('*').eq('invite_code',code).eq('active',true).maybeSingle();
-  if(m.data){ WS=m.data.workspace_id; ME={id:m.data.id, name:m.data.name||'Creator', role:'creator', name_set:!!m.data.name_set}; state.user={id:m.data.id, first_name:ME.name, role:'creator'}; state.isAdmin=false; return {ok:true,role:'creator'}; }
+  if(m.data){ WS=m.data.workspace_id; var _fn=(m.data.name||'Creator').trim().split(/\s+/)[0]; ME={id:m.data.id, name:_fn, role:'creator', name_set:!!m.data.name_set}; state.user={id:m.data.id, first_name:ME.name, role:'creator'}; state.isAdmin=false; return {ok:true,role:'creator'}; }
   return {error:'That code was not recognised'};
 }
 async function doLogin(){ authMsg(''); var code=val('authCode'); var r=await edLoginWithCode(code); if(r.error){ authMsg(r.error); return; } edSaveCode((code||'').trim()); enterApp(); }
@@ -5525,7 +5525,7 @@ async function enterApp(){
 }
 function edSetWho(n){ try{ var els=document.querySelectorAll('.ph-who'); for(var i=0;i<els.length;i++) els[i].textContent=n||''; }catch(e){} }
 function edAskName(){ showModal('<h3>Welcome to Post Haus!</h3><p class="h-sub" style="margin:-2px 0 12px">What is your name?</p><input id="phName" placeholder="Your name" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;box-sizing:border-box"><div class="actions"><button class="btn" onclick="edSaveName()">Continue</button></div>'); setTimeout(function(){ var e=document.getElementById('phName'); if(e) e.focus(); },60); }
-async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter your name','err'); return; } var r=await sb.from('ed_members').update({name:n,name_set:true}).eq('id',ME.id); if(r.error){ toast('Failed: '+r.error.message,'err'); return; } ME.name=n; ME.name_set=true; state.user.first_name=n; edSetWho(n); closeModal(); loadCDash(); toast('Welcome, '+n+'!','ok'); }
+async function edSaveName(){ var n=val('phName').trim(); if(!n){ toast('Enter your name','err'); return; } var r=await sb.from('ed_members').update({name:n,name_set:true}).eq('id',ME.id); if(r.error){ toast('Failed: '+r.error.message,'err'); return; } var _fn=n.split(/\s+/)[0]; ME.name=_fn; ME.name_set=true; state.user.first_name=_fn; edSetWho(_fn); closeModal(); loadCDash(); toast('Welcome, '+_fn+'!','ok'); }
 function showView(v){
   if(!state.isAdmin && v!=='upload' && v!=='cdash' && v!=='board' && v!=='ready') v='cdash';
   state.currentView=v;
