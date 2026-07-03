@@ -985,6 +985,7 @@ a{color:#B0211A}
         <button class="tab" id="tab-downloaded" onclick="setBankTab('downloaded')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Downloaded <span class="cnt" id="cnt-downloaded">0</span></button>
         <button class="tab" id="tab-posted" onclick="setBankTab('posted')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check-circle"></use></svg> Posted <span class="cnt" id="cnt-posted">0</span></button>
       </div>
+      <div id="bankFunnelBar"></div>
       <div id="bankEmpty" class="empty hide"><div class="big"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"></use></svg></div><div id="bankEmptyMsg">Nothing here yet.</div></div>
       <div id="bankCards" class="cards"></div>
     </section>
@@ -1400,11 +1401,13 @@ const SUPABASE_URL='https://vcrforlyuhapvkewsogq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjcmZvcmx5dWhhcHZrZXdzb2dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODk4NzAsImV4cCI6MjA5NTk2NTg3MH0.lcFC5aJFUGYrj4iw8oJ8R1bci4y_-aYKyQg8v9zrMqQ';
 const BUCKET='ed-videos';
 const sb=supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Funnel labelling (Top of funnel / Bottom of funnel) -- Yasmin only for now (2026-07-03).
+const FUNNEL_CLIENT_ID='42d3ed8a-c4ee-4367-805c-63355877ef18';
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
   results:[], products:[], jobs:[], videos:[], downloads:[], profiles:[], editJobs:[],
   sort:{key:null,dir:1}, dashView:'table', bankTab:'new', viewAs:null,
-  viewCols:null, activeViewId:'standard' };
+  viewCols:null, activeViewId:'standard', bankFunnel:null };
 
 function esc(s){ return (s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function toast(m,k){ const t=document.createElement('div'); t.className='toast '+(k||''); t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(), k==='err'?6000:3200); }
@@ -2677,6 +2680,16 @@ function bankBuckets(){
   });
   return b;
 }
+function bankFunnelBarHtml(){
+  if(!state.isAdmin || state.creatorFilter!==FUNNEL_CLIENT_ID) return '';
+  var f=state.bankFunnel;
+  return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">'
+    +'<button type="button" class="edf'+(!f?' on':'')+'" onclick="bankSetFunnel(null)">All</button>'
+    +'<button type="button" class="edf'+(f==='tof'?' on':'')+'" onclick="bankSetFunnel(\'tof\')">Top of funnel</button>'
+    +'<button type="button" class="edf'+(f==='bof'?' on':'')+'" onclick="bankSetFunnel(\'bof\')">Bottom of funnel</button>'
+    +'</div>';
+}
+function bankSetFunnel(f){ state.bankFunnel=f||null; renderBank(); }
 function renderBank(){
   const b=bankBuckets();
   document.getElementById('cnt-new').textContent=b.new.length;
@@ -2684,7 +2697,9 @@ function renderBank(){
   document.getElementById('cnt-downloaded').textContent=b.downloaded.length;
   document.getElementById('cnt-posted').textContent=b.posted.length;
   ['new','edited','downloaded','posted'].forEach(t=>{const el=document.getElementById('tab-'+t); if(el)el.classList.toggle('active',t===state.bankTab);});
-  const list=b[state.bankTab];
+  const fbar=document.getElementById('bankFunnelBar'); if(fbar) fbar.innerHTML=bankFunnelBarHtml();
+  var list=b[state.bankTab];
+  if(state.isAdmin && state.creatorFilter===FUNNEL_CLIENT_ID && state.bankFunnel){ list=list.filter(v=>v.edit_state&&v.edit_state.funnel===state.bankFunnel); }
   const wrap=document.getElementById('bankCards'); const empty=document.getElementById('bankEmpty');
   empty.classList.toggle('hide', list.length>0);
   if(!list.length){ const msgs={new:'No new videos. Upload some, or they arrive from the Drive relay.',edited:'No edited videos yet. Edit a clip and tap the tick -- it renders here, ready to download.',downloaded:'Nothing downloaded yet.',posted:'Nothing posted yet.'}; document.getElementById('bankEmptyMsg').textContent=msgs[state.bankTab]||'Nothing here yet.'; wrap.innerHTML=''; wrap.dataset.sig=''; return; }
@@ -2863,6 +2878,7 @@ function bankCard(v){
       <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:${edited?'#0f6e56':'#8a7f72'}">${edited?'Edited':'Not edited'}</div>
       ${(v.edit_state&&v.edit_state.externally_downloaded)?'<div style="position:absolute;top:7px;right:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#1d4ed8">Downloaded</div>':''}
       ${vnBadge}
+      ${(v.edit_state&&v.edit_state.funnel)?('<div style="position:absolute;bottom:7px;right:7px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;background:'+(v.edit_state.funnel==='tof'?'#0284c7':'#7c3aed')+'">'+(v.edit_state.funnel==='tof'?'TOF':'BOF')+'</div>'):''}
     </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
@@ -2906,6 +2922,7 @@ function toggleMenu(e,id){ e.stopPropagation(); document.querySelectorAll('.menu
   m.innerHTML=`${!isPosted(v)&&!v.delivered_at?`<button onclick="bankSendToPost('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}
     ${v.delivered_at&&!v.posted_at?`<button onclick="bankPullBack('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Pull back for revision</button>`:''}
     <button onclick="downloadVideo('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>
+    <button onclick="jbView('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> Client brief</button>
     ${isPosted(v)?`<button onclick="unpost('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:`<button onclick="markPosted('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Mark posted</button>`}
     ${v.kind!=='edited'?`<button onclick="editVideo('${id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-scissors"></use></svg> Edit video</button>`:''}
     <button onclick="bankToggleDownloaded('${id}')">${(v.edit_state&&v.edit_state.externally_downloaded)?'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unmark downloaded':'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Mark as downloaded'}</button>
@@ -5683,7 +5700,7 @@ async function loadCDash(){
 function edCreatorUpload(){ showView('upload'); }
 
 // ===== Client uploader: single / bulk + Notion-style attachments (matches the mockup) =====
-var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null};
+var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null};
 function ufMB(b){ b=b||0; return (b>=1048576)?((b/1048576).toFixed(1)+' MB'):(Math.max(1,Math.round(b/1024))+' KB'); }
 function ufShort(n){ n=n||'clip'; return n.length>14?(n.slice(0,11)+'...'):n; }
 var UF_FILM='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
@@ -5779,11 +5796,17 @@ function ufSingle(){
     :('<div class="uam-drop" style="padding:14px" onclick="ufPickVoice()"><b>Add a voiceover</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file (MP3, M4A, Voice Memos, WAV)</div></div>');
   var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">Upload an audio file -- MP3, M4A and Voice Memos all work</div></div><div class="uam-bplus" onclick="ufPickVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
+  var funnelBlock=(ME&&ME.id===FUNNEL_CLIENT_ID)?('<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Content type <span class="o">optional</span></div><div class="uam-bdesc">Helps Aaron sort your clips</div></div></div><div class="uam-bbody"><div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button type="button" class="edf'+(ufState.funnel==='tof'?' on':'')+'" onclick="ufSetFunnel(\'tof\')">Top of funnel</button>'
+    +'<button type="button" class="edf'+(ufState.funnel==='bof'?' on':'')+'" onclick="ufSetFunnel(\'bof\')">Bottom of funnel</button>'
+    +(ufState.funnel?'<button type="button" class="edf" onclick="ufSetFunnel(null)">Clear</button>':'')
+    +'</div></div></div>'):'';
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
   var standaloneVoice='<div class="uam-block" style="margin-top:18px"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Upload a voiceover only</div><div class="uam-bdesc">No video needed -- Aaron can attach it later</div></div></div><div class="uam-bbody">'+(window.__saVoiceFile?('<div class="uam-audrow"><div class="nm">'+esc(window.__saVoiceFile.name)+'</div><div class="x" onclick="window.__saVoiceFile=null;ufRender()">&times;</div></div><button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="ufUploadStandaloneVoice()">Send to Aaron</button>'):('<div class="uam-drop" style="padding:14px" onclick="document.getElementById(\'uf_sa_voice\').click()"><b>Tap to choose audio</b><div class="h-sub" style="margin-top:3px">M4A, Voice Memos, MP3, WAV all work</div></div>'))+'<input id="uf_sa_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="window.__saVoiceFile=this.files&&this.files[0];this.value=\'\';ufRender()"></div></div>';
-  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+btn+standaloneVoice;
+  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+funnelBlock+btn+standaloneVoice;
 }
+function ufSetFunnel(f){ ufState.funnel=f; ufRender(); }
 function ufBulk(){
   var b=ufState.bulk||[];
   var grid=b.length?('<div class="uam-bulkgrid">'+b.map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveBulk('+i+')">&times;</div></div>'; }).join('')+'</div>'):'';
@@ -5819,8 +5842,9 @@ function ufSubmitSingle(){
   var notes=(document.getElementById('uf_notes')&&document.getElementById('uf_notes').value)||ufState.notes||'';
   var inspo=(document.getElementById('uf_inspo')&&document.getElementById('uf_inspo').value)||ufState.inspo||'';
   inspo=inspo.trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;   // normalise so the link works on Aaron's side
-  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,notes:notes,inspo:inspo,account:acct});
-  ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:(accs.length===1?accs[0]:acct)}; ufRender();
+  var funnel=(ME&&ME.id===FUNNEL_CLIENT_ID)?(ufState.funnel||null):null;
+  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,notes:notes,inspo:inspo,account:acct,funnel:funnel});
+  ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:(accs.length===1?accs[0]:acct),funnel:null}; ufRender();
   toast('Added to the upload queue -- keep going if you like','ok');
 }
 function ufSubmitBulk(){
@@ -5845,7 +5869,7 @@ function duOpen(){ return new Promise(function(res,rej){ if(_duDB) return res(_d
 function duPut(rec){ return duOpen().then(function(db){ return new Promise(function(res,rej){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).put(rec); tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);}; }catch(e){ rej(e); } }); }).catch(function(){}); }
 function duDel(id){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).delete(id); tx.oncomplete=function(){res(true);}; tx.onerror=function(){res(false);}; }catch(e){ res(false); } }); }).catch(function(){}); }
 function duAll(){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var r=db.transaction(DU_STORE,'readonly').objectStore(DU_STORE).getAll(); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){res([]);}; }catch(e){ res([]); } }); }).catch(function(){ return []; }); }
-function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
+function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',funnel:item.funnel||null,account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
 // keep the screen awake during uploads so iOS is less likely to sleep mid-transfer (best-effort)
 function duWakeOn(){ try{ if('wakeLock' in navigator && !_duWake){ navigator.wakeLock.request('screen').then(function(w){ _duWake=w; w.addEventListener('release',function(){ _duWake=null; }); }).catch(function(){}); } }catch(e){} }
 function duWakeOff(){ try{ if(_duWake){ _duWake.release(); _duWake=null; } }catch(e){} }
@@ -5862,7 +5886,7 @@ async function duResume(){
         var f=new File([rec.file],rec.fileName||'video.mp4',{type:rec.fileType||'video/mp4'});
         var imgs=(rec.images||[]).map(function(im){ return new File([im.blob],im.name||'image.jpg',{type:im.type||'image/jpeg'}); });
         var voice=rec.voice?new File([rec.voice.blob],rec.voice.name||'voice.mp3',{type:(rec.voice.type||'audio/mpeg')}):null;
-        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
+        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',funnel:rec.funnel||null,account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
         n++;
       }catch(e){}
     });
@@ -5908,6 +5932,7 @@ async function uqProcess(item){
   if(item.voice && !item.voiceDone){ try{ await uploadAsset(item.voice,vid,'voiceover'); }catch(e){} item.voiceDone=true; duPersist(item); uq.done+=(item.voice.size||0); uqRender(); }
   if(item.notes){ try{ await sb.from('ed_videos').update({notes:item.notes}).eq('id',vid); }catch(e){} }
   if(item.inspo){ try{ await sb.from('ed_videos').update({inspo_url:item.inspo}).eq('id',vid); }catch(e){} }
+  if(item.funnel){ try{ var _cur=await sb.from('ed_videos').select('edit_state').eq('id',vid).maybeSingle(); var _es=Object.assign({},(_cur.data&&_cur.data.edit_state)||{},{funnel:item.funnel}); await sb.from('ed_videos').update({edit_state:_es}).eq('id',vid); }catch(e){} }
   try{ await duDel(item.duId); }catch(e){} if(item.duId) delete _duActive[item.duId];   // fully done -> drop the durable copy
   try{ if(state.currentView==='cdash') loadCDash(); }catch(e){}
 }
