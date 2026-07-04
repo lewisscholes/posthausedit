@@ -5733,7 +5733,7 @@ function ufPickBulk(){ ufClick('uf_bulk'); }
 function ufPickVideo(files){ if(files&&files[0]) ufState.video=files[0]; ufRender(); }
 function ufAddImages(files){ for(var i=0;i<files.length;i++) ufState.images.push(files[i]); ufRender(); }
 function ufAddVoice(files){ if(files&&files[0]) ufState.voice=files[0]; ufRender(); }
-function ufAddBulk(files){ ufState.bulk=[].slice.call(files); ufRender(); }
+function ufAddBulk(files){ ufState.bulk=[].slice.call(files).map(function(f){ return {file:f,funnel:null}; }); ufRender(); }
 function ufRemoveImage(i){ ufState.images.splice(i,1); ufRender(); }
 function ufRemoveVoice(){ ufState.voice=null; ufRender(); }
 function ufRemoveBulk(i){ ufState.bulk.splice(i,1); ufRender(); }
@@ -5809,12 +5809,22 @@ function ufSingle(){
 function ufSetFunnel(f){ ufState.funnel=f; ufRender(); }
 function ufBulk(){
   var b=ufState.bulk||[];
-  var grid=b.length?('<div class="uam-bulkgrid">'+b.map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveBulk('+i+')">&times;</div></div>'; }).join('')+'</div>'):'';
+  var showFunnel=(ME&&ME.id===FUNNEL_CLIENT_ID);
+  var grid=b.length?('<div class="uam-bulkgrid">'+b.map(function(it,i){
+      var f=it.file;
+      var tag=showFunnel?('<div style="display:flex;gap:4px;margin-top:4px">'
+        +'<button type="button" class="edf'+(it.funnel==='tof'?' on':'')+'" style="padding:2px 8px;font-size:10px" onclick="ufSetBulkFunnel('+i+',\'tof\')">TOF</button>'
+        +'<button type="button" class="edf'+(it.funnel==='bof'?' on':'')+'" style="padding:2px 8px;font-size:10px" onclick="ufSetBulkFunnel('+i+',\'bof\')">BOF</button>'
+        +'</div>'):'';
+      return '<div><div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveBulk('+i+')">&times;</div></div>'+tag+'</div>';
+    }).join('')+'</div>'):'';
   var drop='<div class="uam-drop" onclick="ufPickBulk()"><div class="ic">'+UF_UP+'</div><b>Tap to choose multiple videos</b><div class="h-sub" style="margin-top:4px">Select as many as you like</div></div>';
-  var info='<div class="uam-info">Attachments (overlays, voiceover, notes) are turned off in bulk mode - they are a per-video thing. Upload singly when a clip needs extras.</div>';
+  var info='<div class="uam-info">Attachments (overlays, voiceover, notes) are turned off in bulk mode - they are a per-video thing. Upload singly when a clip needs extras.</div>'
+    +(showFunnel?'<div class="uam-info">Tap TOF/BOF under a clip to tag it -- optional, tap again to clear.</div>':'');
   var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBulk()">'+(b.length?('Upload '+b.length+' videos'):'Upload videos')+'</button>';
   return '<div class="card"><div class="lbl-ed">Bulk upload</div>'+drop+grid+info+'</div>'+btn;
 }
+function ufSetBulkFunnel(i,f){ var it=(ufState.bulk||[])[i]; if(!it) return; it.funnel=(it.funnel===f?null:f); ufRender(); }
 async function uploadVideoReturnId(file){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
   var cid=(ME&&ME.id);
@@ -5852,7 +5862,8 @@ function ufSubmitBulk(){
   var accs=state.myAccounts||[];
   if(accs.length && !ufState.account){ toast('Pick which account these are for','err'); return; }
   var acct=ufState.account||null;
-  b.forEach(function(f){ uqEnqueue({file:f,images:[],voice:null,notes:'',account:acct}); });
+  var showFunnel=(ME&&ME.id===FUNNEL_CLIENT_ID);
+  b.forEach(function(it){ uqEnqueue({file:it.file,images:[],voice:null,notes:'',account:acct,funnel:(showFunnel?(it.funnel||null):null)}); });
   ufState={mode:'bulk',video:null,images:[],voice:null,notes:'',bulk:[],account:(accs.length===1?accs[0]:acct)}; ufRender();
   toast('Added '+b.length+' to the upload queue','ok');
 }
