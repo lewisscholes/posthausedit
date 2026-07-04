@@ -1403,6 +1403,11 @@ const BUCKET='ed-videos';
 const sb=supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Funnel labelling (Top of funnel / Bottom of funnel) -- Yasmin only for now (2026-07-03).
 const FUNNEL_CLIENT_ID='42d3ed8a-c4ee-4367-805c-63355877ef18';
+// B-roll project upload mode -- multiple raw clips + one voiceover + one brief, edited externally
+// into a single finished video (Steph + Demo, 2026-07-04). Hardcoded allowlist by design: adding a
+// new B-roll client is a one-line change here, not a DB migration.
+const BROLL_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bac7f943-1234-4aa7-93cc-facd5787a1f7'];
+function isBrollClient(id){ return !!(id && BROLL_CLIENT_IDS.indexOf(id)>=0); }
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
   results:[], products:[], jobs:[], videos:[], downloads:[], profiles:[], editJobs:[],
@@ -2716,12 +2721,70 @@ let bankPollT=null;
 // poll would wipe + recreate every <video> each time and they'd flash in and out.
 function paintBank(list){
   const wrap=document.getElementById('bankCards'); if(!wrap) return;
-  const sig=state.bankTab+'|'+list.map(v=>v.id+(v._finalizing?'#f':'')+(signed[v.id]?'#u':'')).join(',');
+  const sig=state.bankTab+'|'+list.map(v=>v.id+(v._finalizing?'#f':'')+(signed[v.id]?'#u':'')+(v.edit_state&&v.edit_state.broll_group?('#g'+v.edit_state.broll_group):'')).join(',')+'|'+JSON.stringify(state.brollExpanded||{});
   if(wrap.dataset.sig===sig) return;   // nothing changed -> leave the DOM (and playing videos) alone
   wrap.dataset.sig=sig;
   wrap.innerHTML='';
   if(state.bankTab==='edited'){ wrap.appendChild(bankBar(list)); }
+  // B-roll projects (multiple raw clips uploaded as one group) collapse into a single card in
+  // the To do tab so they don't clutter the board -- "Show clips" reveals the normal per-clip
+  // cards below, unchanged. This only ever activates for clips carrying edit_state.broll_group,
+  // so every other client's board renders exactly as before.
+  if(state.bankTab==='new'){
+    const seen={};
+    list.forEach(v=>{
+      const g=v.edit_state&&v.edit_state.broll_group;
+      if(g){
+        if(state.brollExpanded&&state.brollExpanded[g]){
+          if(!seen[g]){ seen[g]=true; wrap.appendChild(bankBrollExpandedHeader(g)); }
+          wrap.appendChild(bankCard(v));
+          return;
+        }
+        if(seen[g]) return;
+        seen[g]=true;
+        const groupClips=list.filter(x=>x.edit_state&&x.edit_state.broll_group===g);
+        wrap.appendChild(bankBrollCard(g,groupClips));
+        return;
+      }
+      wrap.appendChild(bankCard(v));
+    });
+    return;
+  }
   list.forEach(v=>wrap.appendChild(bankCard(v)));
+}
+function bankBrollExpandedHeader(g){
+  const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin:4px 0 -4px';
+  bar.innerHTML='<button class="btn ghost sm" onclick="bankToggleBrollExpand(\''+g+'\')">&#8963; Collapse B-roll project</button>';
+  return bar;
+}
+function bankBrollCard(groupId,clips){
+  const card=document.createElement('div'); card.className='vcard';
+  const primary=clips.slice().sort((a,b)=>(a.created_at||'')<(b.created_at||'')?-1:1)[0];   // oldest = first uploaded = holds the shared voiceover
+  const url=signed[primary.id]||'';
+  const totalSize=clips.reduce((s,v)=>s+(v.size_bytes||0),0);
+  const sizeStr=totalSize?((totalSize/1048576).toFixed(1)+' MB total'):'';
+  card.innerHTML=`
+    <div class="vthumb" style="position:relative"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
+      <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#7c3aed">B-roll project</div>
+      <div style="position:absolute;bottom:7px;left:7px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.55)">${clips.length} clip${clips.length===1?'':'s'}</div>
+    </div>
+    <div class="vbody">
+      <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">B-roll project (${clips.length} clip${clips.length===1?'':'s'})</div></div>
+      <div class="vstats">${sizeStr?`<span>${sizeStr}</span>`:''}<span>${(primary.created_at||'').slice(0,10)}</span></div>
+      <div class="vrow">
+        <button class="btn sm" onclick="jbView('${primary.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> Client brief</button>
+        <button class="btn ghost sm" onclick="bankDownloadBroll('${groupId}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download all</button>
+        <button class="btn ghost sm" onclick="bankToggleBrollExpand('${groupId}')">Show clips</button>
+      </div>
+    </div>`;
+  return card;
+}
+function bankToggleBrollExpand(g){ state.brollExpanded=state.brollExpanded||{}; state.brollExpanded[g]=!state.brollExpanded[g]; renderBank(); }
+async function bankDownloadBroll(g){
+  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g);
+  if(!clips.length){ toast('Nothing to download','err'); return; }
+  toast('Downloading '+clips.length+' clip'+(clips.length===1?'':'s')+'...','ok');
+  for(const v of clips){ try{ await downloadVideo(v.id); }catch(e){} await new Promise(r=>setTimeout(r,1200)); }
 }
 function bankBar(list){
   const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin-bottom:4px';
@@ -5700,7 +5763,7 @@ async function loadCDash(){
 function edCreatorUpload(){ showView('upload'); }
 
 // ===== Client uploader: single / bulk + Notion-style attachments (matches the mockup) =====
-var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null};
+var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null,broll:{vids:[],voice:null,notes:'',inspo:''}};
 function ufMB(b){ b=b||0; return (b>=1048576)?((b/1048576).toFixed(1)+' MB'):(Math.max(1,Math.round(b/1024))+' KB'); }
 function ufShort(n){ n=n||'clip'; return n.length>14?(n.slice(0,11)+'...'):n; }
 var UF_FILM='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
@@ -5724,25 +5787,37 @@ function ufPickAcct(id){ ufState.account=(state.myAccounts||[]).find(function(x)
 function ufInputs(){ return '<input id="uf_video" type="file" accept="video/*" style="display:none" onchange="ufPickVideo(this.files)">'
   +'<input id="uf_imgs" type="file" accept="image/*" multiple style="display:none" onchange="ufAddImages(this.files)">'
   +'<input id="uf_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddVoice(this.files)">'
-  +'<input id="uf_bulk" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBulk(this.files)">'; }
+  +'<input id="uf_bulk" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBulk(this.files)">'
+  +'<input id="uf_broll_vids" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBrollVids(this.files)">'
+  +'<input id="uf_broll_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddBrollVoice(this.files)">'; }
 function ufClick(id){ var e=document.getElementById(id); if(e) e.click(); }
 function ufPickVideoBtn(){ ufClick('uf_video'); }
 function ufPickImgs(){ ufClick('uf_imgs'); }
 function ufPickVoice(){ ufClick('uf_voice'); }
 function ufPickBulk(){ ufClick('uf_bulk'); }
+function ufPickBrollVids(){ ufClick('uf_broll_vids'); }
+function ufPickBrollVoice(){ ufClick('uf_broll_voice'); }
 function ufPickVideo(files){ if(files&&files[0]) ufState.video=files[0]; ufRender(); }
 function ufAddImages(files){ for(var i=0;i<files.length;i++) ufState.images.push(files[i]); ufRender(); }
 function ufAddVoice(files){ if(files&&files[0]) ufState.voice=files[0]; ufRender(); }
 function ufAddBulk(files){ ufState.bulk=[].slice.call(files).map(function(f){ return {file:f,funnel:null}; }); ufRender(); }
+function ufAddBrollVids(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''}; ufState.broll.vids=(ufState.broll.vids||[]).concat([].slice.call(files)); ufRender(); }
+function ufRemoveBrollVid(i){ if(ufState.broll&&ufState.broll.vids) ufState.broll.vids.splice(i,1); ufRender(); }
+function ufAddBrollVoice(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''}; if(files&&files[0]) ufState.broll.voice=files[0]; ufRender(); }
+function ufRemoveBrollVoice(){ if(ufState.broll) ufState.broll.voice=null; ufRender(); }
 function ufRemoveImage(i){ ufState.images.splice(i,1); ufRender(); }
 function ufRemoveVoice(){ ufState.voice=null; ufRender(); }
 function ufRemoveBulk(i){ ufState.bulk.splice(i,1); ufRender(); }
 function ufRender(){
   var root=document.getElementById('uploadBody'); if(!root) return;
+  var showBroll=(ME&&isBrollClient(ME.id));
   var seg='<div class="uam-seg"><button class="'+(ufState.mode==='single'?'on':'')+'" onclick="ufSetMode(\'single\')">Single upload<span class="s">1 video + extras</span></button>'
-    +'<button class="'+(ufState.mode==='bulk'?'on':'')+'" onclick="ufSetMode(\'bulk\')">Bulk upload<span class="s">many at once</span></button></div>';
+    +'<button class="'+(ufState.mode==='bulk'?'on':'')+'" onclick="ufSetMode(\'bulk\')">Bulk upload<span class="s">many at once</span></button>'
+    +(showBroll?('<button class="'+(ufState.mode==='broll'?'on':'')+'" onclick="ufSetMode(\'broll\')">B-roll project<span class="s">clips + voiceover, one project</span></button>'):'')
+    +'</div>';
   var head='<div class="ph-hi">Hi <span class="ph-accent">'+esc((ME&&ME.name)||'there')+'</span></div><div class="h-sub" style="margin:0 2px 14px">Upload your clips for Aaron to edit.</div>';
-  root.innerHTML=head+seg+(ufState.mode==='single'?ufSingle():ufBulk())+ufInputs()+'<div id="uf-today">'+(state.ufTodayHtml||'')+'</div>';
+  var body=ufState.mode==='single'?ufSingle():(ufState.mode==='broll'&&showBroll)?ufBroll():ufBulk();
+  root.innerHTML=head+seg+body+ufInputs()+'<div id="uf-today">'+(state.ufTodayHtml||'')+'</div>';
 }
 async function ufLoadToday(){
   var el=document.getElementById('uf-today'); if(!el || !ME) return;
@@ -5825,6 +5900,39 @@ function ufBulk(){
   return '<div class="card"><div class="lbl-ed">Bulk upload</div>'+drop+grid+info+'</div>'+btn;
 }
 function ufSetBulkFunnel(i,f){ var it=(ufState.bulk||[])[i]; if(!it) return; it.funnel=(it.funnel===f?null:f); ufRender(); }
+function ufBroll(){
+  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''};
+  var br=ufState.broll;
+  var vids=br.vids||[];
+  var grid=vids.length?('<div class="uam-bulkgrid">'+vids.map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveBrollVid('+i+')">&times;</div></div>'; }).join('')+'</div>'):'';
+  var drop='<div class="uam-drop" onclick="ufPickBrollVids()"><div class="ic">'+UF_UP+'</div><b>Tap to choose B-roll clips</b><div class="h-sub" style="margin-top:4px">Add as many as you like -- they all go to Aaron as one project</div></div>';
+  var vidcard='<div class="card"><div class="lbl-ed">Clips for this project</div>'+drop+grid+'</div>';
+  var voiceInner=br.voice
+    ?('<div class="uam-audrow"><div class="play">'+UF_PLAY+'</div><div class="uam-wave"></div><div class="nm">'+esc(br.voice.name)+'</div><div class="x" onclick="ufRemoveBrollVoice()">&times;</div></div>')
+    :('<div class="uam-drop" style="padding:14px" onclick="ufPickBrollVoice()"><b>Add a voiceover</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file (MP3, M4A, Voice Memos, WAV)</div></div>');
+  var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">One voiceover for the whole project</div></div><div class="uam-bplus" onclick="ufPickBrollVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
+  var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes / brief</div><div class="uam-bdesc">Anything Aaron should know to cut this project together</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_broll_notes" placeholder="e.g. this is for the [product] video, use the voiceover as the base, rough order is..." oninput="ufState.broll.notes=this.value">'+esc(br.notes||'')+'</textarea></div></div>';
+  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_broll_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(br.inspo||'')+'" oninput="ufState.broll.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
+  var info='<div class="uam-info">All these clips, the voiceover and your notes go to Aaron as one B-roll project -- he cuts them together externally into one finished video.</div>';
+  var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBroll()">'+(vids.length?('Upload project ('+vids.length+' clip'+(vids.length===1?'':'s')+')'):'Upload project')+'</button>';
+  return vidcard+info+voiceBlock+noteBlock+inspoBlock+btn;
+}
+function ufSubmitBroll(){
+  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''};
+  var vids=ufState.broll.vids||[]; if(!vids.length){ toast('Choose at least one clip first','err'); return; }
+  var accs=state.myAccounts||[];
+  if(accs.length && !ufState.account){ toast('Pick which account this is for','err'); return; }
+  var acct=ufState.account||null;
+  var notes=(document.getElementById('uf_broll_notes')&&document.getElementById('uf_broll_notes').value)||ufState.broll.notes||'';
+  var inspo=(document.getElementById('uf_broll_inspo')&&document.getElementById('uf_broll_inspo').value)||ufState.broll.inspo||'';
+  inspo=inspo.trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;
+  var groupId='br'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  var voice=ufState.broll.voice||null;
+  vids.forEach(function(f,i){ uqEnqueue({file:f,images:[],voice:(i===0?voice:null),notes:notes,inspo:inspo,account:acct,funnel:null,broll:groupId}); });
+  ufState.broll={vids:[],voice:null,notes:'',inspo:''};
+  ufRender();
+  toast('Added '+vids.length+' clip'+(vids.length===1?'':'s')+' to the upload queue as one project','ok');
+}
 async function uploadVideoReturnId(file){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
   var cid=(ME&&ME.id);
@@ -5880,7 +5988,7 @@ function duOpen(){ return new Promise(function(res,rej){ if(_duDB) return res(_d
 function duPut(rec){ return duOpen().then(function(db){ return new Promise(function(res,rej){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).put(rec); tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);}; }catch(e){ rej(e); } }); }).catch(function(){}); }
 function duDel(id){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).delete(id); tx.oncomplete=function(){res(true);}; tx.onerror=function(){res(false);}; }catch(e){ res(false); } }); }).catch(function(){}); }
 function duAll(){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var r=db.transaction(DU_STORE,'readonly').objectStore(DU_STORE).getAll(); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){res([]);}; }catch(e){ res([]); } }); }).catch(function(){ return []; }); }
-function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',funnel:item.funnel||null,account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
+function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',funnel:item.funnel||null,broll:item.broll||null,account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
 // keep the screen awake during uploads so iOS is less likely to sleep mid-transfer (best-effort)
 function duWakeOn(){ try{ if('wakeLock' in navigator && !_duWake){ navigator.wakeLock.request('screen').then(function(w){ _duWake=w; w.addEventListener('release',function(){ _duWake=null; }); }).catch(function(){}); } }catch(e){} }
 function duWakeOff(){ try{ if(_duWake){ _duWake.release(); _duWake=null; } }catch(e){} }
@@ -5897,7 +6005,7 @@ async function duResume(){
         var f=new File([rec.file],rec.fileName||'video.mp4',{type:rec.fileType||'video/mp4'});
         var imgs=(rec.images||[]).map(function(im){ return new File([im.blob],im.name||'image.jpg',{type:im.type||'image/jpeg'}); });
         var voice=rec.voice?new File([rec.voice.blob],rec.voice.name||'voice.mp3',{type:(rec.voice.type||'audio/mpeg')}):null;
-        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',funnel:rec.funnel||null,account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
+        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',funnel:rec.funnel||null,broll:rec.broll||null,account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
         n++;
       }catch(e){}
     });
@@ -5944,6 +6052,7 @@ async function uqProcess(item){
   if(item.notes){ try{ await sb.from('ed_videos').update({notes:item.notes}).eq('id',vid); }catch(e){} }
   if(item.inspo){ try{ await sb.from('ed_videos').update({inspo_url:item.inspo}).eq('id',vid); }catch(e){} }
   if(item.funnel){ try{ var _cur=await sb.from('ed_videos').select('edit_state').eq('id',vid).maybeSingle(); var _es=Object.assign({},(_cur.data&&_cur.data.edit_state)||{},{funnel:item.funnel}); await sb.from('ed_videos').update({edit_state:_es}).eq('id',vid); }catch(e){} }
+  if(item.broll){ try{ var _cur2=await sb.from('ed_videos').select('edit_state').eq('id',vid).maybeSingle(); var _es2=Object.assign({},(_cur2.data&&_cur2.data.edit_state)||{},{broll_group:item.broll}); await sb.from('ed_videos').update({edit_state:_es2}).eq('id',vid); }catch(e){} }
   try{ await duDel(item.duId); }catch(e){} if(item.duId) delete _duActive[item.duId];   // fully done -> drop the durable copy
   try{ if(state.currentView==='cdash') loadCDash(); }catch(e){}
 }
