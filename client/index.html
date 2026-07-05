@@ -5763,7 +5763,7 @@ async function loadCDash(){
 function edCreatorUpload(){ showView('upload'); }
 
 // ===== Client uploader: single / bulk + Notion-style attachments (matches the mockup) =====
-var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null,broll:{vids:[],voice:null,notes:'',inspo:''}};
+var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null,broll:{vids:[],voice:null,notes:'',inspo:'',images:[]}};
 function ufMB(b){ b=b||0; return (b>=1048576)?((b/1048576).toFixed(1)+' MB'):(Math.max(1,Math.round(b/1024))+' KB'); }
 function ufShort(n){ n=n||'clip'; return n.length>14?(n.slice(0,11)+'...'):n; }
 var UF_FILM='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
@@ -5789,7 +5789,8 @@ function ufInputs(){ return '<input id="uf_video" type="file" accept="video/*" s
   +'<input id="uf_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddVoice(this.files)">'
   +'<input id="uf_bulk" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBulk(this.files)">'
   +'<input id="uf_broll_vids" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBrollVids(this.files)">'
-  +'<input id="uf_broll_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddBrollVoice(this.files)">'; }
+  +'<input id="uf_broll_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddBrollVoice(this.files)">'
+  +'<input id="uf_broll_imgs" type="file" accept="image/*" multiple style="display:none" onchange="ufAddBrollImages(this.files)">'; }
 function ufClick(id){ var e=document.getElementById(id); if(e) e.click(); }
 function ufPickVideoBtn(){ ufClick('uf_video'); }
 function ufPickImgs(){ ufClick('uf_imgs'); }
@@ -5797,14 +5798,17 @@ function ufPickVoice(){ ufClick('uf_voice'); }
 function ufPickBulk(){ ufClick('uf_bulk'); }
 function ufPickBrollVids(){ ufClick('uf_broll_vids'); }
 function ufPickBrollVoice(){ ufClick('uf_broll_voice'); }
+function ufPickBrollImgs(){ ufClick('uf_broll_imgs'); }
 function ufPickVideo(files){ if(files&&files[0]) ufState.video=files[0]; ufRender(); }
 function ufAddImages(files){ for(var i=0;i<files.length;i++) ufState.images.push(files[i]); ufRender(); }
 function ufAddVoice(files){ if(files&&files[0]) ufState.voice=files[0]; ufRender(); }
 function ufAddBulk(files){ ufState.bulk=[].slice.call(files).map(function(f){ return {file:f,funnel:null}; }); ufRender(); }
-function ufAddBrollVids(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''}; ufState.broll.vids=(ufState.broll.vids||[]).concat([].slice.call(files)); ufRender(); }
+function ufAddBrollVids(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]}; ufState.broll.vids=(ufState.broll.vids||[]).concat([].slice.call(files)); ufRender(); }
 function ufRemoveBrollVid(i){ if(ufState.broll&&ufState.broll.vids) ufState.broll.vids.splice(i,1); ufRender(); }
-function ufAddBrollVoice(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''}; if(files&&files[0]) ufState.broll.voice=files[0]; ufRender(); }
+function ufAddBrollVoice(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]}; if(files&&files[0]) ufState.broll.voice=files[0]; ufRender(); }
 function ufRemoveBrollVoice(){ if(ufState.broll) ufState.broll.voice=null; ufRender(); }
+function ufAddBrollImages(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]}; ufState.broll.images=ufState.broll.images||[]; for(var i=0;i<files.length;i++) ufState.broll.images.push(files[i]); ufRender(); }
+function ufRemoveBrollImage(i){ if(ufState.broll&&ufState.broll.images) ufState.broll.images.splice(i,1); ufRender(); }
 function ufRemoveImage(i){ ufState.images.splice(i,1); ufRender(); }
 function ufRemoveVoice(){ ufState.voice=null; ufRender(); }
 function ufRemoveBulk(i){ ufState.bulk.splice(i,1); ufRender(); }
@@ -5901,7 +5905,7 @@ function ufBulk(){
 }
 function ufSetBulkFunnel(i,f){ var it=(ufState.bulk||[])[i]; if(!it) return; it.funnel=(it.funnel===f?null:f); ufRender(); }
 function ufBroll(){
-  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''};
+  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]};
   var br=ufState.broll;
   var vids=br.vids||[];
   var grid=vids.length?('<div class="uam-bulkgrid">'+vids.map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveBrollVid('+i+')">&times;</div></div>'; }).join('')+'</div>'):'';
@@ -5911,14 +5915,16 @@ function ufBroll(){
     ?('<div class="uam-audrow"><div class="play">'+UF_PLAY+'</div><div class="uam-wave"></div><div class="nm">'+esc(br.voice.name)+'</div><div class="x" onclick="ufRemoveBrollVoice()">&times;</div></div>')
     :('<div class="uam-drop" style="padding:14px" onclick="ufPickBrollVoice()"><b>Add a voiceover</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file (MP3, M4A, Voice Memos, WAV)</div></div>');
   var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">One voiceover for the whole project</div></div><div class="uam-bplus" onclick="ufPickBrollVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
+  var brImgs=(br.images||[]).map(function(f,i){ return '<div class="uam-thumb"><img src="'+URL.createObjectURL(f)+'"><div class="x" onclick="ufRemoveBrollImage('+i+')">&times;</div></div>'; }).join('');
+  var imgBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon img">'+UF_IMG+'</div><div><div class="uam-btitle">Image overlays</div><div class="uam-bdesc">Logos / graphics for the whole project</div></div><div class="uam-bplus" onclick="ufPickBrollImgs()">+</div></div><div class="uam-bbody"><div class="uam-thumbrow">'+brImgs+'<div class="uam-thumb add" onclick="ufPickBrollImgs()">+</div></div></div></div>';
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes / brief</div><div class="uam-bdesc">Anything Aaron should know to cut this project together</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_broll_notes" placeholder="e.g. this is for the [product] video, use the voiceover as the base, rough order is..." oninput="ufState.broll.notes=this.value">'+esc(br.notes||'')+'</textarea></div></div>';
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_broll_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(br.inspo||'')+'" oninput="ufState.broll.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
-  var info='<div class="uam-info">All these clips, the voiceover and your notes go to Aaron as one B-roll project -- he cuts them together externally into one finished video.</div>';
+  var info='<div class="uam-info">All these clips, the voiceover, overlays and your notes go to Aaron as one B-roll project -- he cuts them together externally into one finished video.</div>';
   var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBroll()">'+(vids.length?('Upload project ('+vids.length+' clip'+(vids.length===1?'':'s')+')'):'Upload project')+'</button>';
-  return vidcard+info+voiceBlock+noteBlock+inspoBlock+btn;
+  return vidcard+info+voiceBlock+imgBlock+noteBlock+inspoBlock+btn;
 }
 function ufSubmitBroll(){
-  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:''};
+  ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]};
   var vids=ufState.broll.vids||[]; if(!vids.length){ toast('Choose at least one clip first','err'); return; }
   var accs=state.myAccounts||[];
   if(accs.length && !ufState.account){ toast('Pick which account this is for','err'); return; }
@@ -5928,8 +5934,9 @@ function ufSubmitBroll(){
   inspo=inspo.trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;
   var groupId='br'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
   var voice=ufState.broll.voice||null;
-  vids.forEach(function(f,i){ uqEnqueue({file:f,images:[],voice:(i===0?voice:null),notes:notes,inspo:inspo,account:acct,funnel:null,broll:groupId}); });
-  ufState.broll={vids:[],voice:null,notes:'',inspo:''};
+  var images=(ufState.broll.images||[]).slice();
+  vids.forEach(function(f,i){ uqEnqueue({file:f,images:(i===0?images:[]),voice:(i===0?voice:null),notes:notes,inspo:inspo,account:acct,funnel:null,broll:groupId}); });
+  ufState.broll={vids:[],voice:null,notes:'',inspo:'',images:[]};
   ufRender();
   toast('Added '+vids.length+' clip'+(vids.length===1?'':'s')+' to the upload queue as one project','ok');
 }
