@@ -1408,6 +1408,11 @@ const FUNNEL_CLIENT_ID='42d3ed8a-c4ee-4367-805c-63355877ef18';
 // new B-roll client is a one-line change here, not a DB migration.
 const BROLL_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bac7f943-1234-4aa7-93cc-facd5787a1f7'];
 function isBrollClient(id){ return !!(id && BROLL_CLIENT_IDS.indexOf(id)>=0); }
+// Video overlays (a second video clip attached to the brief for Aaron to place himself in his
+// external edit -- NOT auto-composited in-app) -- Sam only for now (2026-07-06). Hardcoded
+// allowlist by design, same pattern as BROLL_CLIENT_IDS: adding a client is a one-line change.
+const VIDEO_OVERLAY_CLIENT_IDS=['2fcb5afc-b5bb-47e7-9d08-b9ad9ef55a2a'];
+function isVideoOverlayClient(id){ return !!(id && VIDEO_OVERLAY_CLIENT_IDS.indexOf(id)>=0); }
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
   results:[], products:[], jobs:[], videos:[], downloads:[], profiles:[], editJobs:[],
@@ -5764,7 +5769,7 @@ async function loadCDash(){
 function edCreatorUpload(){ showView('upload'); }
 
 // ===== Client uploader: single / bulk + Notion-style attachments (matches the mockup) =====
-var ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:null,funnel:null,broll:{vids:[],voice:null,notes:'',inspo:'',images:[]}};
+var ufState={mode:'single',video:null,images:[],voice:null,videoOverlays:[],notes:'',inspo:'',bulk:[],account:null,funnel:null,broll:{vids:[],voice:null,notes:'',inspo:'',images:[]}};
 function ufMB(b){ b=b||0; return (b>=1048576)?((b/1048576).toFixed(1)+' MB'):(Math.max(1,Math.round(b/1024))+' KB'); }
 function ufShort(n){ n=n||'clip'; return n.length>14?(n.slice(0,11)+'...'):n; }
 var UF_FILM='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
@@ -5791,7 +5796,8 @@ function ufInputs(){ return '<input id="uf_video" type="file" accept="video/*" s
   +'<input id="uf_bulk" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBulk(this.files)">'
   +'<input id="uf_broll_vids" type="file" accept="video/*" multiple style="display:none" onchange="ufAddBrollVids(this.files)">'
   +'<input id="uf_broll_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufAddBrollVoice(this.files)">'
-  +'<input id="uf_broll_imgs" type="file" accept="image/*" multiple style="display:none" onchange="ufAddBrollImages(this.files)">'; }
+  +'<input id="uf_broll_imgs" type="file" accept="image/*" multiple style="display:none" onchange="ufAddBrollImages(this.files)">'
+  +'<input id="uf_vidov" type="file" accept="video/*" multiple style="display:none" onchange="ufAddVideoOverlays(this.files)">'; }
 function ufClick(id){ var e=document.getElementById(id); if(e) e.click(); }
 function ufPickVideoBtn(){ ufClick('uf_video'); }
 function ufPickImgs(){ ufClick('uf_imgs'); }
@@ -5800,6 +5806,7 @@ function ufPickBulk(){ ufClick('uf_bulk'); }
 function ufPickBrollVids(){ ufClick('uf_broll_vids'); }
 function ufPickBrollVoice(){ ufClick('uf_broll_voice'); }
 function ufPickBrollImgs(){ ufClick('uf_broll_imgs'); }
+function ufPickVideoOverlays(){ ufClick('uf_vidov'); }
 function ufPickVideo(files){ if(files&&files[0]) ufState.video=files[0]; ufRender(); }
 function ufAddImages(files){ for(var i=0;i<files.length;i++) ufState.images.push(files[i]); ufRender(); }
 function ufAddVoice(files){ if(files&&files[0]) ufState.voice=files[0]; ufRender(); }
@@ -5811,6 +5818,10 @@ function ufRemoveBrollVoice(){ if(ufState.broll) ufState.broll.voice=null; ufRen
 function ufAddBrollImages(files){ ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]}; ufState.broll.images=ufState.broll.images||[]; for(var i=0;i<files.length;i++) ufState.broll.images.push(files[i]); ufRender(); }
 function ufRemoveBrollImage(i){ if(ufState.broll&&ufState.broll.images) ufState.broll.images.splice(i,1); ufRender(); }
 function ufRemoveImage(i){ ufState.images.splice(i,1); ufRender(); }
+// Video overlays -- a second clip attached to the brief for Aaron to place himself in his
+// external edit (not auto-composited in-app). Sam only -- see VIDEO_OVERLAY_CLIENT_IDS.
+function ufAddVideoOverlays(files){ ufState.videoOverlays=ufState.videoOverlays||[]; for(var i=0;i<files.length;i++) ufState.videoOverlays.push(files[i]); ufRender(); }
+function ufRemoveVideoOverlay(i){ if(ufState.videoOverlays) ufState.videoOverlays.splice(i,1); ufRender(); }
 function ufRemoveVoice(){ ufState.voice=null; ufRender(); }
 function ufRemoveBulk(i){ ufState.bulk.splice(i,1); ufRender(); }
 function ufRender(){
@@ -5875,6 +5886,13 @@ function ufSingle(){
     ?('<div class="uam-audrow"><div class="play">'+UF_PLAY+'</div><div class="uam-wave"></div><div class="nm">'+esc(ufState.voice.name)+'</div><div class="x" onclick="ufRemoveVoice()">&times;</div></div>')
     :('<div class="uam-drop" style="padding:14px" onclick="ufPickVoice()"><b>Add a voiceover</b><div class="h-sub" style="margin-top:3px">Tap to choose an audio file (MP3, M4A, Voice Memos, WAV)</div></div>');
   var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">Upload an audio file -- MP3, M4A and Voice Memos all work</div></div><div class="uam-bplus" onclick="ufPickVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
+  // Video overlays -- Sam only (VIDEO_OVERLAY_CLIENT_IDS). A second clip attached to the brief
+  // for Aaron to place himself in his external edit -- not auto-composited in-app.
+  var videoOvBlock='';
+  if(isVideoOverlayClient(ME&&ME.id)){
+    var vidOvItems=(ufState.videoOverlays||[]).map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveVideoOverlay('+i+')">&times;</div></div>'; }).join('');
+    videoOvBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#eef2ff;color:#4338ca">'+UF_FILM+'</div><div><div class="uam-btitle">Video overlays</div><div class="uam-bdesc">A second clip for Aaron to place in the edit himself</div></div><div class="uam-bplus" onclick="ufPickVideoOverlays()">+</div></div><div class="uam-bbody">'+(vidOvItems?('<div class="uam-bulkgrid">'+vidOvItems+'</div>'):'')+'<div class="uam-drop" style="padding:14px;margin-top:'+(vidOvItems?'8px':'0')+'" onclick="ufPickVideoOverlays()"><b>'+(vidOvItems?'Add another':'Add a video overlay')+'</b><div class="h-sub" style="margin-top:3px">Tap to choose a video clip</div></div></div></div>';
+  }
   var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
   var funnelBlock=(ME&&ME.id===FUNNEL_CLIENT_ID)?('<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Content type <span class="o">optional</span></div><div class="uam-bdesc">Helps Aaron sort your clips</div></div></div><div class="uam-bbody"><div style="display:flex;gap:8px;flex-wrap:wrap">'
     +'<button type="button" class="edf'+(ufState.funnel==='tof'?' on':'')+'" onclick="ufSetFunnel(\'tof\')">Top of funnel</button>'
@@ -5884,7 +5902,7 @@ function ufSingle(){
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
   var standaloneVoice='<div class="uam-block" style="margin-top:18px"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Upload a voiceover only</div><div class="uam-bdesc">No video needed -- Aaron can attach it later</div></div></div><div class="uam-bbody">'+(window.__saVoiceFile?('<div class="uam-audrow"><div class="nm">'+esc(window.__saVoiceFile.name)+'</div><div class="x" onclick="window.__saVoiceFile=null;ufRender()">&times;</div></div><button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="ufUploadStandaloneVoice()">Send to Aaron</button>'):('<div class="uam-drop" style="padding:14px" onclick="document.getElementById(\'uf_sa_voice\').click()"><b>Tap to choose audio</b><div class="h-sub" style="margin-top:3px">M4A, Voice Memos, MP3, WAV all work</div></div>'))+'<input id="uf_sa_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="window.__saVoiceFile=this.files&&this.files[0];this.value=\'\';ufRender()"></div></div>';
-  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+inspoBlock+noteBlock+funnelBlock+btn+standaloneVoice;
+  return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+videoOvBlock+inspoBlock+noteBlock+funnelBlock+btn+standaloneVoice;
 }
 function ufSetFunnel(f){ ufState.funnel=f; ufRender(); }
 function ufBulk(){
@@ -5954,7 +5972,7 @@ async function uploadAsset(file,vid,kind){
   var safe=file.name.replace(/[^\w.\-]+/g,'_');
   var cid=(ME&&ME.id);
   var path=(cid||'root')+'/assets/'+vid+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+safe;
-  var _ct=file.type; if(_ct==='audio/x-m4a'||(!_ct&&(file.name||'').toLowerCase().endsWith('.m4a'))) _ct='audio/mp4'; if(!_ct) _ct=(kind==='image'?'image/jpeg':'audio/mp4');
+  var _ct=file.type; if(_ct==='audio/x-m4a'||(!_ct&&(file.name||'').toLowerCase().endsWith('.m4a'))) _ct='audio/mp4'; if(!_ct) _ct=(kind==='image'?'image/jpeg':kind==='video'?'video/mp4':'audio/mp4');
   var up=await sb.storage.from(BUCKET).upload(path,file,{contentType:_ct,upsert:true});
   if(up.error) throw up.error;
   var ins=await sb.from('ed_video_assets').insert({video_id:vid,creator_id:cid,kind:kind,storage_path:path,filename:file.name,content_type:file.type||null,size_bytes:file.size});
@@ -5969,8 +5987,9 @@ function ufSubmitSingle(){
   var inspo=(document.getElementById('uf_inspo')&&document.getElementById('uf_inspo').value)||ufState.inspo||'';
   inspo=inspo.trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;   // normalise so the link works on Aaron's side
   var funnel=(ME&&ME.id===FUNNEL_CLIENT_ID)?(ufState.funnel||null):null;
-  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,notes:notes,inspo:inspo,account:acct,funnel:funnel});
-  ufState={mode:'single',video:null,images:[],voice:null,notes:'',inspo:'',bulk:[],account:(accs.length===1?accs[0]:acct),funnel:null}; ufRender();
+  var videoOverlays=isVideoOverlayClient(ME&&ME.id)?(ufState.videoOverlays||[]).slice():[];
+  uqEnqueue({file:ufState.video,images:ufState.images.slice(),voice:ufState.voice,videoOverlays:videoOverlays,notes:notes,inspo:inspo,account:acct,funnel:funnel});
+  ufState={mode:'single',video:null,images:[],voice:null,videoOverlays:[],notes:'',inspo:'',bulk:[],account:(accs.length===1?accs[0]:acct),funnel:null}; ufRender();
   toast('Added to the upload queue -- keep going if you like','ok');
 }
 function ufSubmitBulk(){
@@ -5996,7 +6015,7 @@ function duOpen(){ return new Promise(function(res,rej){ if(_duDB) return res(_d
 function duPut(rec){ return duOpen().then(function(db){ return new Promise(function(res,rej){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).put(rec); tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);}; }catch(e){ rej(e); } }); }).catch(function(){}); }
 function duDel(id){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var tx=db.transaction(DU_STORE,'readwrite'); tx.objectStore(DU_STORE).delete(id); tx.oncomplete=function(){res(true);}; tx.onerror=function(){res(false);}; }catch(e){ res(false); } }); }).catch(function(){}); }
 function duAll(){ return duOpen().then(function(db){ return new Promise(function(res){ try{ var r=db.transaction(DU_STORE,'readonly').objectStore(DU_STORE).getAll(); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){res([]);}; }catch(e){ res([]); } }); }).catch(function(){ return []; }); }
-function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,notes:item.notes||'',inspo:item.inspo||'',funnel:item.funnel||null,broll:item.broll||null,account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,createdAt:item.createdAt||Date.now()}); }catch(e){} }
+function duPersist(item){ try{ duPut({id:item.duId,path:item.path,file:item.file,fileName:(item.file&&item.file.name)||'video.mp4',fileType:(item.file&&item.file.type)||'video/mp4',images:(item.images||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),voice:item.voice?{blob:item.voice,name:item.voice.name,type:item.voice.type}:null,videoOverlays:(item.videoOverlays||[]).map(function(f){ return {blob:f,name:f.name,type:f.type}; }),notes:item.notes||'',inspo:item.inspo||'',funnel:item.funnel||null,broll:item.broll||null,account:item.account||null,vid:item.vid||null,imgDone:item.imgDone||0,voiceDone:!!item.voiceDone,voDone:item.voDone||0,createdAt:item.createdAt||Date.now()}); }catch(e){} }
 // keep the screen awake during uploads so iOS is less likely to sleep mid-transfer (best-effort)
 function duWakeOn(){ try{ if('wakeLock' in navigator && !_duWake){ navigator.wakeLock.request('screen').then(function(w){ _duWake=w; w.addEventListener('release',function(){ _duWake=null; }); }).catch(function(){}); } }catch(e){} }
 function duWakeOff(){ try{ if(_duWake){ _duWake.release(); _duWake=null; } }catch(e){} }
@@ -6013,7 +6032,8 @@ async function duResume(){
         var f=new File([rec.file],rec.fileName||'video.mp4',{type:rec.fileType||'video/mp4'});
         var imgs=(rec.images||[]).map(function(im){ return new File([im.blob],im.name||'image.jpg',{type:im.type||'image/jpeg'}); });
         var voice=rec.voice?new File([rec.voice.blob],rec.voice.name||'voice.mp3',{type:(rec.voice.type||'audio/mpeg')}):null;
-        uqEnqueue({file:f,images:imgs,voice:voice,notes:rec.notes||'',inspo:rec.inspo||'',funnel:rec.funnel||null,broll:rec.broll||null,account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,createdAt:rec.createdAt,__restored:true});
+        var vidOvs=(rec.videoOverlays||[]).map(function(im){ return new File([im.blob],im.name||'video.mp4',{type:im.type||'video/mp4'}); });
+        uqEnqueue({file:f,images:imgs,voice:voice,videoOverlays:vidOvs,notes:rec.notes||'',inspo:rec.inspo||'',funnel:rec.funnel||null,broll:rec.broll||null,account:rec.account||null,duId:rec.id,path:rec.path,vid:rec.vid||null,imgDone:rec.imgDone||0,voiceDone:!!rec.voiceDone,voDone:rec.voDone||0,createdAt:rec.createdAt,__restored:true});
         n++;
       }catch(e){}
     });
@@ -6033,6 +6053,7 @@ function uqEnqueue(item){
   uq.total+=(item.file&&item.file.size||0);
   (item.images||[]).forEach(function(f){ uq.total+=f.size||0; });
   if(item.voice) uq.total+=(item.voice.size||0);
+  (item.videoOverlays||[]).forEach(function(f){ uq.total+=f.size||0; });
   uq.count++;
   if(!uq.start) uq.start=Date.now();
   uqRender(); uqStartTick(); uqRun();
@@ -6057,6 +6078,7 @@ async function uqProcess(item){
   uq.done+=(item.file&&item.file.size||0); uq.curSent=0; uqRender();
   for(var i=(item.imgDone||0);i<(item.images||[]).length;i++){ try{ await uploadAsset(item.images[i],vid,'image'); }catch(e){} item.imgDone=i+1; duPersist(item); uq.done+=(item.images[i].size||0); uqRender(); }
   if(item.voice && !item.voiceDone){ try{ await uploadAsset(item.voice,vid,'voiceover'); }catch(e){} item.voiceDone=true; duPersist(item); uq.done+=(item.voice.size||0); uqRender(); }
+  for(var j=(item.voDone||0);j<(item.videoOverlays||[]).length;j++){ try{ await uploadAsset(item.videoOverlays[j],vid,'video'); }catch(e){} item.voDone=j+1; duPersist(item); uq.done+=(item.videoOverlays[j].size||0); uqRender(); }
   if(item.notes){ try{ await sb.from('ed_videos').update({notes:item.notes}).eq('id',vid); }catch(e){} }
   if(item.inspo){ try{ await sb.from('ed_videos').update({inspo_url:item.inspo}).eq('id',vid); }catch(e){} }
   if(item.funnel){ try{ var _cur=await sb.from('ed_videos').select('edit_state').eq('id',vid).maybeSingle(); var _es=Object.assign({},(_cur.data&&_cur.data.edit_state)||{},{funnel:item.funnel}); await sb.from('ed_videos').update({edit_state:_es}).eq('id',vid); }catch(e){} }
@@ -6558,18 +6580,27 @@ async function jbRenderEdit(){
   for(var i=0;i<imgs.length;i++){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(imgs[i].storage_path,3600); imgs[i].url=s&&s.data&&s.data.signedUrl; }catch(e){} }
   var imgHtml=imgs.map(function(a){ return '<div style="position:relative;width:54px;height:54px;border-radius:8px;border:1px solid #ccc;background:#11151c '+(a.url?("url(\'"+a.url+"\') center/cover"):'')+'"><div onclick="jbDelAsset(\''+a.id+'\')" style="position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;background:#15171c;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">&times;</div></div>'; }).join('');
   var voiceHtml=voice?('<div style="display:flex;align-items:center;gap:8px"><div class="h-sub" style="flex:1;font-size:12.5px">'+esc(voice.filename||'voiceover.mp3')+'</div><button class="btn ghost sm" onclick="jbDelAsset(\''+voice.id+'\')">Remove</button></div>'):('<button class="btn ghost" style="width:100%;justify-content:center" onclick="document.getElementById(\'jb_voice\').click()">Add voiceover</button>');
+  // Video overlays -- a second clip attached to the brief for Aaron to place himself in the
+  // external edit (not auto-composited in-app). Only ever populated for VIDEO_OVERLAY_CLIENT_IDS
+  // clips, but the display code itself isn't gated -- it just shows whatever assets exist.
+  var vidOvAssets=assets.filter(function(a){return a.kind==='video';});
+  var vidOvHtml=vidOvAssets.map(function(a){ return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div class="h-sub" style="flex:1;font-size:12.5px">'+esc(a.filename||'video.mp4')+'</div><button class="btn ghost sm" onclick="jbDelAsset(\''+a.id+'\')">Remove</button></div>'; }).join('');
+  var vidOvBlock=vidOvAssets.length?('<div class="lbl-ed">Video overlays</div><div style="margin-bottom:8px">'+vidOvHtml+'<button class="btn ghost sm" style="width:100%;justify-content:center" onclick="document.getElementById(\'jb_vidov\').click()">Add another</button></div>'):'';
   var h='<h3>Edit details</h3>'
     +'<div class="lbl-ed">Image overlays</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+imgHtml+'<div onclick="document.getElementById(\'jb_imgs\').click()" style="width:54px;height:54px;border-radius:8px;border:1px dashed #aaa;display:flex;align-items:center;justify-content:center;color:#888;font-size:22px;cursor:pointer">+</div></div>'
     +'<div class="lbl-ed">Voiceover</div><div style="margin-bottom:8px">'+voiceHtml+'</div>'
+    +vidOvBlock
     +'<div class="lbl-ed">Video inspiration</div><input id="jb_inspo" type="url" value="'+esc(window.jbInspo||'')+'" placeholder="https://www.tiktok.com/..." style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;margin-bottom:10px">'
     +'<div class="lbl-ed">Notes</div><textarea id="jb_notes" rows="4" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px">'+esc(window.jbNotes||'')+'</textarea>'
     +'<input id="jb_imgs" type="file" accept="image/*" multiple style="display:none" onchange="jbAddImgs(this.files)">'
     +'<input id="jb_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="jbAddVoice(this.files)">'
+    +'<input id="jb_vidov" type="file" accept="video/*" multiple style="display:none" onchange="jbAddVideoOverlays(this.files)">'
     +'<div class="actions"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="jbSaveExtras()">Save</button></div>';
   showModal(h);
 }
 async function jbAddImgs(files){ if(!files||!files.length) return; toast('Uploading image...'); for(var i=0;i<files.length;i++){ try{ await uploadAsset(files[i], window.jbV, 'image'); }catch(e){} } jbRenderEdit(); }
 async function jbAddVoice(files){ if(!files||!files[0]) return; toast('Uploading voiceover...'); try{ var ar=await sb.from('ed_video_assets').select('id').eq('video_id',window.jbV).eq('kind','voiceover'); for(var i=0;i<((ar.data||[]).length);i++){ await sb.from('ed_video_assets').delete().eq('id',ar.data[i].id); } await uploadAsset(files[0], window.jbV, 'voiceover'); }catch(e){} jbRenderEdit(); }
+async function jbAddVideoOverlays(files){ if(!files||!files.length) return; toast('Uploading video...'); for(var i=0;i<files.length;i++){ try{ await uploadAsset(files[i], window.jbV, 'video'); }catch(e){} } jbRenderEdit(); }
 async function jbDelAsset(aid){ try{ await sb.from('ed_video_assets').delete().eq('id',aid); }catch(e){} jbRenderEdit(); }
 async function jbSaveExtras(){
   var inspo=((document.getElementById('jb_inspo')&&document.getElementById('jb_inspo').value)||'').trim(); if(inspo && !/^https?:\/\//i.test(inspo)) inspo='https://'+inspo;
@@ -6582,13 +6613,15 @@ async function jbView(id){
   var vr=await sb.from('ed_videos').select('notes,inspo_url,status').eq('id',id).maybeSingle(); var v=vr.data||{};
   var ar=await sb.from('ed_video_assets').select('*').eq('video_id',id); var assets=ar.data||[];
   var imgs=assets.filter(function(a){return a.kind==='image';}); var voice=assets.find(function(a){return a.kind==='voiceover';});
+  var vidOvs=assets.filter(function(a){return a.kind==='video';});
   for(var i=0;i<imgs.length;i++){ try{ var s=await sb.storage.from(BUCKET).createSignedUrl(imgs[i].storage_path,3600); imgs[i].url=s&&s.data&&s.data.signedUrl; }catch(e){} }
   var h='<h3>Video details</h3>';
   if(imgs.length){ h+='<div class="lbl-ed">Image overlays</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+imgs.map(function(a){return '<div style="width:54px;height:54px;border-radius:8px;border:1px solid #ccc;background:#11151c '+(a.url?("url(\'"+a.url+"\') center/cover"):'')+'"></div>';}).join('')+'</div>'; }
   if(voice){ h+='<div class="lbl-ed">Voiceover</div>'+(state.isAdmin?'<button class="btn ghost" style="width:100%;justify-content:center;margin-bottom:8px" onclick="jbDl(\''+voice.id+'\',\''+esc((voice.filename||'voiceover.mp3').replace(/\x27/g,""))+'\')">Download voiceover</button>':('<div class="h-sub" style="margin-bottom:8px">'+esc(voice.filename||'voiceover.mp3')+'</div>')); }
+  if(vidOvs.length){ h+='<div class="lbl-ed">Video overlays</div>'+vidOvs.map(function(a){ var nm=esc((a.filename||'video.mp4').replace(/\x27/g,'')); return state.isAdmin?('<button class="btn ghost" style="width:100%;justify-content:center;margin-bottom:8px" onclick="jbDl(\''+a.id+'\',\''+nm+'\')">Download '+nm+'</button>'):('<div class="h-sub" style="margin-bottom:8px">'+esc(a.filename||'video.mp4')+'</div>'); }).join(''); }
   if(v.inspo_url){ h+='<div class="lbl-ed">Video inspiration</div><a href="'+esc(v.inspo_url)+'" target="_blank" rel="noopener" style="display:block;color:#c2410c;font-weight:700;font-size:12.5px;word-break:break-all;margin-bottom:8px">'+esc(v.inspo_url)+'</a>'; }
   if(v.notes){ h+='<div class="lbl-ed">Notes</div><div class="card" style="white-space:pre-wrap;font-size:13px">'+esc(v.notes)+'</div>'; }
-  if(!imgs.length&&!voice&&!v.inspo_url&&!v.notes){ h+='<div class="h-sub">No details added.</div>'; }
+  if(!imgs.length&&!voice&&!vidOvs.length&&!v.inspo_url&&!v.notes){ h+='<div class="h-sub">No details added.</div>'; }
   if(!state.isAdmin && v.status && v.status!=='new'){ h+='<div class="h-sub" style="font-size:11.5px;margin-top:8px">Locked - your editor has started on this clip.</div>'; }
   h+='<div class="actions"><button class="btn" onclick="closeModal()">Close</button></div>';
   showModal(h);
