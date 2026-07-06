@@ -2947,6 +2947,7 @@ function bankCard(v){
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">${esc(v.title||v.filename)}</div>
         ${self?`<div class="menu-wrap"><button class="dots" onclick="toggleMenu(event,'${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-more"></use></svg></button><div class="menu hide" id="menu_${v.id}"></div></div>`:''}</div>
       <div class="vstats">${v.product_uid?`<span class="vtag">${esc(prodName(v.product_uid))}</span>`:''}<span>${size}</span><span>${(v.created_at||'').slice(0,10)}</span></div>
+      ${(state.dupMap&&state.dupMap[v.id])?`<div class="vstats"><span class="pill amber" title="Same filename and file size uploaded ${state.dupMap[v.id]} times for this client">Possible duplicate (${state.dupMap[v.id]})</span></div>`:''}
       ${v.caption_final?`<div class="copybox" onclick="copyText('${esc(v.caption_final).replace(/'/g,"\\'")}','caption')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> ${esc(v.caption_final.slice(0,70))}${v.caption_final.length>70?'…':''}</div>`:''}
       ${posted?`<div class="vstats"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"></use></svg> Posted ${v.posted_at.slice(0,10)}${v.posted_by?(' · '+esc(v.posted_by)):''}</div>`:''}
       <div class="vrow">${self&&!posted&&!v.delivered_at?`<button class="btn sm" onclick="bankSendToPost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Send to post</button>`:''}<button class="btn ghost sm" onclick="downloadVideo('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download</button>${self&&!posted?`<button class="btn ghost sm" onclick="markPosted('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"></use></svg> Posted</button>`:''}${self&&posted?`<button class="btn ghost sm" onclick="unpost('${v.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unpost</button>`:''}</div>
@@ -6228,6 +6229,7 @@ async function loadBank(){
   state.clientList=(mres.data||[]).filter(function(m){return m.role==='creator';});
   state.profiles=(mres.data||[]).map(function(m){ return {id:m.id, first_name:m.name, status:'approved', role:m.role}; });
   state.activeEdits=new Set((ajres.data||[]).map(function(j){ return j.video_id; }));
+  try{ state.dupMap=computeDupMap(); }catch(e){ state.dupMap={}; }
   try{ populateViewAs(); }catch(e){}
   // New rules: no "Edited" limbo in the bank -- hide that tab and never land on it.
   if(state.bankTab==='edited') state.bankTab='new';
@@ -6248,6 +6250,22 @@ function bankBuckets(){
     else { b.new.push(v); }
   });
   return b;
+}
+// Flags probable duplicate uploads: same client + same original filename + same byte size.
+// Read-only / display-only -- never touches uploads, downloads, or the DB. Excludes 'edited'
+// renders and admin_reupload rows (Aaron's deliberate finished-video re-uploads), same as the
+// other counts that already exclude admin_reupload.
+function computeDupMap(){
+  var groups={};
+  (state.videos||[]).forEach(function(v){
+    if(!v||v.kind==='edited'||!v.creator_id||!v.filename||!v.size_bytes) return;
+    if(v.edit_state&&v.edit_state.admin_reupload) return;
+    var key=v.creator_id+'|'+v.filename+'|'+v.size_bytes;
+    (groups[key]=groups[key]||[]).push(v.id);
+  });
+  var dup={};
+  Object.keys(groups).forEach(function(k){ var ids=groups[k]; if(ids.length>1) ids.forEach(function(id){ dup[id]=ids.length; }); });
+  return dup;
 }
 
 // ---- scheduler (workspace scoped; caption from the clip itself, no cross-app reads) ----
