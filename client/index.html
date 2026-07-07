@@ -1415,6 +1415,12 @@ function isBrollClient(id){ return !!(id && BROLL_CLIENT_IDS.indexOf(id)>=0); }
 // allowlist by design, same pattern as BROLL_CLIENT_IDS: adding a client is a one-line change.
 const VIDEO_OVERLAY_CLIENT_IDS=['2fcb5afc-b5bb-47e7-9d08-b9ad9ef55a2a'];
 function isVideoOverlayClient(id){ return !!(id && VIDEO_OVERLAY_CLIENT_IDS.indexOf(id)>=0); }
+// Attach an extra voiceover to an already-uploaded B-roll project (project picker + ordering
+// notes), so a client doesn't have to re-upload clips just to add another voiceover for the same
+// pool of B-roll -- Steph only for now (2026-07-07). Hardcoded allowlist, same pattern as above.
+// Deliberately narrower than BROLL_CLIENT_IDS (excludes Demo) -- Aaron's explicit call.
+const BROLL_EXTRA_VOICE_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b'];
+function isBrollExtraVoiceClient(id){ return !!(id && BROLL_EXTRA_VOICE_CLIENT_IDS.indexOf(id)>=0); }
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
   results:[], products:[], jobs:[], videos:[], downloads:[], profiles:[], editJobs:[],
@@ -5785,7 +5791,24 @@ var UF_IMG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="
 var UF_AUD='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
 var UF_NOTE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
 var UF_LINK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); try{ edRefreshAccounts(); }catch(e){} try{ ufLoadToday(); }catch(e){} }
+function loadUpload(){ edSetWho((ME&&ME.name)||''); if(!ufState) ufState={}; ufState.mode=ufState.mode||'single'; state.myAccounts=[]; ufState.account=null; ufRender(); try{ edRefreshAccounts(); }catch(e){} try{ ufLoadToday(); }catch(e){} try{ ufLoadBrollProjects(); }catch(e){} }
+// Steph-only: her existing B-roll projects, so she can attach another voiceover to one without
+// re-uploading the clips. Fires once on load, re-renders the upload screen when it resolves.
+async function ufLoadBrollProjects(){
+  state.myBrollProjects=[];
+  if(!ME||!ME.id||!isBrollExtraVoiceClient(ME.id)) return;
+  try{
+    var r=await sb.from('ed_videos').select('id,created_at,edit_state').eq('creator_id',ME.id).neq('kind','edited');
+    var rows=(r.data||[]).filter(function(v){ return v.edit_state&&v.edit_state.broll_group; });
+    var groups={};
+    rows.forEach(function(v){ var g=v.edit_state.broll_group; (groups[g]=groups[g]||[]).push(v); });
+    state.myBrollProjects=Object.keys(groups).map(function(g){
+      var clips=groups[g].slice().sort(function(a,b){ return (a.created_at||'')<(b.created_at||'')?-1:1; });
+      return {group:g, count:clips.length, date:clips[0].created_at};
+    }).sort(function(a,b){ return (b.date||'')<(a.date||'')?-1:1; });
+  }catch(e){ state.myBrollProjects=[]; }
+  ufRender();
+}
 async function edRefreshAccounts(){ try{ var ar=await sb.from('ed_member_accounts').select('account_id,handle').eq('member_id',ME.id).order('created_at'); state.myAccounts=(ar.data||[]).map(function(a){ return {id:a.account_id, handle:a.handle}; }); if(state.myAccounts.length===1 && !ufState.account) ufState.account=state.myAccounts[0]; ufRender(); }catch(e){} }
 function ufSetMode(m){ ufState.mode=m; ufRender(); }
 function ufAcctPicker(){
@@ -5946,7 +5969,53 @@ function ufBroll(){
   var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL, optional</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_broll_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(br.inspo||'')+'" oninput="ufState.broll.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var info='<div class="uam-info">All these clips, the voiceover, overlays and your notes go to Aaron as one B-roll project -- he cuts them together externally into one finished video.</div>';
   var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBroll()">'+(vids.length?('Upload project ('+vids.length+' clip'+(vids.length===1?'':'s')+')'):'Upload project')+'</button>';
-  return vidcard+info+voiceBlock+imgBlock+noteBlock+inspoBlock+btn;
+  return vidcard+info+voiceBlock+imgBlock+noteBlock+inspoBlock+btn+ufBrollExtraVoiceBlock();
+}
+// Attach an extra voiceover to a project she already uploaded -- Steph only (BROLL_EXTRA_VOICE_CLIENT_IDS).
+// Reuses the same clips without re-uploading them; each voiceover carries its own ordering notes.
+function ufBrollExtraVoiceBlock(){
+  if(!isBrollExtraVoiceClient(ME&&ME.id)) return '';
+  var projects=state.myBrollProjects||[];
+  if(!projects.length) return '';
+  ufState.extraVoice=ufState.extraVoice||{group:null,file:null,notes:''};
+  var ev=ufState.extraVoice;
+  if(!ev.group) ev.group=projects[0].group;
+  var opts=projects.map(function(p){
+    var lbl=p.count+' clip'+(p.count===1?'':'s')+' -- '+(p.date||'').slice(0,10);
+    return '<option value="'+esc(p.group)+'"'+(ev.group===p.group?' selected':'')+'>'+esc(lbl)+'</option>';
+  }).join('');
+  var fileRow=ev.file
+    ? ('<div class="uam-audrow"><div class="nm">'+esc(ev.file.name)+'</div><div class="x" onclick="ufExtraVoiceClearFile()">&times;</div></div>')
+    : ('<div class="uam-drop" style="padding:14px" onclick="ufClick(\'uf_extra_voice\')"><b>Tap to choose audio</b><div class="h-sub" style="margin-top:3px">M4A, Voice Memos, MP3, WAV all work</div></div>');
+  return '<div class="uam-block" style="margin-top:18px"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Add another voiceover to an existing project</div><div class="uam-bdesc">Reuse clips you already uploaded -- no need to re-upload them</div></div></div><div class="uam-bbody">'
+    +'<select id="uf_extra_voice_group" onchange="ufExtraVoiceSetGroup(this.value)" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;margin-bottom:8px">'+opts+'</select>'
+    +fileRow
+    +'<textarea id="uf_extra_voice_notes" placeholder="Order for this one, e.g. clips 3, 1, 4, 2" oninput="ufState.extraVoice.notes=this.value" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:13px;margin-top:8px;min-height:52px">'+esc(ev.notes||'')+'</textarea>'
+    +'<input id="uf_extra_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="ufExtraVoicePickFile(this.files)">'
+    +'<button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="ufSubmitExtraVoice()">Send to Aaron</button>'
+    +'</div></div>';
+}
+function ufExtraVoiceSetGroup(g){ ufState.extraVoice=ufState.extraVoice||{}; ufState.extraVoice.group=g; }
+function ufExtraVoicePickFile(files){ ufState.extraVoice=ufState.extraVoice||{}; if(files&&files[0]) ufState.extraVoice.file=files[0]; ufRender(); }
+function ufExtraVoiceClearFile(){ if(ufState.extraVoice) ufState.extraVoice.file=null; ufRender(); }
+async function ufSubmitExtraVoice(){
+  var ev=ufState.extraVoice||{};
+  if(!ev.group){ toast('Pick a project first','err'); return; }
+  if(!ev.file){ toast('Pick an audio file first','err'); return; }
+  var notesEl=document.getElementById('uf_extra_voice_notes');
+  var notes=(notesEl&&notesEl.value)||ev.notes||'';
+  toast('Uploading voiceover...','ok');
+  try{
+    var cid=(ME&&ME.id); if(!cid){ toast('Not logged in','err'); return; }
+    var f=ev.file;
+    var safe=f.name.replace(/[^\w.\-]+/g,'_');
+    var path=cid+'/assets/broll_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+safe;
+    var ct=f.type; if(ct==='audio/x-m4a'||(!ct&&f.name.toLowerCase().endsWith('.m4a'))) ct='audio/mp4'; if(!ct) ct='audio/mp4';
+    var up=await sb.storage.from(BUCKET).upload(path,f,{contentType:ct,upsert:true}); if(up.error) throw up.error;
+    await sb.from('ed_video_assets').insert({creator_id:cid,kind:'voiceover',storage_path:path,filename:f.name,content_type:ct,size_bytes:f.size,video_id:null,broll_group:ev.group,notes:notes});
+    ufState.extraVoice={group:ev.group,file:null,notes:''};
+    ufRender(); toast('Voiceover sent to Aaron for that project','ok');
+  }catch(e){ toast('Upload failed: '+((e&&e.message)||e),'err'); }
 }
 function ufSubmitBroll(){
   ufState.broll=ufState.broll||{vids:[],voice:null,notes:'',inspo:'',images:[]};
@@ -6691,12 +6760,15 @@ async function ufUploadStandaloneVoice(){
 async function loadVoiceovers(){
   var root=document.getElementById('voiceoversBody'); if(!root) return;
   root.innerHTML='<div class="h-sub">Loading voiceovers...</div>';
-  var assets=[], members=[];
+  var assets=[], members=[], vids=[];
   try{ var mr=await sb.from('ed_members').select('id,name').eq('workspace_id',WS); members=mr.data||[]; }catch(e){}
-  try{ var ar=await sb.from('ed_video_assets').select('id,creator_id,storage_path,filename,size_bytes,created_at,video_id').eq('kind','voiceover').order('created_at',{ascending:false}); assets=ar.data||[]; }catch(e){}
+  try{ var ar=await sb.from('ed_video_assets').select('id,creator_id,storage_path,filename,size_bytes,created_at,video_id,broll_group,notes').eq('kind','voiceover').order('created_at',{ascending:false}); assets=ar.data||[]; }catch(e){}
+  // Clip counts per B-roll project, purely for labeling groups below -- not used for anything else.
+  try{ var vr=await sb.from('ed_videos').select('id,creator_id,edit_state').eq('workspace_id',WS); vids=vr.data||[]; }catch(e){}
   var nameOf={}; members.forEach(function(m){ nameOf[m.id]=m.name||'Creator'; });
   assets=assets.filter(function(a){ return nameOf[a.creator_id]; });
-  state.voiceAssets=assets; state.voiceNames=nameOf;
+  var groupCounts={}; vids.forEach(function(v){ var g=v.edit_state&&v.edit_state.broll_group; if(g) groupCounts[g]=(groupCounts[g]||0)+1; });
+  state.voiceAssets=assets; state.voiceNames=nameOf; state.voiceGroupCounts=groupCounts;
   voiceoversRender();
 }
 function voiceoversSetClient(id){ state.voiceClient=(id==='__all'?null:id); voiceoversRender(); }
@@ -6714,14 +6786,30 @@ function voiceoversRender(){
   showIds.forEach(function(cid){
     var items=groups[cid]||[]; if(!items.length) return;
     body+='<div class="iov-folder"><div class="iov-fhead"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><use href="#i-folder"></use></svg> <b>'+esc(nameOf[cid]||'Creator')+'</b> <span class="h-sub" style="font-weight:500;font-size:13px">'+items.length+' voiceover'+(items.length===1?'':'s')+'</span></div>';
-    body+=items.map(function(a){
-      var nm=esc(String(a.filename||'voiceover').replace(/\x27/g,''));
-      var tag=a.video_id?'':'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00;margin-left:6px">Unattached</span>';
-      return '<div class="card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;height:28px;flex-shrink:0;color:#6366f1"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/></svg><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(a.filename||'voiceover')+tag+'</div><div class="h-sub" style="font-size:11.5px">'+new Date(a.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+'</div></div><button class="btn ghost sm" onclick="jbDl(\x27'+a.id+'\x27,\x27'+nm+'\x27)">Download</button></div>';
-    }).join('');
+    // Voiceovers tagged with a B-roll project (broll_group) cluster under their own project
+    // sub-header instead of the flat "Unattached" pill -- so multiple voiceovers meant for the
+    // same pool of clips, in different orders, are visually grouped together.
+    var byGroup={}, loose=[];
+    items.forEach(function(a){ if(a.broll_group){ (byGroup[a.broll_group]=byGroup[a.broll_group]||[]).push(a); } else loose.push(a); });
+    var gids=Object.keys(byGroup).sort(function(g1,g2){ var d1=byGroup[g1][0].created_at||'', d2=byGroup[g2][0].created_at||''; return d2<d1?-1:1; });
+    gids.forEach(function(g){
+      var n=state.voiceGroupCounts&&state.voiceGroupCounts[g];
+      body+='<div style="margin:8px 0 6px 2px;font-size:12px;font-weight:800;color:#7c3aed">B-roll project'+(n?(' -- '+n+' clip'+(n===1?'':'s')):'')+'</div>';
+      body+=byGroup[g].map(function(a){ return voiceCardHtml(a,false); }).join('');
+    });
+    if(loose.length){
+      if(gids.length) body+='<div style="margin:10px 0 6px 2px;font-size:12px;font-weight:800;color:#9aa3af">Other voiceovers</div>';
+      body+=loose.map(function(a){ return voiceCardHtml(a,true); }).join('');
+    }
     body+='</div>';
   });
   root.innerHTML=head+body;
+}
+function voiceCardHtml(a,showUnattachedTag){
+  var nm=esc(String(a.filename||'voiceover').replace(/\x27/g,''));
+  var tag=(showUnattachedTag&&!a.video_id)?'<span class="tf-pill" style="background:#fff4e0;color:#9a6b00;margin-left:6px">Unattached</span>':'';
+  var noteHtml=a.notes?('<div class="h-sub" style="font-size:11.5px;margin-top:3px;white-space:pre-wrap">'+esc(a.notes)+'</div>'):'';
+  return '<div class="card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;height:28px;flex-shrink:0;color:#6366f1"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/></svg><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(a.filename||'voiceover')+tag+'</div><div class="h-sub" style="font-size:11.5px">'+new Date(a.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+'</div>'+noteHtml+'</div><button class="btn ghost sm" onclick="jbDl(\x27'+a.id+'\x27,\x27'+nm+'\x27)">Download</button></div>';
 }
 
 // ===================== TIKTOK ACCOUNTS SYNC (admin) =====================
