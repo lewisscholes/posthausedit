@@ -2736,15 +2736,19 @@ function paintBank(list){
   // cards below, unchanged. This only ever activates for clips carrying edit_state.broll_group,
   // so every other client's board renders exactly as before.
   if(state.bankTab==='new'){
+    // If a project is currently expanded, isolate to just that project's own clips --
+    // hide every other card (other groups, other clients, ungrouped clips) until collapsed.
+    var expandedG=null;
+    if(state.brollExpanded){ for(var k in state.brollExpanded){ if(state.brollExpanded[k]){ expandedG=k; break; } } }
+    if(expandedG){
+      wrap.appendChild(bankBrollExpandedHeader(expandedG));
+      list.filter(v=>v.edit_state&&v.edit_state.broll_group===expandedG).forEach(v=>wrap.appendChild(bankCard(v)));
+      return;
+    }
     const seen={};
     list.forEach(v=>{
       const g=v.edit_state&&v.edit_state.broll_group;
       if(g){
-        if(state.brollExpanded&&state.brollExpanded[g]){
-          if(!seen[g]){ seen[g]=true; wrap.appendChild(bankBrollExpandedHeader(g)); }
-          wrap.appendChild(bankCard(v));
-          return;
-        }
         if(seen[g]) return;
         seen[g]=true;
         const groupClips=list.filter(x=>x.edit_state&&x.edit_state.broll_group===g);
@@ -2784,7 +2788,7 @@ function bankBrollCard(groupId,clips){
     </div>`;
   return card;
 }
-function bankToggleBrollExpand(g){ state.brollExpanded=state.brollExpanded||{}; state.brollExpanded[g]=!state.brollExpanded[g]; renderBank(); }
+function bankToggleBrollExpand(g){ var wasOn=!!(state.brollExpanded&&state.brollExpanded[g]); state.brollExpanded={}; if(!wasOn) state.brollExpanded[g]=true; renderBank(); }
 async function bankDownloadBroll(g){
   const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g);
   if(!clips.length){ toast('Nothing to download','err'); return; }
@@ -5893,13 +5897,13 @@ function ufSingle(){
     var vidOvItems=(ufState.videoOverlays||[]).map(function(f,i){ return '<div class="b"><span>'+esc(ufShort(f.name))+'</span><div class="x" onclick="ufRemoveVideoOverlay('+i+')">&times;</div></div>'; }).join('');
     videoOvBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#eef2ff;color:#4338ca">'+UF_FILM+'</div><div><div class="uam-btitle">Video overlays</div><div class="uam-bdesc">A second clip for Aaron to place in the edit himself</div></div><div class="uam-bplus" onclick="ufPickVideoOverlays()">+</div></div><div class="uam-bbody">'+(vidOvItems?('<div class="uam-bulkgrid">'+vidOvItems+'</div>'):'')+'<div class="uam-drop" style="padding:14px;margin-top:'+(vidOvItems?'8px':'0')+'" onclick="ufPickVideoOverlays()"><b>'+(vidOvItems?'Add another':'Add a video overlay')+'</b><div class="h-sub" style="margin-top:3px">Tap to choose a video clip</div></div></div></div>';
   }
-  var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes</div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
+  var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes <span class="o">(optional)</span></div><div class="uam-bdesc">Anything Aaron should know for the edit</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_notes" placeholder="e.g. keep the first 3s hook, logo top-left, use the voiceover, CTA: link in bio" oninput="ufState.notes=this.value">'+esc(ufState.notes||'')+'</textarea></div></div>';
   var funnelBlock=(ME&&ME.id===FUNNEL_CLIENT_ID)?('<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Content type <span class="o">optional</span></div><div class="uam-bdesc">Helps Aaron sort your clips</div></div></div><div class="uam-bbody"><div style="display:flex;gap:8px;flex-wrap:wrap">'
     +'<button type="button" class="edf'+(ufState.funnel==='tof'?' on':'')+'" onclick="ufSetFunnel(\'tof\')">Top of funnel</button>'
     +'<button type="button" class="edf'+(ufState.funnel==='bof'?' on':'')+'" onclick="ufSetFunnel(\'bof\')">Bottom of funnel</button>'
     +(ufState.funnel?'<button type="button" class="edf" onclick="ufSetFunnel(null)">Clear</button>':'')
     +'</div></div></div>'):'';
-  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
+  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL, optional</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(ufState.inspo||'')+'" oninput="ufState.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var btn='<button class="btn" style="margin-top:6px;width:100%;justify-content:center" onclick="ufSubmitSingle()">Upload video + attachments</button>';
   var standaloneVoice='<div class="uam-block" style="margin-top:18px"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Upload a voiceover only</div><div class="uam-bdesc">No video needed -- Aaron can attach it later</div></div></div><div class="uam-bbody">'+(window.__saVoiceFile?('<div class="uam-audrow"><div class="nm">'+esc(window.__saVoiceFile.name)+'</div><div class="x" onclick="window.__saVoiceFile=null;ufRender()">&times;</div></div><button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="ufUploadStandaloneVoice()">Send to Aaron</button>'):('<div class="uam-drop" style="padding:14px" onclick="document.getElementById(\'uf_sa_voice\').click()"><b>Tap to choose audio</b><div class="h-sub" style="margin-top:3px">M4A, Voice Memos, MP3, WAV all work</div></div>'))+'<input id="uf_sa_voice" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac,.caf" style="display:none" onchange="window.__saVoiceFile=this.files&&this.files[0];this.value=\'\';ufRender()"></div></div>';
   return vidcard+'<div class="lbl-ed" style="margin:4px 2px 8px">Attachments <span style="font-weight:500;color:#9aa3af;text-transform:none;letter-spacing:0">(optional)</span></div>'+imgBlock+voiceBlock+videoOvBlock+inspoBlock+noteBlock+funnelBlock+btn+standaloneVoice;
@@ -5936,8 +5940,8 @@ function ufBroll(){
   var voiceBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon aud">'+UF_AUD+'</div><div><div class="uam-btitle">Voiceover</div><div class="uam-bdesc">One voiceover for the whole project</div></div><div class="uam-bplus" onclick="ufPickBrollVoice()">+</div></div><div class="uam-bbody">'+voiceInner+'</div></div>';
   var brImgs=(br.images||[]).map(function(f,i){ return '<div class="uam-thumb"><img src="'+URL.createObjectURL(f)+'"><div class="x" onclick="ufRemoveBrollImage('+i+')">&times;</div></div>'; }).join('');
   var imgBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon img">'+UF_IMG+'</div><div><div class="uam-btitle">Image overlays</div><div class="uam-bdesc">Logos / graphics for the whole project</div></div><div class="uam-bplus" onclick="ufPickBrollImgs()">+</div></div><div class="uam-bbody"><div class="uam-thumbrow">'+brImgs+'<div class="uam-thumb add" onclick="ufPickBrollImgs()">+</div></div></div></div>';
-  var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes / brief</div><div class="uam-bdesc">Anything Aaron should know to cut this project together</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_broll_notes" placeholder="e.g. this is for the [product] video, use the voiceover as the base, rough order is..." oninput="ufState.broll.notes=this.value">'+esc(br.notes||'')+'</textarea></div></div>';
-  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_broll_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(br.inspo||'')+'" oninput="ufState.broll.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
+  var noteBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon note">'+UF_NOTE+'</div><div><div class="uam-btitle">Notes / brief <span class="o">(optional)</span></div><div class="uam-bdesc">Anything Aaron should know to cut this project together</div></div></div><div class="uam-bbody"><textarea class="uam-note" id="uf_broll_notes" placeholder="e.g. this is for the [product] video, use the voiceover as the base, rough order is..." oninput="ufState.broll.notes=this.value">'+esc(br.notes||'')+'</textarea></div></div>';
+  var inspoBlock='<div class="uam-block"><div class="uam-bhead"><div class="uam-bicon" style="background:#fff0e6;color:#c2410c">'+UF_LINK+'</div><div><div class="uam-btitle">Video inspiration <span class="o">URL, optional</span></div><div class="uam-bdesc">Paste a TikTok link to show Aaron the vibe</div></div></div><div class="uam-bbody"><input id="uf_broll_inspo" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/..." value="'+esc(br.inspo||'')+'" oninput="ufState.broll.inspo=this.value" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13px"></div></div>';
   var info='<div class="uam-info">All these clips, the voiceover, overlays and your notes go to Aaron as one B-roll project -- he cuts them together externally into one finished video.</div>';
   var btn='<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="ufSubmitBroll()">'+(vids.length?('Upload project ('+vids.length+' clip'+(vids.length===1?'':'s')+')'):'Upload project')+'</button>';
   return vidcard+info+voiceBlock+imgBlock+noteBlock+inspoBlock+btn;
