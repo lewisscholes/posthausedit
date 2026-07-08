@@ -2846,35 +2846,6 @@ function dlProgressUpdate(done,total,doneBytes,totalBytes,t0){
   else if(done>0) etaSec=elapsed*(total-done)/done;                                        // fall back to count
   if(eta) eta.textContent=dlFmtEta(etaSec);
 }
-// Byte-based version of dlProgressUpdate for a single file (no item count to show, just a %).
-function dlByteProgress(receivedBytes,totalBytes,t0){
-  const bar=document.getElementById('dlpBar'); const sub=document.getElementById('dlpSub'); const eta=document.getElementById('dlpEta');
-  if(!bar) return;
-  const pct=totalBytes>0?Math.max(0,Math.min(100,Math.round(receivedBytes/totalBytes*100))):0;
-  bar.style.width=pct+'%';
-  if(sub) sub.textContent=pct+'% downloaded';
-  const elapsed=(Date.now()-t0)/1000;
-  let etaSec=Infinity;
-  if(totalBytes>0 && receivedBytes>=totalBytes) etaSec=0;
-  else if(receivedBytes>0 && totalBytes>0) etaSec=elapsed*(totalBytes-receivedBytes)/receivedBytes;
-  if(eta) eta.textContent=dlFmtEta(etaSec);
-}
-// Fetches a URL while reporting byte progress via onProgress(receivedBytes,totalBytes). Falls
-// back to a plain blob() if the response has no readable stream or no content-length.
-async function dlFetchWithProgress(url,onProgress){
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('download failed');
-  const total=parseInt(res.headers.get('content-length')||'0',10);
-  if(!res.body||!total){ const blob=await res.blob(); if(onProgress) onProgress(blob.size,blob.size||0); return blob; }
-  const reader=res.body.getReader(); const chunks=[]; let received=0;
-  while(true){
-    const {done,value}=await reader.read();
-    if(done) break;
-    chunks.push(value); received+=value.length;
-    if(onProgress) onProgress(received,total);
-  }
-  return new Blob(chunks);
-}
 async function downloadAllEdited(){
   const list=bankBuckets().edited.slice().filter(v=>!v._finalizing); if(!list.length){ toast(bankBuckets().edited.length?'Still finalizing -- try again in a moment':'Nothing to download','err'); return; }
   await downloadAllList(list);
@@ -3096,24 +3067,7 @@ async function hydrateBankUrls(){ for(const v of state.videos){ if(signed[v.id])
 function renderBankVideos(){ const b=bankBuckets(); const list=b[state.bankTab]; if(list.length) paintBank(list); }
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints>1); }
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
-async function fileDownload(v,id){
-  const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4');
-  const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300,{download:fn});
-  if(error){toast('Failed: '+error.message,'err');return;}
-  dlCancelled=false; dlProgressModal(1); const t0=Date.now();
-  try{
-    const blob=await dlFetchWithProgress(data.signedUrl,(recv,tot)=>dlByteProgress(recv,tot,t0));
-    if(dlCancelled) return;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
-  }catch(e){
-    // fetch/CORS failed -- fall back to the direct signed-url download (no progress, but still works)
-    const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click();
-  }
-  closeModal();
-  await recordDownload(id);
-}
+async function fileDownload(v,id){ toast('Preparing download...'); const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:fn}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
   let v=state.videos.find(x=>x.id===id);
   if(!v){ try{ const r=await sb.from('ed_videos').select('*').eq('id',id).single(); v=r.data; }catch(e){} }
@@ -3125,14 +3079,12 @@ async function downloadVideo(id){
   // that tap's activation, so if the direct share is blocked we re-offer it behind a fresh tap.
   if(isMobileDevice() && navigator.canShare){
     let file=null;
-    dlCancelled=false; dlProgressModal(1); const t0=Date.now();
     try{
+      toast('Preparing video...');
       const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300); if(error) throw error;
-      const blob=await dlFetchWithProgress(data.signedUrl,(recv,tot)=>dlByteProgress(recv,tot,t0));
-      if(dlCancelled) return;
+      const blob=await (await fetch(data.signedUrl)).blob();
       file=new File([blob], (v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'), {type: blob.type||'video/mp4'});
     }catch(e){ file=null; }
-    closeModal();
     if(file && navigator.canShare({files:[file]})){
       try{
         await navigator.share({files:[file]});       // share sheet -> "Save Video" -> camera roll
