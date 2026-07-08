@@ -2744,6 +2744,7 @@ function paintBank(list){
   // cards below, unchanged. This only ever activates for clips carrying edit_state.broll_group,
   // so every other client's board renders exactly as before.
   if(state.bankTab==='new'){
+    wrap.appendChild(bankBar(list,'downloadAllNew'));
     // If a project is currently expanded, isolate to just that project's own clips --
     // hide every other card (other groups, other clients, ungrouped clips) until collapsed.
     var expandedG=null;
@@ -2803,12 +2804,12 @@ async function bankDownloadBroll(g){
   toast('Downloading '+clips.length+' clip'+(clips.length===1?'':'s')+'...','ok');
   for(const v of clips){ try{ await downloadVideo(v.id); }catch(e){} await new Promise(r=>setTimeout(r,1200)); }
 }
-function bankBar(list){
+function bankBar(list,fn){
   const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin-bottom:4px';
   const ready=list.filter(v=>!v._finalizing).length;   // don't count clips still finalizing
   if(!ready) return bar;   // nothing downloadable yet -> no button
   const lbl=isMobileDevice()?('&#8595; Save all '+ready+' to camera roll'):('&#8595; Download all ('+ready+')');
-  bar.innerHTML='<button class="btn" style="width:100%;justify-content:center" onclick="downloadAllEdited()">'+lbl+'</button>';
+  bar.innerHTML='<button class="btn" style="width:100%;justify-content:center" onclick="'+(fn||'downloadAllEdited')+'()">'+lbl+'</button>';
   return bar;
 }
 let dlCancelled=false;
@@ -2842,7 +2843,17 @@ function dlProgressUpdate(done,total,doneBytes,totalBytes,t0){
 }
 async function downloadAllEdited(){
   const list=bankBuckets().edited.slice().filter(v=>!v._finalizing); if(!list.length){ toast(bankBuckets().edited.length?'Still finalizing -- try again in a moment':'Nothing to download','err'); return; }
-  // Phone: pull every edited clip (a few at a time) behind a live progress bar + ETA, then
+  await downloadAllList(list);
+}
+// Same bulk-download behavior as downloadAllEdited, but for the To do tab -- e.g. Steph's
+// B-roll clips landing as separate uploads instead of one grouped project. Lets an admin grab
+// every raw clip currently shown (respects any active client filter) in one action.
+async function downloadAllNew(){
+  const list=bankBuckets().new.slice().filter(v=>!v._finalizing); if(!list.length){ toast('Nothing to download','err'); return; }
+  await downloadAllList(list);
+}
+async function downloadAllList(list){
+  // Phone: pull every clip (a few at a time) behind a live progress bar + ETA, then
   // save them ALL to the camera roll in one share-sheet action. iOS needs a FRESH tap to allow
   // the share, so when the files are ready we show a Save button (promptShareAll) to tap.
   if(isMobileDevice() && navigator.canShare){
