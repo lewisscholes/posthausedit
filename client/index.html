@@ -2804,9 +2804,10 @@ function bankBrollCard(groupId,clips){
 }
 function bankToggleBrollExpand(g){ var wasOn=!!(state.brollExpanded&&state.brollExpanded[g]); state.brollExpanded={}; if(!wasOn) state.brollExpanded[g]=true; renderBank(); }
 async function bankDownloadBroll(g){
-  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g&&!v._finalizing);
+  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g);
   if(!clips.length){ toast('Nothing to download','err'); return; }
-  await downloadAllList(clips);
+  toast('Downloading '+clips.length+' clip'+(clips.length===1?'':'s')+'...','ok');
+  for(const v of clips){ try{ await downloadVideo(v.id); }catch(e){} await new Promise(r=>setTimeout(r,1200)); }
 }
 function bankBar(list,fn){
   const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin-bottom:4px';
@@ -2837,7 +2838,7 @@ function dlProgressUpdate(done,total,doneBytes,totalBytes,t0){
   if(!bar) return;
   const pct=Math.max(0,Math.min(100,Math.round(done/total*100)));
   bar.style.width=pct+'%';
-  if(sub) sub.textContent=done+' of '+total+' ready ('+pct+'%)';
+  if(sub) sub.textContent=done+' of '+total+' ready';
   const elapsed=(Date.now()-t0)/1000;
   let etaSec=Infinity;
   if(done>=total) etaSec=0;
@@ -2910,15 +2911,9 @@ async function markAllDownloaded(list){
   await loadBank(); toast('Done','ok');
 }
 function promptShareAll(files,list){
-  showModal('<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">'+files.length+' edited video'+(files.length!==1?'s are':' is')+' ready. Tap <b>Save '+files.length+'</b>, then choose <b>Save '+files.length+' Video'+(files.length!==1?'s':'')+'</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareAllNow">Save '+files.length+' to camera roll</button><button class="btn ghost" id="shareAllCancel">Cancel</button></div>');
+  showModal('<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">'+files.length+' edited video'+(files.length!==1?'s are':' is')+' ready. Tap <b>Save '+files.length+'</b>, then choose <b>Save '+files.length+' Video'+(files.length!==1?'s':'')+'</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareAllNow">Save '+files.length+' to camera roll</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>');
   const b=document.getElementById('shareAllNow');
-  const c=document.getElementById('shareAllCancel'); if(c) c.onclick=()=>closeModal();
-  if(b) b.onclick=async()=>{
-    b.disabled=true; c.disabled=true;
-    b.innerHTML='<span class="spin"></span> Opening share sheet...';
-    try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }
-    catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); }
-  };
+  if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 const signed={};
 // Returns the permanent 1-based clip number for a video.
@@ -3072,7 +3067,7 @@ async function hydrateBankUrls(){ for(const v of state.videos){ if(signed[v.id])
 function renderBankVideos(){ const b=bankBuckets(); const list=b[state.bankTab]; if(list.length) paintBank(list); }
 function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints>1); }
 async function recordDownload(id){ if(state.user&&!downloadedBy(id,state.user.id)){ const {error:de}=await sb.from('ed_video_downloads').insert({video_id:id,user_id:state.user.id,user_email:state.user.email}); if(!de){ await loadBank(); toast('Moved to your Downloaded','ok'); } } }
-async function fileDownload(v,id){ toast('Preparing download...'); const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:fn}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click(); await recordDownload(id); }
+async function fileDownload(v,id){ toast('Preparing download…'); const fn=(v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'); const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,120,{download:fn}); if(error){toast('Failed: '+error.message,'err');return;} const a=document.createElement('a'); a.href=data.signedUrl; a.download=fn; a.click(); await recordDownload(id); }
 async function downloadVideo(id){
   let v=state.videos.find(x=>x.id===id);
   if(!v){ try{ const r=await sb.from('ed_videos').select('*').eq('id',id).single(); v=r.data; }catch(e){} }
@@ -3085,7 +3080,7 @@ async function downloadVideo(id){
   if(isMobileDevice() && navigator.canShare){
     let file=null;
     try{
-      toast('Preparing video...');
+      toast('Preparing video…');
       const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(v.storage_path,300); if(error) throw error;
       const blob=await (await fetch(data.signedUrl)).blob();
       file=new File([blob], (v.filename||'video.mp4').replace(/\.mov$/i,'.mp4'), {type: blob.type||'video/mp4'});
@@ -3104,15 +3099,9 @@ async function downloadVideo(id){
   await fileDownload(v,id);
 }
 function promptShare(file,id){
-  showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" id="shareNowCancel">Cancel</button></div>`);
+  showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
   const b=document.getElementById('shareNow');
-  const c=document.getElementById('shareNowCancel'); if(c) c.onclick=()=>closeModal();
-  if(b) b.onclick=async()=>{
-    b.disabled=true; c.disabled=true;
-    b.innerHTML='<span class="spin"></span> Opening share sheet...';
-    try{ await navigator.share({files:[file]}); closeModal(); await recordDownload(id); }
-    catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); }
-  };
+  if(b) b.onclick=async()=>{ try{ await navigator.share({files:[file]}); closeModal(); await recordDownload(id); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
 }
 async function markPosted(id){ const {error}=await sb.from('ed_videos').update({posted_at:new Date().toISOString(),posted_by:displayName(state.user)}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Marked posted (shared)','ok'); loadBank(); }
 async function unpost(id){ const {error}=await sb.from('ed_videos').update({posted_at:null,posted_by:null,delivered_at:null,status:'new'}).eq('id',id); if(error){toast('Failed','err');return;} toast('Unposted -- moved back to To do','ok'); loadBank(); }
