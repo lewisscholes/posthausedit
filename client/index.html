@@ -2749,7 +2749,7 @@ function paintBank(list){
   // cards below, unchanged. This only ever activates for clips carrying edit_state.broll_group,
   // so every other client's board renders exactly as before.
   if(state.bankTab==='new'){
-    if(state.isAdmin && canDownloadAllNew(state.creatorFilter)) wrap.appendChild(bankBar(list,'downloadAllNew'));
+    if(state.isAdmin){ var dlnList=list.filter(function(v){ return canDownloadAllNew(v.creator_id); }); if(dlnList.length) wrap.appendChild(bankBar(dlnList,'downloadAllNew')); }   // count shown matches what downloadAllNew() actually grabs -- Steph's clips only
     // If a project is currently expanded, isolate to just that project's own clips --
     // hide every other card (other groups, other clients, ungrouped clips) until collapsed.
     var expandedG=null;
@@ -2854,8 +2854,12 @@ async function downloadAllEdited(){
 // B-roll clips landing as separate uploads instead of one grouped project. Lets an admin grab
 // every raw clip currently shown (respects any active client filter) in one action.
 async function downloadAllNew(){
-  if(!(state.isAdmin && canDownloadAllNew(state.creatorFilter))){ toast('Not available for this client','err'); return; }
-  const list=bankBuckets().new.slice().filter(v=>!v._finalizing); if(!list.length){ toast('Nothing to download','err'); return; }
+  if(!state.isAdmin){ toast('Not available','err'); return; }
+  // Always scoped to Steph's own clips by creator_id, regardless of whatever client filter (if
+  // any) the admin currently has selected on screen -- so this can't grab another client's clips
+  // even if it's showing on a mixed/unfiltered To do board.
+  const list=bankBuckets().new.slice().filter(function(v){ return !v._finalizing && canDownloadAllNew(v.creator_id); });
+  if(!list.length){ toast('Nothing to download','err'); return; }
   await downloadAllList(list);
 }
 async function downloadAllList(list){
