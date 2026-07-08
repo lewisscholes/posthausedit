@@ -2910,9 +2910,15 @@ async function markAllDownloaded(list){
   await loadBank(); toast('Done','ok');
 }
 function promptShareAll(files,list){
-  showModal('<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">'+files.length+' edited video'+(files.length!==1?'s are':' is')+' ready. Tap <b>Save '+files.length+'</b>, then choose <b>Save '+files.length+' Video'+(files.length!==1?'s':'')+'</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareAllNow">Save '+files.length+' to camera roll</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>');
+  showModal('<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">'+files.length+' edited video'+(files.length!==1?'s are':' is')+' ready. Tap <b>Save '+files.length+'</b>, then choose <b>Save '+files.length+' Video'+(files.length!==1?'s':'')+'</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareAllNow">Save '+files.length+' to camera roll</button><button class="btn ghost" id="shareAllCancel">Cancel</button></div>');
   const b=document.getElementById('shareAllNow');
-  if(b) b.onclick=async()=>{ try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
+  const c=document.getElementById('shareAllCancel'); if(c) c.onclick=()=>closeModal();
+  if(b) b.onclick=async()=>{
+    b.disabled=true; c.disabled=true;
+    b.innerHTML='<span class="spin"></span> Opening share sheet...';
+    try{ await navigator.share({files}); closeModal(); await markAllDownloaded(list); }
+    catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); }
+  };
 }
 const signed={};
 // Returns the permanent 1-based clip number for a video.
@@ -3098,9 +3104,15 @@ async function downloadVideo(id){
   await fileDownload(v,id);
 }
 function promptShare(file,id){
-  showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`);
+  showModal(`<h3>Save to camera roll</h3><p class="h-sub" style="margin:6px 0 14px">Your video is ready. Tap <b>Save video</b>, then choose <b>"Save Video"</b> in the share sheet.</p><div class="actions"><button class="btn" id="shareNow">Save video</button><button class="btn ghost" id="shareNowCancel">Cancel</button></div>`);
   const b=document.getElementById('shareNow');
-  if(b) b.onclick=async()=>{ try{ await navigator.share({files:[file]}); closeModal(); await recordDownload(id); }catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); } };
+  const c=document.getElementById('shareNowCancel'); if(c) c.onclick=()=>closeModal();
+  if(b) b.onclick=async()=>{
+    b.disabled=true; c.disabled=true;
+    b.innerHTML='<span class="spin"></span> Opening share sheet...';
+    try{ await navigator.share({files:[file]}); closeModal(); await recordDownload(id); }
+    catch(e){ if(e&&e.name==='AbortError')return; closeModal(); toast('Could not open the share sheet','err'); }
+  };
 }
 async function markPosted(id){ const {error}=await sb.from('ed_videos').update({posted_at:new Date().toISOString(),posted_by:displayName(state.user)}).eq('id',id); if(error){toast('Failed: '+error.message,'err');return;} toast('Marked posted (shared)','ok'); loadBank(); }
 async function unpost(id){ const {error}=await sb.from('ed_videos').update({posted_at:null,posted_by:null,delivered_at:null,status:'new'}).eq('id',id); if(error){toast('Failed','err');return;} toast('Unposted -- moved back to To do','ok'); loadBank(); }
