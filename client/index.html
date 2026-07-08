@@ -2804,10 +2804,9 @@ function bankBrollCard(groupId,clips){
 }
 function bankToggleBrollExpand(g){ var wasOn=!!(state.brollExpanded&&state.brollExpanded[g]); state.brollExpanded={}; if(!wasOn) state.brollExpanded[g]=true; renderBank(); }
 async function bankDownloadBroll(g){
-  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g);
+  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g&&!v._finalizing);
   if(!clips.length){ toast('Nothing to download','err'); return; }
-  toast('Downloading '+clips.length+' clip'+(clips.length===1?'':'s')+'...','ok');
-  for(const v of clips){ try{ await downloadVideo(v.id); }catch(e){} await new Promise(r=>setTimeout(r,1200)); }
+  await downloadAllList(clips);
 }
 function bankBar(list,fn){
   const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin-bottom:4px';
