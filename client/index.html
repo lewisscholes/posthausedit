@@ -3106,7 +3106,7 @@ async function applyVideoType(id,v){
   const s=(typeof swVids!=='undefined'&&swVids)?swVids.find(x=>x.id===id):null; if(s)s.video_type=dbval;
   closeModal(); toast('Saved','ok');
 }
-async function deleteVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; if(!confirm('Delete this video permanently?'))return; await sb.storage.from(BUCKET).remove([v.storage_path]); const {error}=await sb.from('ed_videos').delete().eq('id',id); if(error){toast('Failed','err');return;} delete signed[id]; toast('Deleted','ok'); loadBank(); }
+async function deleteVideo(id){ const v=state.videos.find(x=>x.id===id); if(!v)return; if(!confirm('Delete this video permanently?'))return; var safeToRemove=false; try{ const {data:sharers}=await sb.from('ed_videos').select('id').eq('storage_path',v.storage_path).neq('id',id).limit(1); safeToRemove=!(sharers&&sharers.length); }catch(e){}   /* another row on the same file -- never delete the shared bytes, only this row */ if(safeToRemove){ await sb.storage.from(BUCKET).remove([v.storage_path]); } const {error}=await sb.from('ed_videos').delete().eq('id',id); if(error){toast('Failed','err');return;} delete signed[id]; toast('Deleted','ok'); loadBank(); }
 
 // ---------- EDITOR (pending approval) ----------
 // ──────────────────────────────────────────────────────
@@ -3311,7 +3311,10 @@ async function swDelete(){
   if(!confirm('Delete this video permanently?'))return;
   card.classList.add('fly-left');
   const v=swVids.find(x=>x.id===id);
-  if(v){await sb.storage.from(BUCKET).remove([v.storage_path]);}
+  if(v){
+    var safeToRemove=false; try{ const {data:sharers}=await sb.from('ed_videos').select('id').eq('storage_path',v.storage_path).neq('id',id).limit(1); safeToRemove=!(sharers&&sharers.length); }catch(e){}   /* another row on the same file -- never delete the shared bytes, only this row */
+    if(safeToRemove){ await sb.storage.from(BUCKET).remove([v.storage_path]); }
+  }
   await sb.from('ed_videos').delete().eq('id',id);
   toast('Deleted','ok');
   setTimeout(()=>swAdvance(),420);
@@ -5077,7 +5080,7 @@ async function swBackToUploads(id){
 }
 
 async function approveEdit(id){ swDoApprove(id); }
-async function rejectEdit(id){ await sb.storage.from(BUCKET).remove([(await sb.from('ed_videos').select('storage_path').eq('id',id).single()).data?.storage_path||'']); await sb.from('ed_videos').delete().eq('id',id); }
+async function rejectEdit(id){ var sp=(await sb.from('ed_videos').select('storage_path').eq('id',id).single()).data?.storage_path||''; if(sp){ var safeToRemove=false; try{ const {data:sharers}=await sb.from('ed_videos').select('id').eq('storage_path',sp).neq('id',id).limit(1); safeToRemove=!(sharers&&sharers.length); }catch(e){} if(safeToRemove){ await sb.storage.from(BUCKET).remove([sp]); } } await sb.from('ed_videos').delete().eq('id',id); }
 
 // ---------- OVERLAY GENERATOR (AI caption & overlay suggestions) ----------
 async function suggestOverlays(id){
@@ -5456,7 +5459,8 @@ async function recoverTempFile(id){
 async function deleteTempFile(id){
   const f=(state.files||[]).find(x=>x.id===id); if(!f)return;
   if(!confirm('Remove "'+(f.filename||'this file')+'" permanently?'))return;
-  try{ await sb.storage.from(BUCKET).remove([f.storage_path]); }catch(e){}
+  var safeToRemove=false; try{ const {data:sharers}=await sb.from('temp_files').select('id').eq('storage_path',f.storage_path).neq('id',id).limit(1); safeToRemove=!(sharers&&sharers.length); }catch(e){}   /* another row on the same file -- never delete the shared bytes, only this row */
+  if(safeToRemove){ try{ await sb.storage.from(BUCKET).remove([f.storage_path]); }catch(e){} }
   const {error}=await sb.from('temp_files').delete().eq('id',id);
   if(error){ toast('Failed: '+error.message,'err'); return; }
   state.files=(state.files||[]).filter(x=>x.id!==id);
