@@ -1421,6 +1421,11 @@ function isVideoOverlayClient(id){ return !!(id && VIDEO_OVERLAY_CLIENT_IDS.inde
 // Deliberately narrower than BROLL_CLIENT_IDS (excludes Demo) -- Aaron's explicit call.
 const BROLL_EXTRA_VOICE_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b'];
 function isBrollExtraVoiceClient(id){ return !!(id && BROLL_EXTRA_VOICE_CLIENT_IDS.indexOf(id)>=0); }
+// "Download all" bulk button on the To do tab -- a stopgap for Steph's B-roll clips landing as
+// separate uploads instead of one grouped project (2026-07-08). Steph only, hardcoded allowlist,
+// same pattern as above. Remove once the B-roll grouping issue is actually fixed.
+const DOWNLOAD_ALL_NEW_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b'];
+function canDownloadAllNew(id){ return !!(id && DOWNLOAD_ALL_NEW_CLIENT_IDS.indexOf(id)>=0); }
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
   results:[], products:[], jobs:[], videos:[], downloads:[], profiles:[], editJobs:[],
@@ -2744,7 +2749,7 @@ function paintBank(list){
   // cards below, unchanged. This only ever activates for clips carrying edit_state.broll_group,
   // so every other client's board renders exactly as before.
   if(state.bankTab==='new'){
-    wrap.appendChild(bankBar(list,'downloadAllNew'));
+    if(state.isAdmin && canDownloadAllNew(state.creatorFilter)) wrap.appendChild(bankBar(list,'downloadAllNew'));
     // If a project is currently expanded, isolate to just that project's own clips --
     // hide every other card (other groups, other clients, ungrouped clips) until collapsed.
     var expandedG=null;
@@ -2849,6 +2854,7 @@ async function downloadAllEdited(){
 // B-roll clips landing as separate uploads instead of one grouped project. Lets an admin grab
 // every raw clip currently shown (respects any active client filter) in one action.
 async function downloadAllNew(){
+  if(!(state.isAdmin && canDownloadAllNew(state.creatorFilter))){ toast('Not available for this client','err'); return; }
   const list=bankBuckets().new.slice().filter(v=>!v._finalizing); if(!list.length){ toast('Nothing to download','err'); return; }
   await downloadAllList(list);
 }
