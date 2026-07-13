@@ -1408,7 +1408,7 @@ const FUNNEL_CLIENT_ID='42d3ed8a-c4ee-4367-805c-63355877ef18';
 // B-roll project upload mode -- multiple raw clips + one voiceover + one brief, edited externally
 // into a single finished video (Steph + Demo, 2026-07-04). Hardcoded allowlist by design: adding a
 // new B-roll client is a one-line change here, not a DB migration.
-const BROLL_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bac7f943-1234-4aa7-93cc-facd5787a1f7','bfbc6bcb-6509-422d-a015-8b9ef810aeda'];
+const BROLL_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bac7f943-1234-4aa7-93cc-facd5787a1f7','bfbc6bcb-6509-422d-a015-8b9ef810aeda','07b657ea-17fb-48d1-a18c-31ca23be0b2f'];
 function isBrollClient(id){ return !!(id && BROLL_CLIENT_IDS.indexOf(id)>=0); }
 // Video overlays (a second video clip attached to the brief for Aaron to place himself in his
 // external edit -- NOT auto-composited in-app) -- Sam only for now (2026-07-06). Hardcoded
@@ -1419,14 +1419,14 @@ function isVideoOverlayClient(id){ return !!(id && VIDEO_OVERLAY_CLIENT_IDS.inde
 // notes), so a client doesn't have to re-upload clips just to add another voiceover for the same
 // pool of B-roll -- Steph only for now (2026-07-07). Hardcoded allowlist, same pattern as above.
 // Deliberately narrower than BROLL_CLIENT_IDS (excludes Demo) -- Aaron's explicit call.
-// Sophie added 2026-07-10 -- Aaron asked for the same permissions as Steph.
-const BROLL_EXTRA_VOICE_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bfbc6bcb-6509-422d-a015-8b9ef810aeda'];
+// Sophie added 2026-07-10, Harriet added 2026-07-13 -- Aaron asked for the same permissions as Steph.
+const BROLL_EXTRA_VOICE_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bfbc6bcb-6509-422d-a015-8b9ef810aeda','07b657ea-17fb-48d1-a18c-31ca23be0b2f'];
 function isBrollExtraVoiceClient(id){ return !!(id && BROLL_EXTRA_VOICE_CLIENT_IDS.indexOf(id)>=0); }
 // "Download all" bulk button on the To do tab -- a stopgap for Steph's B-roll clips landing as
 // separate uploads instead of one grouped project (2026-07-08). Steph only, hardcoded allowlist,
 // same pattern as above. Remove once the B-roll grouping issue is actually fixed.
-// Sophie added 2026-07-10 -- Aaron asked for the same permissions as Steph.
-const DOWNLOAD_ALL_NEW_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bfbc6bcb-6509-422d-a015-8b9ef810aeda'];
+// Sophie added 2026-07-10, Harriet added 2026-07-13 -- Aaron asked for the same permissions as Steph.
+const DOWNLOAD_ALL_NEW_CLIENT_IDS=['2443f8d7-278e-4f45-b000-ddaa3c63d36b','bfbc6bcb-6509-422d-a015-8b9ef810aeda','07b657ea-17fb-48d1-a18c-31ca23be0b2f'];
 function canDownloadAllNew(id){ return !!(id && DOWNLOAD_ALL_NEW_CLIENT_IDS.indexOf(id)>=0); }
 
 let state={ user:null, currentView:'dashboard', isAdmin:false,
