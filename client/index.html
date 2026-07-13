@@ -3074,11 +3074,17 @@ async function downloadVideo(id){
   if(!v){ try{ const r=await sb.from('ed_videos').select('*').eq('id',id).single(); v=r.data; }catch(e){} }
   if(!v){ toast('Could not find video -- tap Refresh and try again','err'); return; }
   // If an edited render exists, download that instead of the raw file
-  try{ const ed=await swResolveEdited(id); if(ed&&ed.storage_path){ v={storage_path:ed.storage_path, filename:(ed.filename||v.filename||'video.mp4')}; } }catch(e){}
+  try{ const ed=await swResolveEdited(id); if(ed&&ed.storage_path){ v={storage_path:ed.storage_path, filename:(ed.filename||v.filename||'video.mp4'), size_bytes:ed.size_bytes}; } }catch(e){}
   // Phone: get the file into the camera roll via the share sheet ("Save Video").
   // navigator.share() must run inside a real tap; downloading the video first can use up
   // that tap's activation, so if the direct share is blocked we re-offer it behind a fresh tap.
-  if(isMobileDevice() && navigator.canShare){
+  // Large files (300MB+) skip this path entirely -- pulling that much into memory as a Blob on
+  // an installed iOS PWA can trigger the OS to reclaim memory by silently reloading the tab mid-
+  // fetch, which replays the saved login code on boot and looks exactly like a logout. Falls
+  // through to the plain-link path below instead, which streams via the native video player.
+  var DL_BIG_FILE_BYTES=300*1024*1024;
+  var dlTooBig=!!(v.size_bytes && v.size_bytes>DL_BIG_FILE_BYTES);
+  if(isMobileDevice() && navigator.canShare && !dlTooBig){
     let file=null;
     try{
       toast('Preparing video…');
@@ -4885,14 +4891,14 @@ async function swResolveEdited(id){
   // Returns the worker-rendered (edited, text burned-in) clip for this source video.
   // 1) direct link
   try{
-    const {data}=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,kind').eq('source_video_id',id).eq('kind','edited').order('created_at',{ascending:false}).limit(1);
+    const {data}=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,kind,size_bytes').eq('source_video_id',id).eq('kind','edited').order('created_at',{ascending:false}).limit(1);
     if(data&&data.length&&data[0].storage_path) return data[0];
   }catch(e){}
   // 2) fallback via the render job (worker may not set source_video_id)
   try{
     const {data:j}=await sb.from('ed_edit_jobs').select('result_video_id').eq('video_id',id).eq('status','done').not('result_video_id','is',null).order('finished_at',{ascending:false}).limit(1);
     if(j&&j.length&&j[0].result_video_id){
-      const {data:ev}=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,kind').eq('id',j[0].result_video_id).limit(1);
+      const {data:ev}=await sb.from('ed_videos').select('id,storage_path,filename,source_video_id,kind,size_bytes').eq('id',j[0].result_video_id).limit(1);
       if(ev&&ev.length&&ev[0].storage_path) return ev[0];
     }
   }catch(e){}
