@@ -617,13 +617,14 @@ html,body{overscroll-behavior:none;}
   body.ph-client .main{padding:0 0 calc(86px + env(safe-area-inset-bottom)) !important}
   /* client personal stat cards (under the greeting) */
   .ph-statwrap{max-width:620px;margin:0 auto;padding:0 16px}
-  .ph-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+  .ph-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0 4px}
   .ph-stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 14px;display:flex;flex-direction:column}
   .ph-stat-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
   .ph-stat.up .ph-stat-ic{background:#eaf3ff;color:#2f6df6}
+  .ph-stat.rd .ph-stat-ic{background:#e7f6f1;color:#0f6e56}
   .ph-stat.po .ph-stat-ic{background:#eafaf0;color:#16a34a}
   .ph-stat-num{font-size:30px;font-weight:800;line-height:1}
-  .ph-stat.up .ph-stat-num{color:#2f6df6}.ph-stat.po .ph-stat-num{color:#16a34a}
+  .ph-stat.up .ph-stat-num{color:#2f6df6}.ph-stat.rd .ph-stat-num{color:#0f6e56}.ph-stat.po .ph-stat-num{color:#16a34a}
   .ph-stat-cap{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
   .tt-badge{width:46px;height:46px;border-radius:13px;background:#010101;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
   .tt-badge svg{width:24px;height:24px}
@@ -5819,13 +5820,14 @@ async function loadCDash(){
   var conn='';   // TikTok connect/disconnect removed -- finished videos are delivered in-app via "To post"
   var q=await sb.from('ed_videos').select('*').eq('workspace_id',WS).eq('creator_id',ME.id).order('created_at',{ascending:false});
   var vids=(q.data||[]).filter(function(v){ return !(v.edit_state&&v.edit_state.admin_reupload); });
-  // this client's own stats (their uploads + their posted), with a date filter, shown under the greeting
+  // this client's own stats (their uploads + their ready-to-post + their posted), with a date filter, shown under the greeting
   var cr=cdRangeFor(state.cdRange);
   var statUp=vids.filter(function(v){ return v.kind!=='edited' && cdIn(v.created_at,cr); }).length;
+  var statRd=vids.filter(function(v){ return v.kind!=='edited' && v.delivered_at && cdIn(v.delivered_at,cr); }).length;
   var statPo=vids.filter(function(v){ return v.kind!=='edited' && v.posted_at && cdIn(v.posted_at,cr); }).length;
   var cdOpts=[['all','All time'],['today','Today'],['yesterday','Yesterday'],['last7','Last 7 days'],['last14','Last 14 days'],['last30','Last 30 days']];
   var dateSel='<select class="ph-datesel" onchange="cdSetRange(this.value)">'+cdOpts.map(function(o){ return '<option value="'+o[0]+'"'+((state.cdRange||'all')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
-  var statsHtml=dateSel+'<div class="ph-stats"><div class="ph-stat up"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V6M5 12l7-7 7 7"/></svg></div><div class="ph-stat-num">'+statUp+'</div><div class="ph-stat-cap">Videos uploaded</div></div><div class="ph-stat po"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div><div class="ph-stat-num">'+statPo+'</div><div class="ph-stat-cap">Videos posted</div></div></div>';
+  var statsHtml=dateSel+'<div class="ph-stats"><div class="ph-stat up"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V6M5 12l7-7 7 7"/></svg></div><div class="ph-stat-num">'+statUp+'</div><div class="ph-stat-cap">Videos uploaded</div></div><div class="ph-stat rd"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div><div class="ph-stat-num">'+statRd+'</div><div class="ph-stat-cap">Ready to post</div></div><div class="ph-stat po"><div class="ph-stat-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div><div class="ph-stat-num">'+statPo+'</div><div class="ph-stat-cap">Videos posted</div></div></div>';
   var up='<div class="card"><div class="lbl-ed">Your videos</div><div class="up-dash" onclick="showView(\'upload\')"><div class="big">Upload videos</div><div class="sm">Add raw clips for Aaron to edit</div></div>';
   up+='<div style="margin-top:14px;font-weight:700;font-size:13px">Uploads ('+vids.length+')</div>';
   if(!vids.length){ up+='<div class="h-sub" style="margin-top:6px">Nothing uploaded yet.</div>'; }
