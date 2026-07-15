@@ -2788,10 +2788,12 @@ function bankBrollCard(groupId,clips){
   const url=signed[primary.id]||'';
   const totalSize=clips.reduce((s,v)=>s+(v.size_bytes||0),0);
   const sizeStr=totalSize?((totalSize/1048576).toFixed(1)+' MB total'):'';
+  const allDown=clips.every(v=>v.edit_state&&v.edit_state.externally_downloaded);
   card.innerHTML=`
     <div class="vthumb" style="position:relative"><video preload="metadata" muted playsinline src="${esc(url)}#t=0.1"></video>
       <div style="position:absolute;top:7px;left:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#7c3aed">B-roll project</div>
       <div style="position:absolute;bottom:7px;left:7px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.55)">${clips.length} clip${clips.length===1?'':'s'}</div>
+      ${allDown?'<div style="position:absolute;top:7px;right:7px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:#fff;background:#1d4ed8">Downloaded</div>':''}
     </div>
     <div class="vbody">
       <div class="vtop"><div class="vh" style="font-size:13px;word-break:break-word">B-roll project (${clips.length} clip${clips.length===1?'':'s'})</div></div>
@@ -2799,6 +2801,7 @@ function bankBrollCard(groupId,clips){
       <div class="vrow">
         <button class="btn sm" onclick="jbView('${primary.id}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message"></use></svg> Client brief</button>
         <button class="btn ghost sm" onclick="bankDownloadBroll('${groupId}')"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Download all</button>
+        <button class="btn ghost sm" onclick="bankToggleBrollDownloaded('${groupId}')">${allDown?'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-undo"></use></svg> Unmark downloaded':'<svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"></use></svg> Mark as downloaded'}</button>
         <button class="btn ghost sm" onclick="bankToggleBrollExpand('${groupId}')">Show clips</button>
       </div>
     </div>`;
@@ -2809,6 +2812,27 @@ async function bankDownloadBroll(g){
   const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g&&!v._finalizing);
   if(!clips.length){ toast('Nothing to download','err'); return; }
   await downloadAllList(clips);
+}
+// Same manual override as bankToggleDownloaded(), but applied to every clip in a B-roll group
+// at once -- lets an admin flag a whole project as downloaded (or undo that) in one tap instead
+// of expanding it and toggling each clip individually.
+async function bankToggleBrollDownloaded(g){
+  const clips=(state.videos||[]).filter(v=>v.edit_state&&v.edit_state.broll_group===g);
+  if(!clips.length) return;
+  const allDown=clips.every(v=>v.edit_state&&v.edit_state.externally_downloaded);
+  for(const v of clips){
+    const es=Object.assign({},v.edit_state||{});
+    if(allDown){
+      delete es.externally_downloaded;
+      try{ await sb.from('ed_video_downloads').delete().eq('video_id',v.id).eq('user_id',state.user.id); }catch(e){}
+    } else {
+      es.externally_downloaded=true;
+      try{ if(!downloadedBy(v.id,state.user.id)) await sb.from('ed_video_downloads').insert({video_id:v.id,user_id:state.user.id,user_email:(state.user&&state.user.email)||'',workspace_id:WS}); }catch(e){}
+    }
+    try{ await sb.from('ed_videos').update({edit_state:es}).eq('id',v.id); v.edit_state=es; }catch(e){}
+  }
+  toast(allDown?'Removed from Downloaded':'Moved to Downloaded tab','ok');
+  loadBank();
 }
 function bankBar(list,fn){
   const bar=document.createElement('div'); bar.style.cssText='grid-column:1/-1;margin-bottom:4px';
