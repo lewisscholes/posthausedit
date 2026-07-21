@@ -899,6 +899,7 @@ a{color:#B0211A}
       <button class="nav-btn" id="nav-clients" onclick="showView('clients')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"></use></svg></span> Clients</button>
       <button class="nav-btn" id="nav-cdash" onclick="showView('cdash')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span> Dashboard</button>
       <button class="nav-btn" id="nav-upload" onclick="showView('upload')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"></use></svg></span> Upload</button>
+      <button class="nav-btn" id="nav-ready" onclick="showView('ready')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></span> To post</button>
       <button class="nav-btn" id="nav-board" onclick="showView('board')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg></span> Job board</button>
       <button class="nav-btn" id="nav-analytics" onclick="showView('analytics')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg></span> Analytics</button>
       <button class="nav-btn" id="nav-imgov" onclick="showView('imgov')"><span class="ic"><svg class="svic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-folder"></use></svg></span> Image overlays</button>
@@ -5657,8 +5658,10 @@ async function loadProducts(){ state.products=[]; }
 function edApplyRole(){
   var admin=!!state.isAdmin;
   try{ document.body.classList.toggle('ph-client', !admin); }catch(e){}   // client views fill the screen (no admin top padding)
-  // Hamburger (sidebar): Clients + Board (the less-used). Quick-access lives in the bottom bar.
-  var show={'nav-clients':admin,'nav-board':admin,'nav-imgov':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':false,'nav-cdash':false};
+  // Hamburger (sidebar): Clients + Board (the less-used, admin) / Dashboard + Upload + To post +
+  // Board (creator) -- creators get the same nav options in the sidebar as they do in the mobile
+  // bottom bar, so desktop/laptop clients aren't stuck with no way to reach these tabs.
+  var show={'nav-clients':admin,'nav-board':true,'nav-imgov':admin,'nav-bank':false,'nav-editor':false,'nav-schedule':false,'nav-analytics':false,'nav-upload':!admin,'nav-cdash':!admin,'nav-ready':!admin};
   Object.keys(show).forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display=show[id]?'':'none'; });
   ['nav-dashboard','nav-priority','nav-products','nav-files','nav-scraper','nav-overlays','nav-training','nav-team','nav-access'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var tp=document.getElementById('toolsPanel'); if(tp) tp.style.display='none';
